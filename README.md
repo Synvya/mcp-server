@@ -1,6 +1,6 @@
 # Synvya MCP Server
 
-MCP server for AI assistants to discover restaurants via Nostr data.
+Discover and book restaurants and other food establishments directly from your AI assistant.
 
 ## Available Tools
 
@@ -12,23 +12,22 @@ Find food establishments (restaurants, bakeries, cafes, etc.) by type, cuisine, 
 - `foodEstablishmentType` (optional): Filter by schema.org FoodEstablishment type
   - Valid values: `Bakery`, `BarOrPub`, `Brewery`, `CafeOrCoffeeShop`, `Distillery`, `FastFoodRestaurant`, `IceCreamShop`, `Restaurant`, `Winery`
   - If not provided, returns all FoodEstablishment types
-  - Type is determined from the `l` tag in Nostr profiles: `["l", "https://schema.org:<type>"]`
 - `cuisine` (optional): Cuisine type (e.g., "Spanish", "Italian", "Mexican")
-  - Searches `schema.org:servesCuisine` tags first (SEO-compatible), then falls back to description text matching
+  - Searches `schema.org:servesCuisine` property first, then falls back to description text matching
 - `query` (optional): Free-text search for establishment name, location, or description
-  - Matches establishment name, description text, or location data from `schema.org:PostalAddress` tags
+  - Matches establishment name, description text, or location data from `schema.org:PostalAddress` property
   - Example: "Snoqualmie" to find establishments in that location
 - `dietary` (optional): Dietary requirement (e.g., "vegan", "gluten free")
-  - Matches against lowercase dietary tags in profiles
-  - Tags are normalized for flexible matching (handles "gluten free" vs "gluten-free")
+  - Matches against lowercase dietary keywords in food establishment profiles
+  - Keywords are normalized for flexible matching (handles "gluten free" vs "gluten-free")
 
 **Returns:**
 - `food_establishments`: Array of JSON-LD formatted food establishment objects, each containing:
   - `@context` (string): JSON-LD context ("https://schema.org")
   - `@type` (string): Schema.org FoodEstablishment type (Bakery, BarOrPub, Brewery, CafeOrCoffeeShop, Distillery, FastFoodRestaurant, IceCreamShop, Restaurant, or Winery)
   - `name` (string): Restaurant display name
-  - `description` (string): Full restaurant description (from `about` field)
-  - `identifier` (string): Restaurant pubkey (Nostr identifier) - **use this for `get_menu_items`**
+  - `description` (string): Full restaurant description 
+  - `identifier` (string): Food establishment unique identifier - **use this for `get_menu_items`**
   - `address` (object, optional): PostalAddress with streetAddress, addressLocality, addressRegion, postalCode, addressCountry
   - `telephone` (string, optional): Phone number
   - `email` (string, optional): Email in mailto: format
@@ -38,7 +37,7 @@ Find food establishments (restaurants, bakeries, cafes, etc.) by type, cuisine, 
   - `geo` (object, optional): GeoCoordinates with latitude and longitude
   - `url` (string, optional): Website URL
   - `acceptsReservations` (string, optional): "True", "False", or URL
-  - `keywords` (string, optional): Comma-separated keywords from tags
+  - `keywords` (string, optional): Comma-separated keywords
 
 **Example:**
 ```json
@@ -50,8 +49,6 @@ Find food establishments (restaurants, bakeries, cafes, etc.) by type, cuisine, 
 
 **Behavior Notes:**
 - All filters use AND logic (must match all specified criteria)
-- **STRICT**: Only profiles with valid `l` tag containing a FoodEstablishment type are included. Profiles without valid `l` tag are ignored.
-- FoodEstablishment type is extracted from the `l` tag: `["l", "https://schema.org:<type>"]`
 - If `foodEstablishmentType` parameter is provided, only establishments of that type are returned
 - If `foodEstablishmentType` is not provided, all valid FoodEstablishment types are returned (mixed types in array)
 - Cuisine matching prioritizes schema.org tags for SEO compatibility
@@ -176,7 +173,7 @@ The server supports both HTTP (for testing) and stdio (for Claude Desktop) trans
    ```json
    {
      "mcpServers": {
-       "synvya-restaurant": {
+       "synvya": {
          "command": "node",
          "args": ["/absolute/path/to/mcp-server/dist/server.js"]
        }
@@ -197,9 +194,3 @@ The server reads from JSON files in the `data/` directory:
 - `profiles.json` - Restaurant profiles (kind:0 events)
 - `collections.json` - Menu collections (kind:30405 events)
 - `products.json` - Individual dishes (kind:30402 events)
-
-## ChatGPT Integration
-
-Once deployed, add the MCP server URL to ChatGPT:
-1. Settings → Advanced → Enable developer mode
-2. Tools → Add → MCP Server → Enter your HTTPS URL
