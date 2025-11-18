@@ -37,7 +37,12 @@ Find food establishments (restaurants, bakeries, cafes, etc.) by type, cuisine, 
   - `geo` (object, optional): GeoCoordinates with latitude and longitude
   - `url` (string, optional): Website URL
   - `acceptsReservations` (string, optional): "True", "False", or URL
-  - `keywords` (string, optional): Comma-separated keywords
+  - `keywords` (string, optional): Comma-separated keywords from tags
+  - `hasMenu` (array, optional): Array of menu objects, each containing:
+    - `@type` (string): "Menu"
+    - `name` (string): Menu name from title tag
+    - `description` (string, optional): Menu description from summary tag
+    - `identifier` (string): Menu identifier from d tag - **use this as `menu_id` for `get_menu_items`**
 
 **Example:**
 ```json

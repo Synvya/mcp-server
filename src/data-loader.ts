@@ -165,7 +165,7 @@ const VALID_FOOD_ESTABLISHMENT_TYPES = [
 
 // Extract schema.org data from Nostr profile tags and format as JSON-LD
 // Returns null if profile doesn't have a valid l tag with FoodEstablishment type
-export function extractSchemaOrgData(profile: NostrEvent): Record<string, any> | null {
+export function extractSchemaOrgData(profile: NostrEvent, collections?: NostrEvent[]): Record<string, any> | null {
   // Extract FoodEstablishment type from l tag: ["l", "https://schema.org:<type>"]
   const lTag = profile.tags.find(t => t[0] === 'l' && t[1]?.startsWith('https://schema.org:'));
   if (!lTag || !lTag[1]) {
@@ -302,6 +302,32 @@ export function extractSchemaOrgData(profile: NostrEvent): Record<string, any> |
 
   // Add identifier field with Nostr publicKey (schema.org standard)
   schemaData.identifier = profile.pubkey;
+
+  // Extract menus (collections kind:30405) for this establishment
+  if (collections) {
+    const establishmentMenus = collections
+      .filter(collection => 
+        collection.kind === 30405 && 
+        collection.pubkey === profile.pubkey
+      )
+      .map(collection => {
+        const titleTag = collection.tags.find(t => t[0] === 'title');
+        const summaryTag = collection.tags.find(t => t[0] === 'summary');
+        const dTag = collection.tags.find(t => t[0] === 'd');
+        
+        return {
+          "@type": "Menu",
+          "name": titleTag?.[1] || '',
+          "description": summaryTag?.[1] || '',
+          "identifier": dTag?.[1] || '',
+        };
+      })
+      .filter(menu => menu.identifier); // Only include menus with identifier
+    
+    if (establishmentMenus.length > 0) {
+      schemaData.hasMenu = establishmentMenus;
+    }
+  }
 
   return schemaData;
 }

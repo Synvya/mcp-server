@@ -82,7 +82,13 @@ server.registerTool(
         "url": z.string().optional().describe("Website URL"),
         "acceptsReservations": z.union([z.string(), z.boolean()]).optional().describe("True, False, or URL"),
         "keywords": z.string().optional().describe("Comma-separated keywords from tags"),
-        "identifier": z.string().describe("Restaurant pubkey (Nostr identifier) - use this for get_menu_items"),
+        "identifier": z.string().describe("Food establishment pubkey (Nostr identifier) - use this for get_menu_items"),
+        "hasMenu": z.array(z.object({
+          "@type": z.string().describe("Menu"),
+          "name": z.string().describe("Menu name from title tag"),
+          "description": z.string().optional().describe("Menu description from summary tag"),
+          "identifier": z.string().describe("Menu identifier from d tag - use this as menu_id for get_menu_items"),
+        })).optional().describe("Array of menus (collections kind:30405) available at this establishment"),
       })).describe("Array of JSON-LD formatted food establishment objects following schema.org FoodEstablishment specification. May contain mixed types (Restaurant, Bakery, etc.)"),
     }),
   },
@@ -151,7 +157,7 @@ server.registerTool(
       // Format as JSON-LD with schema.org structure
       // Filter out null results (profiles without valid l tag)
       const establishmentList = results
-        .map((p) => extractSchemaOrgData(p))
+        .map((p) => extractSchemaOrgData(p, collections))
         .filter((data): data is Record<string, any> => data !== null);
 
       return {
@@ -207,7 +213,7 @@ server.registerTool(
       if (!establishment) {
         const availableEstablishments = profiles
           .map(p => {
-            const schemaData = extractSchemaOrgData(p);
+            const schemaData = extractSchemaOrgData(p, collections);
             if (!schemaData) return null;
             return {
               identifier: p.pubkey,

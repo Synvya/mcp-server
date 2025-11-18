@@ -1,5 +1,242 @@
 [
   {
+    "content": "**Bacalao al Pil Pil**\n\nSalt cod in garlic-olive oil emulsion with guindilla peppers\n\nSKU: 0008",
+    "created_at": 1763416960,
+    "id": "07d399c2386ee9e18324542f7b31677b5b2ea3818f43c60d07d7692e0eaaf449",
+    "kind": 30402,
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "sig": "6d3b690fbcafd003fe7442b5577f81d0eb11a70572c6c45088813daa4f34f7100d7884592c3ba27a55ac8e91e0b7855a844885582ffeb3d88f6200e869c3c265",
+    "tags": [
+      [
+        "d",
+        "0008"
+      ],
+      [
+        "title",
+        "Bacalao al Pil Pil"
+      ],
+      [
+        "summary",
+        "Salt cod in garlic-olive oil emulsion with guindilla peppers"
+      ],
+      [
+        "type",
+        "simple",
+        "physical"
+      ],
+      [
+        "image",
+        "https://items-images-sandbox.s3.us-west-2.amazonaws.com/files/9218a370e2a0483bf4e3291a08f767615a3f86f5/original.png",
+        ""
+      ],
+      [
+        "location",
+        "123 Main Street, Snoqualmie, WA, 98065, USA"
+      ],
+      [
+        "g",
+        "c23q7u2hn"
+      ],
+      [
+        "price",
+        "26.99",
+        "USD"
+      ],
+      [
+        "t",
+        "FISH"
+      ],
+      [
+        "t",
+        "SULPHITES"
+      ],
+      [
+        "t",
+        "DAIRY_FREE"
+      ],
+      [
+        "t",
+        "GLUTEN_FREE"
+      ],
+      [
+        "a",
+        "30405",
+        "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+        "Dinner"
+      ],
+      [
+        "suitableForDiet",
+        "DAIRY_FREE"
+      ],
+      [
+        "suitableForDiet",
+        "GLUTEN_FREE"
+      ],
+      [
+        "published_at",
+        "1763416960"
+      ]
+    ]
+  },
+  {
+    "content": "**Setas al Jerez**\n\nWild mushrooms sautéed with sherry and garlic\n\nSKU: 0007",
+    "created_at": 1763416960,
+    "id": "a01f9332ab29ec955a40f4e0880d30dd911c60625edded74f5de03a53d8c9eb6",
+    "kind": 30402,
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "sig": "d50cb66e37d3387f0015d362d489737d4cd18fc71d7bc7b3e960476b3d803849499a7903fa707c67f7b73e19a63382f20285c951ca1f0e9913fa2a7d235f0ae7",
+    "tags": [
+      [
+        "d",
+        "0007"
+      ],
+      [
+        "title",
+        "Setas al Jerez"
+      ],
+      [
+        "summary",
+        "Wild mushrooms sautéed with sherry and garlic"
+      ],
+      [
+        "type",
+        "simple",
+        "physical"
+      ],
+      [
+        "image",
+        "https://items-images-sandbox.s3.us-west-2.amazonaws.com/files/bb7616d26b664ea997337df7e151041864bcdc06/original.png",
+        ""
+      ],
+      [
+        "location",
+        "123 Main Street, Snoqualmie, WA, 98065, USA"
+      ],
+      [
+        "g",
+        "c23q7u2hn"
+      ],
+      [
+        "price",
+        "14.99",
+        "USD"
+      ],
+      [
+        "t",
+        "DAIRY_FREE"
+      ],
+      [
+        "t",
+        "GLUTEN_FREE"
+      ],
+      [
+        "t",
+        "VEGAN"
+      ],
+      [
+        "t",
+        "VEGETARIAN"
+      ],
+      [
+        "a",
+        "30405",
+        "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+        "Dinner"
+      ],
+      [
+        "suitableForDiet",
+        "DAIRY_FREE"
+      ],
+      [
+        "suitableForDiet",
+        "GLUTEN_FREE"
+      ],
+      [
+        "suitableForDiet",
+        "VEGAN"
+      ],
+      [
+        "suitableForDiet",
+        "VEGETARIAN"
+      ],
+      [
+        "published_at",
+        "1763416960"
+      ]
+    ]
+  },
+  {
+    "content": "**Cordero Asado**\n\nRoasted rack of lamb with rosemary and Rioja reduction\n\nSKU: 0006",
+    "created_at": 1763416960,
+    "id": "4384cdfde3562680f6613d0c3158f7273d92a1d947099a97889c120a8a9cb14b",
+    "kind": 30402,
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "sig": "de22946c8c12cff088f42c2e1975dc62bbf23edbb64f4ddf6a01e7afd843e5d4ed0d64d6cde404fae64399ddfb64914c860b7e3fc047139f4552a9b9ddefa5ff",
+    "tags": [
+      [
+        "d",
+        "0006"
+      ],
+      [
+        "title",
+        "Cordero Asado"
+      ],
+      [
+        "summary",
+        "Roasted rack of lamb with rosemary and Rioja reduction"
+      ],
+      [
+        "type",
+        "simple",
+        "physical"
+      ],
+      [
+        "image",
+        "https://items-images-sandbox.s3.us-west-2.amazonaws.com/files/329b71fa0c40a04a1abfa46e223e7adb207673d9/original.png",
+        ""
+      ],
+      [
+        "location",
+        "123 Main Street, Snoqualmie, WA, 98065, USA"
+      ],
+      [
+        "g",
+        "c23q7u2hn"
+      ],
+      [
+        "price",
+        "28.99",
+        "USD"
+      ],
+      [
+        "t",
+        "DAIRY_FREE"
+      ],
+      [
+        "t",
+        "GLUTEN_FREE"
+      ],
+      [
+        "a",
+        "30405",
+        "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+        "Dinner"
+      ],
+      [
+        "suitableForDiet",
+        "DAIRY_FREE"
+      ],
+      [
+        "suitableForDiet",
+        "GLUTEN_FREE"
+      ],
+      [
+        "published_at",
+        "1763416960"
+      ]
+    ]
+  },
+  {
     "content": "**Ensalada de Pulpo**\n\nGrilled octopus salad with potatoes, paprika, and olive oil\n\nSKU: 0004",
     "created_at": 1763416960,
     "id": "51c4d4553e46311ef79435c101990993c349e92907c6479fbb660b6b3a901bea",
