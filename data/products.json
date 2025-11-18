@@ -1,0 +1,385 @@
+[
+  {
+    "content": "**Ensalada de Pulpo**\n\nGrilled octopus salad with potatoes, paprika, and olive oil\n\nSKU: 0004",
+    "created_at": 1763416960,
+    "id": "51c4d4553e46311ef79435c101990993c349e92907c6479fbb660b6b3a901bea",
+    "kind": 30402,
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "sig": "bdcc942af1e7072acd9d6c022e89ace410a83efc5c68864a2c706f6835161e9404f0c934022e8cb1f938bf1991c18b9255fd0a1394d0fdff3a51826ae8e19e30",
+    "tags": [
+      [
+        "d",
+        "0004"
+      ],
+      [
+        "title",
+        "Ensalada de Pulpo"
+      ],
+      [
+        "summary",
+        "Grilled octopus salad with potatoes, paprika, and olive oil"
+      ],
+      [
+        "type",
+        "simple",
+        "physical"
+      ],
+      [
+        "image",
+        "https://items-images-sandbox.s3.us-west-2.amazonaws.com/files/fa0eb9143dfcbabc036d58e3872835fafa29a014/original.png",
+        ""
+      ],
+      [
+        "location",
+        "123 Main Street, Snoqualmie, WA, 98065, USA"
+      ],
+      [
+        "g",
+        "c23q7u2hn"
+      ],
+      [
+        "price",
+        "16.99",
+        "USD"
+      ],
+      [
+        "t",
+        "MOLLUSCS"
+      ],
+      [
+        "t",
+        "GLUTEN_FREE"
+      ],
+      [
+        "t",
+        "DAIRY_FREE"
+      ],
+      [
+        "a",
+        "30405",
+        "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+        "Lunch"
+      ],
+      [
+        "suitableForDiet",
+        "GLUTEN_FREE"
+      ],
+      [
+        "suitableForDiet",
+        "DAIRY_FREE"
+      ],
+      [
+        "published_at",
+        "1763416960"
+      ]
+    ]
+  },
+  {
+    "content": "**Pisto Manchego**\n\nVegetable stew with tomatoes, peppers, zucchini, and onions\n\nSKU: 0003",
+    "created_at": 1763416960,
+    "id": "5a3ce4e4ec6e0d585c07ef16cc69518da0b80670ccfe438894192f2c9ce51dc2",
+    "kind": 30402,
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "sig": "9b5e9601607c74db0cc75fb31fa9826bb3a72d72aff0245378b16a00bb6147d29c1e111b3e377dc64a01575e26be1821dd097bfb0b9035456887f3b0a6159ab7",
+    "tags": [
+      [
+        "d",
+        "0003"
+      ],
+      [
+        "title",
+        "Pisto Manchego"
+      ],
+      [
+        "summary",
+        "Vegetable stew with tomatoes, peppers, zucchini, and onions"
+      ],
+      [
+        "type",
+        "simple",
+        "physical"
+      ],
+      [
+        "image",
+        "https://items-images-sandbox.s3.us-west-2.amazonaws.com/files/5921fc6463d1a327f91cacf813033a16f6f687c7/original.png",
+        ""
+      ],
+      [
+        "location",
+        "123 Main Street, Snoqualmie, WA, 98065, USA"
+      ],
+      [
+        "g",
+        "c23q7u2hn"
+      ],
+      [
+        "price",
+        "10.99",
+        "USD"
+      ],
+      [
+        "t",
+        "DAIRY_FREE"
+      ],
+      [
+        "t",
+        "GLUTEN_FREE"
+      ],
+      [
+        "t",
+        "VEGAN"
+      ],
+      [
+        "t",
+        "VEGETARIAN"
+      ],
+      [
+        "a",
+        "30405",
+        "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+        "Lunch"
+      ],
+      [
+        "suitableForDiet",
+        "DAIRY_FREE"
+      ],
+      [
+        "suitableForDiet",
+        "GLUTEN_FREE"
+      ],
+      [
+        "suitableForDiet",
+        "VEGAN"
+      ],
+      [
+        "suitableForDiet",
+        "VEGETARIAN"
+      ],
+      [
+        "published_at",
+        "1763416960"
+      ]
+    ]
+  },
+  {
+    "content": "**Gambas a la Plancha**\n\nGrilled wild prawns with garlic and smoked sea salt\n\nSKU: 0002",
+    "created_at": 1763416960,
+    "id": "92cc3e93e28d1594111339e8b750acdab92b23d6f493c13877f60d29229d14fc",
+    "kind": 30402,
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "sig": "809ef4d4b9888a9721249a423d29ed9d5b1a1dd7f2cf4cf4896cea2e45153db6658a246321094500d1a15d8accdcc13597caad78a074cb0cc78a73b179f68a73",
+    "tags": [
+      [
+        "d",
+        "0002"
+      ],
+      [
+        "title",
+        "Gambas a la Plancha"
+      ],
+      [
+        "summary",
+        "Grilled wild prawns with garlic and smoked sea salt"
+      ],
+      [
+        "type",
+        "simple",
+        "physical"
+      ],
+      [
+        "image",
+        "https://items-images-sandbox.s3.us-west-2.amazonaws.com/files/30f77e31ea87f7770c459109bcda0ea26c3f9768/original.png",
+        ""
+      ],
+      [
+        "location",
+        "123 Main Street, Snoqualmie, WA, 98065, USA"
+      ],
+      [
+        "g",
+        "c23q7u2hn"
+      ],
+      [
+        "price",
+        "18.99",
+        "USD"
+      ],
+      [
+        "t",
+        "CRUSTACEANS"
+      ],
+      [
+        "t",
+        "DAIRY_FREE"
+      ],
+      [
+        "t",
+        "GLUTEN_FREE"
+      ],
+      [
+        "t",
+        "NUT_FREE"
+      ],
+      [
+        "a",
+        "30405",
+        "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+        "Lunch"
+      ],
+      [
+        "suitableForDiet",
+        "DAIRY_FREE"
+      ],
+      [
+        "suitableForDiet",
+        "GLUTEN_FREE"
+      ],
+      [
+        "suitableForDiet",
+        "NUT_FREE"
+      ],
+      [
+        "published_at",
+        "1763416960"
+      ]
+    ]
+  },
+  {
+    "content": "**Paella Valenciana**\n\nSaffron rice with chicken, rabbit, green beans, and lima beans.\n\nSKU: 0005",
+    "created_at": 1763416960,
+    "id": "e863c369acabcc229650a07e8286a98c855925d04cb5c87d2d4d1cf1a690e717",
+    "kind": 30402,
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "sig": "793b76a08812773b3bc4cb41184062c7a12c5f56b31563076b29b41f7897680170c2a4120f88fcad7dbc9f11eedf099c9a2d1e8200d36ce152ab13f64e3b8998",
+    "tags": [
+      [
+        "d",
+        "0005"
+      ],
+      [
+        "title",
+        "Paella Valenciana"
+      ],
+      [
+        "summary",
+        "Saffron rice with chicken, rabbit, green beans, and lima beans."
+      ],
+      [
+        "type",
+        "simple",
+        "physical"
+      ],
+      [
+        "image",
+        "https://items-images-sandbox.s3.us-west-2.amazonaws.com/files/91f7a22d22d0d87b2f800215dfa0ce7c8c6f8b92/original.png",
+        ""
+      ],
+      [
+        "location",
+        "123 Main Street, Snoqualmie, WA, 98065, USA"
+      ],
+      [
+        "g",
+        "c23q7u2hn"
+      ],
+      [
+        "price",
+        "24.99",
+        "USD"
+      ],
+      [
+        "t",
+        "GLUTEN_FREE"
+      ],
+      [
+        "t",
+        "DAIRY_FREE"
+      ],
+      [
+        "t",
+        "NUT_FREE"
+      ],
+      [
+        "a",
+        "30405",
+        "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+        "Dinner"
+      ],
+      [
+        "suitableForDiet",
+        "GLUTEN_FREE"
+      ],
+      [
+        "suitableForDiet",
+        "DAIRY_FREE"
+      ],
+      [
+        "suitableForDiet",
+        "NUT_FREE"
+      ],
+      [
+        "published_at",
+        "1763416960"
+      ]
+    ]
+  },
+  {
+    "content": "**Bocadillo de Jamón**\n\nTraditional Spanish baguette with cured Iberian ham and tomato spread\n\nSKU: 0001",
+    "created_at": 1763416960,
+    "id": "c059154c436297c01c74d8aaf80cdce90ec04091f9b974c01212964c80518b74",
+    "kind": 30402,
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "sig": "a59477e5d9c062aecccaf6a48507b4ef8be219587881f6653639fdb0d35300beba9103df625b6138cd6b47d9503f0ee1b9c18590c8dd5e94c39844d718e0b79b",
+    "tags": [
+      [
+        "d",
+        "0001"
+      ],
+      [
+        "title",
+        "Bocadillo de Jamón"
+      ],
+      [
+        "summary",
+        "Traditional Spanish baguette with cured Iberian ham and tomato spread"
+      ],
+      [
+        "type",
+        "simple",
+        "physical"
+      ],
+      [
+        "image",
+        "https://items-images-sandbox.s3.us-west-2.amazonaws.com/files/477ccaba02308b4e418785993a25185bce244296/original.png",
+        ""
+      ],
+      [
+        "location",
+        "123 Main Street, Snoqualmie, WA, 98065, USA"
+      ],
+      [
+        "g",
+        "c23q7u2hn"
+      ],
+      [
+        "price",
+        "12.99",
+        "USD"
+      ],
+      [
+        "t",
+        "GLUTEN"
+      ],
+      [
+        "a",
+        "30405",
+        "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+        "Lunch"
+      ],
+      [
+        "published_at",
+        "1763416960"
+      ]
+    ]
+  }
+]

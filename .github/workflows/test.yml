@@ -1,0 +1,49 @@
+name: Test and Build
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [20.x, 22.x]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Build project
+      run: npm run build
+    
+    - name: Check for TypeScript errors
+      run: npx tsc --noEmit
+    
+    - name: Verify data files exist
+      run: |
+        test -f data/profiles.json || (echo "Missing data/profiles.json" && exit 1)
+        test -f data/collections.json || (echo "Missing data/collections.json" && exit 1)
+        test -f data/products.json || (echo "Missing data/products.json" && exit 1)
+        echo "All data files present"
+    
+    - name: Verify build output
+      run: |
+        test -f dist/server.js || (echo "Build failed: dist/server.js not found" && exit 1)
+        test -f dist/data-loader.js || (echo "Build failed: dist/data-loader.js not found" && exit 1)
+        echo "Build output verified"
+
