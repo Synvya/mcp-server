@@ -1,6 +1,11 @@
 import fs from 'fs/promises';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { createRequire } from 'module';
+import { bech32 } from '@scure/base';
+
+const require = createRequire(import.meta.url);
+const ngeohash = require('ngeohash');
 
 // Get the directory of the current module (works in both ESM and CommonJS)
 const __filename = fileURLToPath(import.meta.url);
@@ -8,6 +13,40 @@ const __dirname = dirname(__filename);
 
 // Get the project root (go up from dist/ to project root)
 const projectRoot = join(__dirname, '..');
+
+// Convert hex pubkey to bech32 npub format
+export function pubkeyToNpub(hexPubkey: string): string {
+  try {
+    // Convert hex string to bytes
+    const bytes = Buffer.from(hexPubkey, 'hex');
+    // Encode to bech32 with 'npub' prefix
+    const npub = bech32.encode('npub', bech32.toWords(bytes));
+    return `nostr:${npub}`;
+  } catch (error) {
+    console.error('Error converting pubkey to npub:', error);
+    // Fallback to hex if conversion fails
+    return hexPubkey;
+  }
+}
+
+// Convert bech32 npub format back to hex pubkey
+export function npubToPubkey(npub: string): string {
+  try {
+    // Remove 'nostr:' prefix if present
+    const cleanNpub = npub.replace(/^nostr:/, '');
+    // Decode bech32 - decode returns { prefix: string, words: number[] }
+    // @ts-ignore - bech32.decode has strict typing but accepts strings at runtime
+    const decoded = bech32.decode(cleanNpub);
+    // Convert words to bytes
+    const bytes = Buffer.from(bech32.fromWords(decoded.words));
+    // Convert bytes to hex
+    return bytes.toString('hex');
+  } catch (error) {
+    console.error('Error converting npub to pubkey:', error);
+    // If it's already hex, return as-is
+    return npub;
+  }
+}
 
 export type NostrEvent = {
   kind: number;
@@ -300,8 +339,8 @@ export function extractSchemaOrgData(profile: NostrEvent, collections?: NostrEve
     schemaData.keywords = keywordTags.join(', ');
   }
 
-  // Add identifier field with Nostr publicKey (schema.org standard)
-  schemaData.identifier = profile.pubkey;
+  // Add @id field with Nostr publicKey in bech32 format
+  schemaData["@id"] = pubkeyToNpub(profile.pubkey);
 
   // Extract menus (collections kind:30405) for this establishment
   if (collections) {
@@ -326,6 +365,172 @@ export function extractSchemaOrgData(profile: NostrEvent, collections?: NostrEve
     
     if (establishmentMenus.length > 0) {
       schemaData.hasMenu = establishmentMenus;
+    }
+  }
+
+  return schemaData;
+}
+
+// Map dietary tags to schema.org suitableForDiet values
+// Returns the schema.org value if mapped, null otherwise
+export function mapDietaryTagToSchemaOrg(tag: string): string | null {
+  const normalized = tag.toUpperCase().trim();
+  
+  const mapping: Record<string, string> = {
+    'VEGAN': 'VeganDiet',
+    'VEGETARIAN': 'VegetarianDiet',
+    'GLUTEN_FREE': 'GlutenFreeDiet',
+    'DAIRY_FREE': 'LowLactoseDiet',
+    'HALAL': 'HalalDiet',
+    'KOSHER': 'KosherDiet',
+    'LOW_CALORIE': 'LowCalorieDiet',
+    'LOW_FAT': 'LowFatDiet',
+    'LOW_SALT': 'LowSaltDiet',
+    'DIABETIC': 'DiabeticDiet',
+    'HINDU': 'HinduDiet',
+  };
+  
+  return mapping[normalized] || null;
+}
+
+// Format unmapped dietary tags for description text
+// Converts "NUT_FREE" -> "Nut free", "SULPHITES" -> "Sulphites"
+export function formatDietaryTagForDescription(tag: string): string {
+  return tag
+    .toLowerCase()
+    .replace(/_/g, ' ')
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
+// Decode geohash to GeoCoordinates object
+export function decodeGeohashToGeoCoordinates(geohash: string): { "@type": "GeoCoordinates"; latitude: number; longitude: number } | null {
+  try {
+    const decoded = ngeohash.decode(geohash);
+    return {
+      "@type": "GeoCoordinates",
+      latitude: decoded.latitude,
+      longitude: decoded.longitude,
+    };
+  } catch (error) {
+    console.error('Error decoding geohash:', error);
+    return null;
+  }
+}
+
+// Extract schema.org MenuItem data from Nostr kind:30402 product event
+export function extractMenuItemSchemaOrgData(product: NostrEvent, includeSeller: boolean = true): Record<string, any> | null {
+  const schemaData: Record<string, any> = {
+    "@context": "https://schema.org",
+    "@type": "MenuItem",
+  };
+
+  // Extract name from title tag
+  const titleTag = product.tags.find(t => t[0] === 'title');
+  if (titleTag && titleTag[1]) {
+    schemaData.name = titleTag[1];
+  } else {
+    // Fallback to extracting from content
+    schemaData.name = extractDishName(product);
+  }
+
+  // Extract description: content + contains + unmapped dietary tags
+  let description = '';
+  
+  // Base description from content field
+  if (typeof product.content === 'string') {
+    // Remove markdown formatting for description
+    description = product.content
+      .replace(/\*\*(.+?)\*\*/g, '$1') // Remove bold
+      .replace(/\n\n/g, ' ') // Replace double newlines with space
+      .replace(/\n/g, ' ') // Replace single newlines with space
+      .trim();
+  }
+  
+  // Add contains tag values if present
+  const containsTags = product.tags.filter(t => t[0] === 'contains');
+  if (containsTags.length > 0) {
+    const containsValues = containsTags
+      .map(t => t[1])
+      .filter(Boolean);
+    if (containsValues.length > 0) {
+      description += `. Contains ${containsValues.join(', ')}`;
+    }
+  }
+  
+  // Get tags from "t" tags and "suitableForDiet" tags (deduplicate)
+  const dietaryTagsSet = new Set<string>();
+  product.tags
+    .filter(t => t[0] === 't' || t[0] === 'suitableForDiet')
+    .forEach(t => {
+      if (t[1]) dietaryTagsSet.add(t[1]);
+    });
+  
+  const dietaryTags = Array.from(dietaryTagsSet);
+  
+  // Separate mapped and unmapped dietary tags
+  const mappedDietaryTags: string[] = [];
+  const unmappedDietaryTags: string[] = [];
+  
+  for (const tag of dietaryTags) {
+    const mapped = mapDietaryTagToSchemaOrg(tag);
+    if (mapped) {
+      mappedDietaryTags.push(mapped);
+    } else {
+      unmappedDietaryTags.push(tag);
+    }
+  }
+  
+  // Add mapped dietary tags to suitableForDiet
+  if (mappedDietaryTags.length > 0) {
+    schemaData.suitableForDiet = mappedDietaryTags;
+  }
+  
+  // Add unmapped dietary tags to description
+  if (unmappedDietaryTags.length > 0) {
+    const formattedUnmapped = unmappedDietaryTags.map(formatDietaryTagForDescription);
+    description += `. ${formattedUnmapped.join('. ')}`;
+  }
+  
+  schemaData.description = description.trim();
+
+  // Extract identifier from d tag
+  const dTag = product.tags.find(t => t[0] === 'd');
+  if (dTag && dTag[1]) {
+    schemaData.identifier = dTag[1];
+  }
+
+  // Extract image from image tag
+  const imageTag = product.tags.find(t => t[0] === 'image');
+  if (imageTag && imageTag[1]) {
+    schemaData.image = imageTag[1];
+  }
+
+  // Extract price and format as Offer
+  const priceTag = product.tags.find(t => t[0] === 'price');
+  if (priceTag && priceTag[1]) {
+    const price = parseFloat(priceTag[1]);
+    const currency = priceTag[2] || 'USD';
+    
+    if (!isNaN(price)) {
+      schemaData.offers = {
+        "@type": "Offer",
+        price: price,
+        priceCurrency: currency,
+      };
+      if (includeSeller) {
+        schemaData.offers.seller = pubkeyToNpub(product.pubkey);
+      }
+    }
+  }
+
+  // Extract geo coordinates from geohash (g tag)
+  const geohashTag = product.tags.find(t => t[0] === 'g');
+  if (geohashTag && geohashTag[1]) {
+    const geo = decodeGeohashToGeoCoordinates(geohashTag[1]);
+    if (geo) {
+      schemaData.geo = geo;
     }
   }
 

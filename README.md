@@ -27,22 +27,22 @@ Find food establishments (restaurants, bakeries, cafes, etc.) by type, cuisine, 
   - `@type` (string): Schema.org FoodEstablishment type (Bakery, BarOrPub, Brewery, CafeOrCoffeeShop, Distillery, FastFoodRestaurant, IceCreamShop, Restaurant, or Winery)
   - `name` (string): Restaurant display name
   - `description` (string): Full restaurant description 
-  - `identifier` (string): Food establishment unique identifier - **use this for `get_menu_items`**
+  - `@id` (string): Food establishment identifier - **use this as `restaurant_id` for `get_menu_items`**
   - `address` (object, optional): PostalAddress with streetAddress, addressLocality, addressRegion, postalCode, addressCountry
   - `telephone` (string, optional): Phone number
-  - `email` (string, optional): Email in mailto: format
+  - `email` (string, optional): Email in `mailto:` format
   - `openingHours` (array, optional): Opening hours in format `["Tu-Th 11:00-21:00", "Fr-Sa 11:00-00:00", "Su 11:00-21:00"]`
   - `image` (string, optional): Banner image URL
   - `servesCuisine` (array, optional): Array of cuisine types
   - `geo` (object, optional): GeoCoordinates with latitude and longitude
   - `url` (string, optional): Website URL
   - `acceptsReservations` (string, optional): "True", "False", or URL
-  - `keywords` (string, optional): Comma-separated keywords from tags
+  - `keywords` (string, optional): Comma-separated keywords 
   - `hasMenu` (array, optional): Array of menu objects, each containing:
     - `@type` (string): "Menu"
-    - `name` (string): Menu name from title tag
-    - `description` (string, optional): Menu description from summary tag
-    - `identifier` (string): Menu identifier from d tag - **use this as `menu_id` for `get_menu_items`**
+    - `name` (string): Menu name 
+    - `description` (string, optional): Menu description 
+    - `identifier` (string): Menu identifier - **use this as `menu_identifier` for `get_menu_items`**
 
 **Example:**
 ```json
@@ -60,48 +60,59 @@ Find food establishments (restaurants, bakeries, cafes, etc.) by type, cuisine, 
 - Dietary tags are case-insensitive and handle variations
 - Returns full description text (not truncated)
 - Output format is JSON-LD (JSON for Linked Data) following schema.org FoodEstablishment specification
-- All establishment objects include `@context` and `@type` for proper JSON-LD interpretation
+- All establishment objects include `@context`, `@id`, and `@type` for proper JSON-LD interpretation
 
 ---
 
 ### get_menu_items
 
-Get all dishes from a specific food establishment menu.
+Get all dishes from a specific food establishment menu. Returns a complete Menu object with all menu items.
 
 **Parameters:**
-- `food_establishment_identifier` (required): Food establishment pubkey (ID)
-  - **MUST** be the exact `identifier` value from `search_food_establishments` results
-  - The pubkey is reported as `identifier` in the JSON-LD output
-  - Using establishment names will fail - always use the pubkey identifier
-- `menu_id` (required): Menu identifier
-  - Common values: "Lunch", "Dinner", "Brunch", "Breakfast"
-  - The `menu_id` comes from the `d` tag in Nostr kind:30405 collection events
+- `restaurant_id` (required): Food establishment identifier 
+  - **MUST** be the exact `@id` value from `search_food_establishments` results
+- `menu_identifier` (required): Menu identifier
+  - **MUST** be the exact `identifier` value from the `hasMenu` array in `search_food_establishments` results
 
 **Returns:**
-- `items`: Array of menu item objects, each containing:
-  - `name` (string): Dish name (extracted from markdown or content)
-  - `description` (string, optional): Dish description from summary tag
-  - `price` (string, optional): Price in USD format (e.g., "$10.99")
+A JSON-LD Menu object following schema.org Menu specification:
+- `@context`: "https://schema.org"
+- `@type`: "Menu"
+- `name` (string): Menu name from 
+- `description` (string, optional): Menu description 
+- `identifier` (string): Menu identifier 
+- `hasMenuItem` (array): Array of MenuItem objects, each containing:
+  - `@context`: "https://schema.org"
+  - `@type`: "MenuItem"
+  - `name` (string): name of the menu item
+  - `description` (string): Description of the menu item
+  - `identifier` (string, optional): Menu item identifier 
+  - `image` (string, optional): Image URL for the menu item
+  - `suitableForDiet` (array, optional): Array of schema.org suitableForDiet values (e.g., "VeganDiet", "GlutenFreeDiet")
+  - `offers` (object, optional): Price information with `@type: "Offer"`, `price` (number), `priceCurrency` (string)
+  - `geo` (object, optional): Geographic coordinates with `@type: "GeoCoordinates"`, `latitude`, and `longitude`
 
 **Example:**
 ```json
 {
-  "food_establishment_identifier": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
-  "menu_id": "Lunch"
+  "restaurant_id": "nostr:npub1...",
+  "menu_identifier": "Dinner"
 }
 ```
 
 **Behavior Notes:**
-- Products are linked to collections via Nostr `["a", "30405", pubkey, collection_id]` tags
-- Dish names are extracted from markdown content (e.g., `**Dish Name**`)
-- If menu not found, returns available menus for that food establishment
-- If food establishment not found, returns list of available establishments with their identifiers
+- Output format is JSON-LD (JSON for Linked Data) following schema.org Menu and MenuItem specifications
+- All objects include `@context` and `@type` for proper JSON-LD interpretation
+- Dietary tags are mapped to schema.org suitableForDiet values
+- Unmapped dietary tags are appended to the description as text (e.g., "Nut free. Sulphites")
+- If menu not found, returns an error message
+- If food establishment not found, returns an error message
 
 ---
 
 ### search_menu_items
 
-Find specific dishes across all food establishments by name, ingredient, or dietary preference.
+Find specific dishes across all food establishments by name, ingredient, or dietary preference. Returns a JSON-LD graph structure with food establishments grouped by their matching menu items.
 
 **Parameters:**
 - `dish_query` (required): Dish name, ingredient, or dietary term to search for
@@ -111,33 +122,50 @@ Find specific dishes across all food establishments by name, ingredient, or diet
 - `dietary` (optional): Additional dietary filter
   - Combined with `dish_query` using AND logic
   - If `dish_query` is already a dietary term, this adds an additional constraint
-- `food_establishment_identifier` (optional): Filter results to a specific food establishment
-  - Use the `identifier` from `search_food_establishments` results
-  - The pubkey is reported as `identifier` in the JSON-LD output
+- `restaurant_id` (optional): Filter results to a specific food establishment
+  - Use the `@id` from `search_food_establishments` results 
 
 **Returns:**
-- `results`: Array of dish objects, each containing:
-  - `dish` (string): Dish name
-  - `description` (string, optional): Dish description
-  - `price` (string, optional): Price in USD
-  - `restaurant` (string): Food establishment name
-  - `food_establishment_identifier` (string): Food establishment pubkey (identifier)
-  - `menu` (string, optional): Menu name where dish appears (dishes can appear in multiple menus)
+A JSON-LD graph structure following schema.org specifications:
+- `@context`: "https://schema.org"
+- `@graph`: Array of FoodEstablishment objects, each containing:
+  - `@type` (string): Schema.org FoodEstablishment type (Restaurant, Bakery, etc.)
+  - `name` (string): Food establishment name
+  - `geo` (object, optional): GeoCoordinates with latitude and longitude
+  - `@id` (string): Food establishment identifier in bech32 format (nostr:npub1...)
+  - `hasMenu` (array): Array of Menu objects, each containing:
+    - `@type` (string): "Menu"
+    - `name` (string): Menu name
+    - `description` (string, optional): Menu description
+    - `identifier` (string): Menu identifier
+    - `hasMenuItem` (array): Array of MenuItem objects, each containing:
+      - `@context`: "https://schema.org"
+      - `@type`: "MenuItem"
+      - `name` (string): Name of the menu item
+      - `description` (string): Description of the menu item
+      - `identifier` (string, optional): Menu item identifier
+      - `image` (string, optional): Image URL for the menu item
+      - `suitableForDiet` (array, optional): Array of schema.org suitableForDiet values (e.g., "VeganDiet", "GlutenFreeDiet")
+      - `offers` (object, optional): Price information with `@type: "Offer"`, `price` (number), and `priceCurrency` (string)
+      - `geo` (object, optional): Geographic coordinates with `@type: "GeoCoordinates"`, `latitude`, and `longitude`
 
 **Example:**
 ```json
 {"dish_query": "pizza"}
 {"dish_query": "vegan"}  // Auto-detects as dietary term
 {"dish_query": "pizza", "dietary": "vegan"}
-{"dish_query": "tomato", "food_establishment_identifier": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f"}
+{"dish_query": "tomato", "restaurant_id": "nostr:npub1..."}
 ```
 
 **Behavior Notes:**
 - Automatically detects common dietary terms: vegan, vegetarian, gluten-free, gluten free, dairy-free, dairy free, nut-free, nut free
 - When a dietary term is detected, matches both text search AND dietary tags
 - Products use uppercase dietary tags with underscores (e.g., "VEGAN", "GLUTEN_FREE") - normalized for matching
-- Dishes can appear in multiple menus - all matches are returned
-- Dietary tag matching is case-insensitive and handles variations
+- Results are grouped by food establishment and menu - each establishment appears once with all matching menu items organized by menu
+- Output format is JSON-LD (JSON for Linked Data) following schema.org specifications
+- All objects include `@context` and `@type` for proper JSON-LD interpretation
+- Dietary tags are mapped to schema.org suitableForDiet values
+- Unmapped dietary tags are appended to the description as text (e.g., "Nut free. Sulphites")
 
 ## Testing
 
@@ -190,7 +218,7 @@ The server supports both HTTP (for testing) and stdio (for Claude Desktop) trans
 
 #### Example test queries:
    - Search food establishments: `{"foodEstablishmentType": "Restaurant", "cuisine": "Spanish", "dietary": "vegan"}` or `{"query": "Snoqualmie"}` or `{"foodEstablishmentType": "Bakery", "dietary": "gluten free"}`
-   - Get menu items: `{"food_establishment_identifier": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f", "menu_id": "Lunch"}`
+   - Get menu items: `{"restaurant_id": "nostr:npub1...", "menu_identifier": "Dinner"}`
    - Search dishes: `{"dish_query": "pizza"}` or `{"dish_query": "vegan"}` (auto-detects dietary term)
 
 ## Data Files

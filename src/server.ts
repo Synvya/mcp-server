@@ -15,6 +15,8 @@ import {
   getPrice,
   productMatchesDietary,
   extractSchemaOrgData,
+  extractMenuItemSchemaOrgData,
+  npubToPubkey,
   type NostrEvent,
 } from './data-loader.js';
 
@@ -82,13 +84,13 @@ server.registerTool(
         "url": z.string().optional().describe("Website URL"),
         "acceptsReservations": z.union([z.string(), z.boolean()]).optional().describe("True, False, or URL"),
         "keywords": z.string().optional().describe("Comma-separated keywords from tags"),
-        "identifier": z.string().describe("Food establishment pubkey (Nostr identifier) - use this for get_menu_items"),
+        "@id": z.string().describe("Food establishment identifier in bech32 format (nostr:npub1...) - use this as restaurant_id for get_menu_items"),
         "hasMenu": z.array(z.object({
           "@type": z.string().describe("Menu"),
-          "name": z.string().describe("Menu name from title tag"),
-          "description": z.string().optional().describe("Menu description from summary tag"),
-          "identifier": z.string().describe("Menu identifier from d tag - use this as menu_id for get_menu_items"),
-        })).optional().describe("Array of menus (collections kind:30405) available at this establishment"),
+          "name": z.string().describe("Menu name"),
+          "description": z.string().optional().describe("Menu description"),
+          "identifier": z.string().describe("Menu identifier - use this as menu_identifier for get_menu_items"),
+        })).optional().describe("Array of menus available at this establishment"),
       })).describe("Array of JSON-LD formatted food establishment objects following schema.org FoodEstablishment specification. May contain mixed types (Restaurant, Bakery, etc.)"),
     }),
   },
@@ -191,109 +193,133 @@ server.registerTool(
 server.registerTool(
   "get_menu_items",
   {
-    description: "Get all dishes from a specific food establishment menu. IMPORTANT: Use the exact 'identifier' field (pubkey) from search_food_establishments results as food_establishment_identifier. Do NOT use establishment names. Example: {'food_establishment_identifier': 'e01e4b0b...', 'menu_id': 'Lunch'}",
+    description: "Get all dishes from a specific food establishment menu. IMPORTANT: Use the exact '@id' field from search_food_establishments results as restaurant_id, and use the 'identifier' from the 'hasMenu' array for menu_identifier. Do NOT use establishment names or guess menu names. Example: {'restaurant_id': 'nostr:npub1...', 'menu_identifier': 'Dinner'}",
     inputSchema: z.object({
-      food_establishment_identifier: z.string().describe("Food establishment pubkey (ID) - MUST be the exact 'identifier' value from search_food_establishments results. The pubkey is reported as 'identifier' in the JSON-LD output. Using establishment names will fail."),
-      menu_id: z.string().describe("Menu identifier from the restaurant's menu collections. Common values: 'Lunch', 'Dinner', 'Brunch', 'Breakfast'. The menu_id comes from the 'd' tag in Nostr kind:30405 collection events."),
+      restaurant_id: z.string().describe("Food establishment identifier in bech32 format (nostr:npub1...) - MUST be the exact '@id' value from search_food_establishments results. The identifier is reported as '@id' in the JSON-LD output. Using establishment names will fail."),
+      menu_identifier: z.string().describe("Menu identifier - MUST be the exact 'identifier' value from the 'hasMenu' array in search_food_establishments results. Each menu in the 'hasMenu' array has an 'identifier' field that should be used here. Do NOT guess menu names."),
     }),
     outputSchema: z.object({
-      items: z.array(z.object({
-        name: z.string().describe("Dish name"),
-        description: z.string().optional().describe("Dish description"),
-        price: z.string().optional().describe("Price in USD"),
-      })),
+      "@context": z.string().describe("JSON-LD context, always 'https://schema.org'"),
+      "@type": z.string().describe("JSON-LD type, always 'Menu'"),
+      "name": z.string().describe("Menu name"),
+      "description": z.string().optional().describe("Menu description"),
+      "identifier": z.string().describe("Menu identifier"),
+      "hasMenuItem": z.array(z.object({
+        "@context": z.string().describe("JSON-LD context, always 'https://schema.org'"),
+        "@type": z.string().describe("JSON-LD type, always 'MenuItem'"),
+        "name": z.string().describe("Name of the menu item"),
+        "description": z.string().describe("Description of the menu item"),
+        "identifier": z.string().optional().describe("Menu item identifier"),
+        "image": z.string().url().optional().describe("Image URL for the menu item"),
+        "suitableForDiet": z.array(z.enum([
+          "DiabeticDiet",
+          "GlutenFreeDiet",
+          "HalalDiet",
+          "HinduDiet",
+          "KosherDiet",
+          "LowCalorieDiet",
+          "LowFatDiet",
+          "LowLactoseDiet",
+          "LowSaltDiet",
+          "VeganDiet",
+          "VegetarianDiet",
+        ])).optional().describe("Array of schema.org suitableForDiet values (e.g., 'VeganDiet', 'GlutenFreeDiet')"),
+        "offers": z.object({
+          "@type": z.string().describe("Always 'Offer'"),
+          "price": z.number().describe("Price as number"),
+          "priceCurrency": z.string().describe("Currency code (e.g., 'USD')"),
+        }).optional().describe("Price information formatted as schema.org Offer (seller not included since restaurant_id is already specified)"),
+        "geo": z.object({
+          "@type": z.string().describe("Always 'GeoCoordinates'"),
+          "latitude": z.number().describe("Latitude"),
+          "longitude": z.number().describe("Longitude"),
+        }).optional().describe("Geographic coordinates"),
+      })).describe("Array of JSON-LD formatted menu item objects following schema.org MenuItem specification"),
     }),
   },
   async (args) => {
     try {
-      const { food_establishment_identifier, menu_id } = args;
+      const { restaurant_id, menu_identifier } = args;
       
-      // Find food establishment by pubkey only
-      const establishment = profiles.find(p => p.pubkey === food_establishment_identifier);
+      // Convert npub to hex pubkey for lookup
+      const establishmentPubkey = npubToPubkey(restaurant_id);
+      
+      // Find food establishment by pubkey
+      const establishment = profiles.find(p => p.pubkey === establishmentPubkey);
       if (!establishment) {
-        const availableEstablishments = profiles
-          .map(p => {
-            const schemaData = extractSchemaOrgData(p, collections);
-            if (!schemaData) return null;
-            return {
-              identifier: p.pubkey,
-              name: schemaData.name || 'Unknown'
-            };
-          })
-          .filter((e): e is { identifier: string; name: string } => e !== null);
         return {
           content: [
             {
               type: "text",
-              text: `Invalid food_establishment_identifier: "${food_establishment_identifier}". You must use the exact 'identifier' (pubkey) from search_food_establishments results. Available establishments with their identifiers: ${availableEstablishments.map(e => `${e.name} (identifier: ${e.identifier})`).join('; ')}`,
+              text: `Food establishment with identifier "${restaurant_id}" not found. Use the exact '@id' from search_food_establishments results.`,
             },
           ],
-          structuredContent: { results: [] },
+          structuredContent: {
+            "@context": "https://schema.org",
+            "@type": "Menu",
+            "name": "",
+            "identifier": "",
+            "hasMenuItem": [],
+          },
         };
       }
       
-      const establishmentPubkey = establishment.pubkey;
-      
       // Find the collection (menu)
-      const collection = findCollection(collections, establishmentPubkey, menu_id);
+      const collection = findCollection(collections, establishmentPubkey, menu_identifier);
       if (!collection) {
-        // List available menus for this food establishment
-        const availableMenus = collections
-          .filter(c => c.pubkey === establishmentPubkey)
-          .map(c => {
-            const menuTag = c.tags.find(t => t[0] === 'd');
-            return menuTag?.[1] || 'Unknown';
-          })
-          .filter(Boolean);
-        
         return {
           content: [
             {
               type: "text",
-              text: `Menu "${menu_id}" not found for this restaurant. Available menus: ${availableMenus.join(', ')}`,
+              text: `Menu with identifier "${menu_identifier}" not found for this food establishment. Use the exact 'identifier' from the 'hasMenu' array in search_food_establishments results.`,
             },
           ],
-          structuredContent: { results: [] },
+          structuredContent: {
+            "@context": "https://schema.org",
+            "@type": "Menu",
+            "name": "",
+            "identifier": "",
+            "hasMenuItem": [],
+          },
         };
       }
       
       // Find products in this collection
-      const menuItems = findProductsInCollection(products, establishmentPubkey, menu_id);
+      const menuItems = findProductsInCollection(products, establishmentPubkey, menu_identifier);
       
-      const items = menuItems.map((item) => {
-        const dishName = extractDishName(item);
-        const price = getPrice(item);
-        const summaryTag = item.tags.find(t => t[0] === 'summary');
-        const description = summaryTag?.[1] || '';
-        
-        return {
-          name: dishName,
-          description: description,
-          price: price ? `$${price}` : undefined,
-        };
-      });
-
-      const itemNames = items.map(item => item.name).join(', ');
+      // Convert to JSON-LD MenuItem format (without seller since restaurant_id is already specified)
+      const menuItemsJsonLd = menuItems
+        .map(item => extractMenuItemSchemaOrgData(item, false))
+        .filter((item): item is Record<string, any> => item !== null);
+      
+      // Extract menu properties from collection (same as in search_food_establishments)
+      const titleTag = collection.tags.find(t => t[0] === 'title');
+      const summaryTag = collection.tags.find(t => t[0] === 'summary');
+      const dTag = collection.tags.find(t => t[0] === 'd');
+      
+      const menuObject = {
+        "@context": "https://schema.org",
+        "@type": "Menu",
+        "name": titleTag?.[1] || '',
+        "description": summaryTag?.[1] || undefined,
+        "identifier": dTag?.[1] || '',
+        "hasMenuItem": menuItemsJsonLd,
+      };
+      
+      // Remove description if empty
+      if (!menuObject.description) {
+        delete menuObject.description;
+      }
       
       return {
-        structuredContent: {
-          items: items,
-        },
+        structuredContent: menuObject,
         content: [
           {
             type: "text",
-            text: items.length > 0
-              ? `Found ${items.length} item${items.length > 1 ? 's' : ''} in ${menu_id} menu: ${itemNames}`
-              : `No items found in ${menu_id} menu`,
+            text: menuItemsJsonLd.length > 0
+              ? `Found ${menuItemsJsonLd.length} menu item${menuItemsJsonLd.length > 1 ? 's' : ''}`
+              : `No items found in menu`,
           },
-          ...(items.length > 0 ? [{
-            type: "resource" as const,
-            resource: {
-              uri: `dinedirect://menu/${establishmentPubkey}/${menu_id}`,
-              mimeType: "application/json",
-              text: JSON.stringify({ items: items }, null, 2),
-            },
-          }] : []),
         ],
       };
     } catch (error) {
@@ -305,7 +331,13 @@ server.registerTool(
             text: `Error getting menu items: ${error instanceof Error ? error.message : 'Unknown error'}`,
           },
         ],
-        structuredContent: { results: [] },
+        structuredContent: {
+          "@context": "https://schema.org",
+          "@type": "Menu",
+          "name": "",
+          "identifier": "",
+          "hasMenuItem": [],
+        },
       };
     }
   }
@@ -315,39 +347,70 @@ server.registerTool(
 server.registerTool(
   "search_menu_items",
   {
-    description: "Find specific dishes across all restaurants by name, ingredient, or dietary preference. Automatically detects if dish_query is a dietary term (vegan, vegetarian, gluten-free, etc.) and matches against dietary tags. Example: {'dish_query': 'pizza', 'dietary': 'vegan'} or {'dish_query': 'vegan'} (auto-detects as dietary term).",
+    description: "Find specific dishes across all food establishments by name, ingredient, or dietary preference. Returns a JSON-LD graph structure with food establishments grouped by their matching menu items. Automatically detects if dish_query is a dietary term (vegan, vegetarian, gluten-free, etc.) and matches against dietary tags. Example: {'dish_query': 'pizza', 'dietary': 'vegan'} or {'dish_query': 'vegan'} (auto-detects as dietary term).",
     inputSchema: z.object({
       dish_query: z.string().describe("Dish name, ingredient, or dietary term to search for. Searches dish names and descriptions. If the query looks like a dietary term (vegan, vegetarian, gluten-free, etc.), it will also match dishes with matching dietary tags even if the word isn't in the dish name. Example: 'pizza' or 'vegan' or 'tomato'"),
       dietary: z.string().optional().describe("Additional dietary filter (e.g., 'vegan', 'gluten free'). Combined with dish_query using AND logic. If dish_query is already a dietary term, this adds an additional constraint."),
-      food_establishment_identifier: z.string().optional().describe("Optional: Filter results to a specific food establishment by pubkey. Use the 'identifier' from search_food_establishments results. The pubkey is reported as 'identifier' in the JSON-LD output."),
+      restaurant_id: z.string().optional().describe("Optional: Filter results to a specific food establishment. Use the '@id' from search_food_establishments results. The identifier is reported as '@id' in bech32 format (nostr:npub1...) in the JSON-LD output."),
     }),
     outputSchema: z.object({
-      results: z.array(z.object({
-        dish: z.string().describe("Dish name"),
-        description: z.string().optional().describe("Dish description"),
-        price: z.string().optional().describe("Price in USD"),
-        restaurant: z.string().describe("Restaurant name"),
-        food_establishment_identifier: z.string().describe("Food establishment pubkey (identifier)"),
-        menu: z.string().optional().describe("Menu name"),
+      "@context": z.string().describe("JSON-LD context, always 'https://schema.org'"),
+      "@graph": z.array(z.object({
+        "@type": z.string().describe("Schema.org FoodEstablishment type (Restaurant, Bakery, etc.)"),
+        "name": z.string().describe("Food establishment name"),
+        "geo": z.object({
+          "@type": z.string().describe("Always 'GeoCoordinates'"),
+          "latitude": z.number(),
+          "longitude": z.number(),
+        }).optional().describe("Geographic coordinates"),
+        "@id": z.string().describe("Food establishment identifier in bech32 format (nostr:npub1...)"),
+        "hasMenu": z.array(z.object({
+          "@type": z.string().describe("Always 'Menu'"),
+          "name": z.string().describe("Menu name"),
+          "description": z.string().optional().describe("Menu description"),
+          "identifier": z.string().describe("Menu identifier"),
+          "hasMenuItem": z.array(z.object({
+            "@context": z.string().describe("JSON-LD context, always 'https://schema.org'"),
+            "@type": z.string().describe("JSON-LD type, always 'MenuItem'"),
+            "name": z.string().describe("Name of the menu item"),
+            "description": z.string().describe("Description of the menu item"),
+            "identifier": z.string().optional().describe("Menu item identifier"),
+            "image": z.string().url().optional().describe("Image URL for the menu item"),
+            "suitableForDiet": z.array(z.enum([
+              "DiabeticDiet",
+              "GlutenFreeDiet",
+              "HalalDiet",
+              "HinduDiet",
+              "KosherDiet",
+              "LowCalorieDiet",
+              "LowFatDiet",
+              "LowLactoseDiet",
+              "LowSaltDiet",
+              "VeganDiet",
+              "VegetarianDiet",
+            ])).optional().describe("Array of schema.org suitableForDiet values (e.g., 'VeganDiet', 'GlutenFreeDiet')"),
+            "offers": z.object({
+              "@type": z.string().describe("Always 'Offer'"),
+              "price": z.number().describe("Price as number"),
+              "priceCurrency": z.string().describe("Currency code (e.g., 'USD')"),
+            }).optional().describe("Price information formatted as schema.org Offer (seller not included since results are organized by restaurant)"),
+            "geo": z.object({
+              "@type": z.string().describe("Always 'GeoCoordinates'"),
+              "latitude": z.number().describe("Latitude"),
+              "longitude": z.number().describe("Longitude"),
+            }).optional().describe("Geographic coordinates"),
+          })),
+        })),
       })),
     }),
   },
   async (args) => {
     try {
-      const { dish_query, dietary, food_establishment_identifier } = args;
-      
-      const results: Array<{
-        dish: string;
-        description?: string;
-        price?: string;
-        restaurant: string;
-        food_establishment_identifier: string;
-        menu?: string;
-      }> = [];
+      const { dish_query, dietary, restaurant_id } = args;
       
       // Filter products by food establishment if specified
-      const productsToSearch = food_establishment_identifier
-        ? products.filter(p => p.pubkey === food_establishment_identifier)
+      const productsToSearch = restaurant_id
+        ? products.filter(p => p.pubkey === npubToPubkey(restaurant_id))
         : products;
       
       // Check if dish_query might be a dietary term
@@ -357,6 +420,9 @@ server.registerTool(
       
       // If no dietary parameter but query looks like a dietary term, use it as dietary filter too
       const effectiveDietary = dietary || (mightBeDietaryQuery ? dish_query : undefined);
+      
+      // Collect matching products
+      const matchingProducts: NostrEvent[] = [];
       
       for (const product of productsToSearch) {
         const dishName = extractDishName(product);
@@ -379,66 +445,128 @@ server.registerTool(
           : false;
         
         if ((matchesDish || matchesByDietaryTag) && matchesDietary) {
-          // Find restaurant details
-          const restaurant = profiles.find((p) => p.pubkey === product.pubkey);
-          const restaurantName = restaurant
-            ? parseContent(restaurant).display_name || parseContent(restaurant).name || 'Unknown'
-            : 'Unknown';
-          
-          // Find which menu(s) this product belongs to
-          const menuTags = product.tags
-            .filter(t => t[0] === 'a' && t[1] === '30405')
-            .map(t => t[3])
-            .filter(Boolean);
-          
-          const price = getPrice(product);
-          
-          // Add result for each menu the product appears in
-          if (menuTags.length > 0) {
-            for (const menu of menuTags) {
-              results.push({
-                dish: dishName,
-                description: description,
-                price: price ? `$${price}` : undefined,
-                restaurant: restaurantName,
-                food_establishment_identifier: product.pubkey,
-                menu: menu,
-              });
-            }
-          } else {
-            // Product not in any menu, still include it
-            results.push({
-              dish: dishName,
-              description: description,
-              price: price ? `$${price}` : undefined,
-              restaurant: restaurantName,
-              food_establishment_identifier: product.pubkey,
-            });
-          }
+          matchingProducts.push(product);
         }
       }
 
-      const dishList = results.map(r => `${r.dish} at ${r.restaurant}${r.price ? ` (${r.price})` : ''}`).join('; ');
+      // Group products by establishment and menu
+      // Structure: Map<establishmentPubkey, Map<menuId, products[]>>
+      const establishmentMap = new Map<string, Map<string, NostrEvent[]>>();
+      
+      for (const product of matchingProducts) {
+        const establishmentPubkey = product.pubkey;
+        
+        // Get menus this product belongs to
+        const menuTags = product.tags
+          .filter(t => t[0] === 'a' && t[1] === '30405')
+          .map(t => t[3])
+          .filter(Boolean);
+        
+        if (!establishmentMap.has(establishmentPubkey)) {
+          establishmentMap.set(establishmentPubkey, new Map());
+        }
+        const menuMap = establishmentMap.get(establishmentPubkey)!;
+        
+        if (menuTags.length > 0) {
+          // Add product to each menu it belongs to
+          for (const menuId of menuTags) {
+            if (!menuMap.has(menuId)) {
+              menuMap.set(menuId, []);
+            }
+            menuMap.get(menuId)!.push(product);
+          }
+        } else {
+          // Product not in any menu - use empty string as key
+          if (!menuMap.has('')) {
+            menuMap.set('', []);
+          }
+          menuMap.get('')!.push(product);
+        }
+      }
+      
+      // Build @graph structure
+      const graph: Record<string, any>[] = [];
+      
+      for (const [establishmentPubkey, menuMap] of establishmentMap) {
+        // Get establishment profile
+        const profile = profiles.find(p => p.pubkey === establishmentPubkey);
+        if (!profile) continue;
+        
+        // Extract basic establishment info (name, geo, @id, @type)
+        const establishmentData = extractSchemaOrgData(profile);
+        if (!establishmentData) continue;
+        
+        // Build hasMenu array
+        const hasMenu: Record<string, any>[] = [];
+        
+        for (const [menuId, menuProducts] of menuMap) {
+          if (menuId === '') {
+            // Products not in any menu - skip for now or handle differently
+            continue;
+          }
+          
+          // Find the collection (menu) to get menu name and description
+          const collection = findCollection(collections, establishmentPubkey, menuId);
+          if (!collection) continue;
+          
+          const titleTag = collection.tags.find(t => t[0] === 'title');
+          const summaryTag = collection.tags.find(t => t[0] === 'summary');
+          const dTag = collection.tags.find(t => t[0] === 'd');
+          
+          // Convert products to MenuItem format
+          // Note: menuProducts only contains products that matched the search query
+          // Seller not included since results are organized by restaurant
+          const menuItems = menuProducts
+            .map(item => extractMenuItemSchemaOrgData(item, false))
+            .filter((item): item is Record<string, any> => item !== null);
+          
+          const menuObject: Record<string, any> = {
+            "@type": "Menu",
+            "name": titleTag?.[1] || '',
+            "identifier": dTag?.[1] || '',
+            "hasMenuItem": menuItems,
+          };
+          
+          if (summaryTag?.[1]) {
+            menuObject.description = summaryTag[1];
+          }
+          
+          hasMenu.push(menuObject);
+        }
+        
+        // Build establishment object
+        const establishmentObject: Record<string, any> = {
+          "@type": establishmentData["@type"],
+          "name": establishmentData.name,
+          "@id": establishmentData["@id"],
+        };
+        
+        if (establishmentData.geo) {
+          establishmentObject.geo = establishmentData.geo;
+        }
+        
+        if (hasMenu.length > 0) {
+          establishmentObject.hasMenu = hasMenu;
+        }
+        
+        graph.push(establishmentObject);
+      }
+      
+      const totalItems = matchingProducts.length;
+      const dishNames = matchingProducts.map(p => extractDishName(p)).join(', ');
       
       return {
         structuredContent: {
-          results: results,
+          "@context": "https://schema.org",
+          "@graph": graph,
         },
         content: [
           {
             type: "text",
-            text: results.length > 0
-              ? `Found ${results.length} matching dish${results.length > 1 ? 'es' : ''}: ${dishList}`
+            text: totalItems > 0
+              ? `Found ${totalItems} matching menu item${totalItems > 1 ? 's' : ''}`
               : "No dishes match your search",
           },
-          ...(results.length > 0 ? [{
-            type: "resource" as const,
-            resource: {
-              uri: "dinedirect://dishes/search",
-              mimeType: "application/json",
-              text: JSON.stringify({ results: results }, null, 2),
-            },
-          }] : []),
         ],
       };
     } catch (error) {
@@ -450,7 +578,10 @@ server.registerTool(
             text: `Error searching menu items: ${error instanceof Error ? error.message : 'Unknown error'}`,
           },
         ],
-        structuredContent: { results: [] },
+        structuredContent: {
+          "@context": "https://schema.org",
+          "@graph": [],
+        },
       };
     }
   }

@@ -22,9 +22,12 @@
   },
   "homepage": "https://github.com/synvya/mcp-server#readme",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.22.0"
+    "@modelcontextprotocol/sdk": "^1.22.0",
+    "@scure/base": "^2.0.0",
+    "ngeohash": "^0.6.3"
   },
   "devDependencies": {
+    "@types/ngeohash": "^0.6.8",
     "@types/node": "^24.10.1",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3"
