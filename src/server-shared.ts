@@ -15,18 +15,15 @@ import {
   extractMenuItemSchemaOrgData,
   npubToPubkey,
   type NostrEvent,
-} from '../dist/data-loader.js';
+} from './data-loader.js';
 
 // Response formatter type - determines how tool responses are formatted
+// Returns any to allow flexibility for different MCP client formats
 export type ResponseFormatter = (result: {
   structuredData: any;
   textSummary: string;
   meta?: Record<string, any>;
-}) => {
-  content: Array<{ type: string; text?: string; data?: any }>;
-  structuredContent?: any;
-  _meta?: Record<string, any>;
-};
+}) => any;
 
 // Global server instance (reused across invocations to minimize cold starts)
 let serverInstance: McpServer | null = null;
@@ -115,7 +112,7 @@ export async function initializeServer(responseFormatter: ResponseFormatter) {
         
         const results = profiles.filter((profile) => {
           // STRICT: First check if profile has valid l tag with FoodEstablishment type
-          const lTag = profile.tags.find(t => t[0] === 'l' && t[1]?.startsWith('https://schema.org:'));
+          const lTag = profile.tags.find((t: string[]) => t[0] === 'l' && t[1]?.startsWith('https://schema.org:'));
           if (!lTag || !lTag[1]) {
             return false; // Ignore profiles without valid l tag
           }
@@ -139,7 +136,7 @@ export async function initializeServer(responseFormatter: ResponseFormatter) {
           
           // Match cuisine - check tags and content
           const matchesCuisine = cuisine
-            ? profile.tags.some(tag => {
+            ? profile.tags.some((tag: string[]) => {
                 // Check schema.org:servesCuisine tag
                 if (tag[0] === 'schema.org:servesCuisine' && tag[1]) {
                   return tag[1].toLowerCase().includes(cuisine.toLowerCase());
@@ -152,7 +149,7 @@ export async function initializeServer(responseFormatter: ResponseFormatter) {
           const matchesQuery = query
             ? profileName.toLowerCase().includes(query.toLowerCase()) ||
               about.toLowerCase().includes(query.toLowerCase()) ||
-              profile.tags.some(tag => {
+              profile.tags.some((tag: string[]) => {
                 // Check location tags
                 if (tag[0] === 'i' && tag[1] && tag[1].includes('schema.org:PostalAddress')) {
                   return tag[1].toLowerCase().includes(query.toLowerCase());
@@ -163,7 +160,7 @@ export async function initializeServer(responseFormatter: ResponseFormatter) {
           
           // Match dietary tags (profiles use lowercase tags in "t" tags)
           const matchesDietary = dietary
-            ? profile.tags.some(tag => 
+            ? profile.tags.some((tag: string[]) => 
                 tag[0] === 't' && tag[1] && matchesDietaryTag(tag[1], dietary)
               )
             : true;
@@ -305,13 +302,13 @@ export async function initializeServer(responseFormatter: ResponseFormatter) {
         
         // Convert to JSON-LD MenuItem format (without seller since restaurant_id is already specified)
         const menuItemsJsonLd = menuItems
-          .map(item => extractMenuItemSchemaOrgData(item, false))
+          .map((item: NostrEvent) => extractMenuItemSchemaOrgData(item, false))
           .filter((item): item is Record<string, any> => item !== null);
         
         // Extract menu properties from collection (same as in search_food_establishments)
-        const titleTag = collection.tags.find(t => t[0] === 'title');
-        const summaryTag = collection.tags.find(t => t[0] === 'summary');
-        const dTag = collection.tags.find(t => t[0] === 'd');
+        const titleTag = collection.tags.find((t: string[]) => t[0] === 'title');
+        const summaryTag = collection.tags.find((t: string[]) => t[0] === 'summary');
+        const dTag = collection.tags.find((t: string[]) => t[0] === 'd');
         
         const menuObject = {
           "@context": "https://schema.org",
@@ -427,7 +424,7 @@ export async function initializeServer(responseFormatter: ResponseFormatter) {
         // Check if dish_query might be a dietary term
         const commonDietaryTerms = ['vegan', 'vegetarian', 'gluten free', 'gluten-free', 'dairy free', 'dairy-free', 'nut free', 'nut-free'];
         const queryLower = dish_query.toLowerCase();
-        const mightBeDietaryQuery = commonDietaryTerms.some(term => queryLower.includes(term));
+        const mightBeDietaryQuery = commonDietaryTerms.some((term: string) => queryLower.includes(term));
         
         // If no dietary parameter but query looks like a dietary term, use it as dietary filter too
         const effectiveDietary = dietary || (mightBeDietaryQuery ? dish_query : undefined);
@@ -437,7 +434,7 @@ export async function initializeServer(responseFormatter: ResponseFormatter) {
         
         for (const product of productsToSearch) {
           const dishName = extractDishName(product);
-          const summaryTag = product.tags.find(t => t[0] === 'summary');
+          const summaryTag = product.tags.find((t: string[]) => t[0] === 'summary');
           const description = summaryTag?.[1] || '';
           const contentText = typeof product.content === 'string' ? product.content : '';
           
@@ -469,8 +466,8 @@ export async function initializeServer(responseFormatter: ResponseFormatter) {
           
           // Get menus this product belongs to
           const menuTags = product.tags
-            .filter(t => t[0] === 'a' && t[1] === '30405')
-            .map(t => t[3])
+            .filter((t: string[]) => t[0] === 'a' && t[1] === '30405')
+            .map((t: string[]) => t[3])
             .filter(Boolean);
           
           if (!establishmentMap.has(establishmentPubkey)) {
@@ -520,15 +517,15 @@ export async function initializeServer(responseFormatter: ResponseFormatter) {
             const collection = findCollection(collections, establishmentPubkey, menuId);
             if (!collection) continue;
             
-            const titleTag = collection.tags.find(t => t[0] === 'title');
-            const summaryTag = collection.tags.find(t => t[0] === 'summary');
-            const dTag = collection.tags.find(t => t[0] === 'd');
+            const titleTag = collection.tags.find((t: string[]) => t[0] === 'title');
+            const summaryTag = collection.tags.find((t: string[]) => t[0] === 'summary');
+            const dTag = collection.tags.find((t: string[]) => t[0] === 'd');
             
             // Convert products to MenuItem format
             // Note: menuProducts only contains products that matched the search query
             // Seller not included since results are organized by restaurant
             const menuItems = menuProducts
-              .map(item => extractMenuItemSchemaOrgData(item, false))
+              .map((item: NostrEvent) => extractMenuItemSchemaOrgData(item, false))
               .filter((item): item is Record<string, any> => item !== null);
             
             const menuObject: Record<string, any> = {
