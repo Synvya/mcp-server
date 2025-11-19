@@ -1,5 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
+import { InitializeRequestSchema, SUPPORTED_PROTOCOL_VERSIONS, LATEST_PROTOCOL_VERSION } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
 import {
   loadProfileData,
@@ -58,6 +59,38 @@ export async function initializeServer(responseFormatter: ResponseFormatter) {
     version: "1.0.0",
   });
 
+  // Override initialize handler to log protocol version
+  if (!serverInstance) {
+    throw new Error('Failed to create server instance');
+  }
+  
+  serverInstance.server.setRequestHandler(InitializeRequestSchema, async (request, extra) => {
+    const requestedVersion = request.params.protocolVersion;
+    const protocolVersion = SUPPORTED_PROTOCOL_VERSIONS.includes(requestedVersion) ? requestedVersion : LATEST_PROTOCOL_VERSION;
+    
+    // Store client info (same as default handler does)
+    (serverInstance!.server as any)._clientCapabilities = request.params.capabilities;
+    (serverInstance!.server as any)._clientVersion = request.params.clientInfo;
+    
+    console.error("🔌 Client initialize:", {
+      requestedVersion,
+      negotiatedVersion: protocolVersion,
+      clientInfo: request.params.clientInfo,
+      headers: extra.requestInfo?.headers ? {
+        'mcp-protocol-version': extra.requestInfo.headers['mcp-protocol-version'],
+        'mcp-session-id': extra.requestInfo.headers['mcp-session-id'],
+      } : undefined,
+    });
+
+    // Return initialize response (same format as default handler)
+    return {
+      protocolVersion,
+      capabilities: (serverInstance!.server as any).getCapabilities(),
+      serverInfo: (serverInstance!.server as any)._serverInfo,
+      ...((serverInstance!.server as any)._instructions && { instructions: (serverInstance!.server as any)._instructions }),
+    };
+  });
+
   // Tool 1: Food Establishment Search
   serverInstance.registerTool(
     "search_food_establishments",
@@ -106,8 +139,15 @@ export async function initializeServer(responseFormatter: ResponseFormatter) {
         })).describe("Array of JSON-LD formatted food establishment objects following schema.org FoodEstablishment specification. May contain mixed types (Restaurant, Bakery, etc.)"),
       }),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
+        // Log protocol version from headers
+        const protocolVersion = extra.requestInfo?.headers?.['mcp-protocol-version'] || 'not-provided';
+        console.error("🔍 search_food_establishments called:", {
+          protocolVersion,
+          sessionId: extra.sessionId,
+        });
+
         const { foodEstablishmentType, cuisine, query, dietary } = args;
         
         const results = profiles.filter((profile) => {
@@ -250,8 +290,15 @@ export async function initializeServer(responseFormatter: ResponseFormatter) {
         })).describe("Array of JSON-LD formatted menu item objects following schema.org MenuItem specification"),
       }),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
+        // Log protocol version from headers
+        const protocolVersion = extra.requestInfo?.headers?.['mcp-protocol-version'] || 'not-provided';
+        console.error("🍽️ get_menu_items called:", {
+          protocolVersion,
+          sessionId: extra.sessionId,
+        });
+
         const { restaurant_id, menu_identifier } = args;
         
         // Convert npub to hex pubkey for lookup
@@ -412,8 +459,15 @@ export async function initializeServer(responseFormatter: ResponseFormatter) {
         })),
       }),
     },
-    async (args) => {
+    async (args, extra) => {
       try {
+        // Log protocol version from headers
+        const protocolVersion = extra.requestInfo?.headers?.['mcp-protocol-version'] || 'not-provided';
+        console.error("🔎 search_menu_items called:", {
+          protocolVersion,
+          sessionId: extra.sessionId,
+        });
+
         const { dish_query, dietary, restaurant_id } = args;
         
         // Filter products by food establishment if specified
