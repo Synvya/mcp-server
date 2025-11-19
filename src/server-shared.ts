@@ -32,6 +32,8 @@ let transportInstance: StreamableHTTPServerTransport | null = null;
 let profiles: NostrEvent[] = [];
 let collections: NostrEvent[] = [];
 let products: NostrEvent[] = [];
+// Store protocol version per session (for stateless mode, we'll use a fallback)
+const sessionProtocolVersions = new Map<string, string>();
 
 export async function initializeServer(responseFormatter: ResponseFormatter) {
   if (serverInstance && transportInstance) {
@@ -72,9 +74,15 @@ export async function initializeServer(responseFormatter: ResponseFormatter) {
     (serverInstance!.server as any)._clientCapabilities = request.params.capabilities;
     (serverInstance!.server as any)._clientVersion = request.params.clientInfo;
     
+    // Store protocol version for this session
+    const sessionIdHeader = extra.requestInfo?.headers?.['mcp-session-id'];
+    const sessionId = extra.sessionId || (typeof sessionIdHeader === 'string' ? sessionIdHeader : Array.isArray(sessionIdHeader) ? sessionIdHeader[0] : 'default');
+    sessionProtocolVersions.set(sessionId, protocolVersion);
+    
     console.error("🔌 Client initialize:", {
       requestedVersion,
       negotiatedVersion: protocolVersion,
+      sessionId,
       clientInfo: request.params.clientInfo,
       headers: extra.requestInfo?.headers ? {
         'mcp-protocol-version': extra.requestInfo.headers['mcp-protocol-version'],
@@ -141,11 +149,20 @@ export async function initializeServer(responseFormatter: ResponseFormatter) {
     },
     async (args, extra) => {
       try {
-        // Log protocol version from headers
-        const protocolVersion = extra.requestInfo?.headers?.['mcp-protocol-version'] || 'not-provided';
+        // Get protocol version from headers or session storage
+        const headerVersionRaw = extra.requestInfo?.headers?.['mcp-protocol-version'];
+        const headerVersion = typeof headerVersionRaw === 'string' ? headerVersionRaw : Array.isArray(headerVersionRaw) ? headerVersionRaw[0] : undefined;
+        const sessionIdHeader = extra.requestInfo?.headers?.['mcp-session-id'];
+        const sessionId = extra.sessionId || (typeof sessionIdHeader === 'string' ? sessionIdHeader : Array.isArray(sessionIdHeader) ? sessionIdHeader[0] : 'default');
+        const storedVersion = sessionProtocolVersions.get(sessionId);
+        const protocolVersion = headerVersion || storedVersion || '2025-03-26'; // Default fallback
+        
         console.error("🔍 search_food_establishments called:", {
-          protocolVersion,
-          sessionId: extra.sessionId,
+          protocolVersionFromHeader: headerVersion,
+          protocolVersionFromSession: storedVersion,
+          finalProtocolVersion: protocolVersion,
+          sessionId,
+          allHeaders: extra.requestInfo?.headers ? Object.keys(extra.requestInfo.headers) : undefined,
         });
 
         const { foodEstablishmentType, cuisine, query, dietary } = args;
@@ -292,11 +309,19 @@ export async function initializeServer(responseFormatter: ResponseFormatter) {
     },
     async (args, extra) => {
       try {
-        // Log protocol version from headers
-        const protocolVersion = extra.requestInfo?.headers?.['mcp-protocol-version'] || 'not-provided';
+        // Get protocol version from headers or session storage
+        const headerVersionRaw = extra.requestInfo?.headers?.['mcp-protocol-version'];
+        const headerVersion = typeof headerVersionRaw === 'string' ? headerVersionRaw : Array.isArray(headerVersionRaw) ? headerVersionRaw[0] : undefined;
+        const sessionIdHeader = extra.requestInfo?.headers?.['mcp-session-id'];
+        const sessionId = extra.sessionId || (typeof sessionIdHeader === 'string' ? sessionIdHeader : Array.isArray(sessionIdHeader) ? sessionIdHeader[0] : 'default');
+        const storedVersion = sessionProtocolVersions.get(sessionId);
+        const protocolVersion = headerVersion || storedVersion || '2025-03-26'; // Default fallback
+        
         console.error("🍽️ get_menu_items called:", {
-          protocolVersion,
-          sessionId: extra.sessionId,
+          protocolVersionFromHeader: headerVersion,
+          protocolVersionFromSession: storedVersion,
+          finalProtocolVersion: protocolVersion,
+          sessionId,
         });
 
         const { restaurant_id, menu_identifier } = args;
@@ -461,11 +486,19 @@ export async function initializeServer(responseFormatter: ResponseFormatter) {
     },
     async (args, extra) => {
       try {
-        // Log protocol version from headers
-        const protocolVersion = extra.requestInfo?.headers?.['mcp-protocol-version'] || 'not-provided';
+        // Get protocol version from headers or session storage
+        const headerVersionRaw = extra.requestInfo?.headers?.['mcp-protocol-version'];
+        const headerVersion = typeof headerVersionRaw === 'string' ? headerVersionRaw : Array.isArray(headerVersionRaw) ? headerVersionRaw[0] : undefined;
+        const sessionIdHeader = extra.requestInfo?.headers?.['mcp-session-id'];
+        const sessionId = extra.sessionId || (typeof sessionIdHeader === 'string' ? sessionIdHeader : Array.isArray(sessionIdHeader) ? sessionIdHeader[0] : 'default');
+        const storedVersion = sessionProtocolVersions.get(sessionId);
+        const protocolVersion = headerVersion || storedVersion || '2025-03-26'; // Default fallback
+        
         console.error("🔎 search_menu_items called:", {
-          protocolVersion,
-          sessionId: extra.sessionId,
+          protocolVersionFromHeader: headerVersion,
+          protocolVersionFromSession: storedVersion,
+          finalProtocolVersion: protocolVersion,
+          sessionId,
         });
 
         const { dish_query, dietary, restaurant_id } = args;
