@@ -1,11 +1,11 @@
 [
   {
-    "content": "**Bacalao al Pil Pil**\n\nSalt cod in garlic-olive oil emulsion with guindilla peppers\n\nSKU: 0008",
-    "created_at": 1763416960,
-    "id": "07d399c2386ee9e18324542f7b31677b5b2ea3818f43c60d07d7692e0eaaf449",
+    "content": "**Bacalao al Pil Pil**\n\nSalt cod in garlic-olive oil emulsion with guindilla peppers",
+    "created_at": 1763511307,
+    "id": "14be87de6161f6b536ecb2cad459dd922478218674be7c60b6fa2e552e1a3734",
     "kind": 30402,
     "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
-    "sig": "6d3b690fbcafd003fe7442b5577f81d0eb11a70572c6c45088813daa4f34f7100d7884592c3ba27a55ac8e91e0b7855a844885582ffeb3d88f6200e869c3c265",
+    "sig": "7b431f65779f1d09062cce92372bf45e911091245baebc057ba0e243aa5ae7e6f7d765df5bcbc986efe1ba987b85361f926a7f694eb9741461c0d4e4ff95b26d",
     "tags": [
       [
         "d",
@@ -43,11 +43,11 @@
         "USD"
       ],
       [
-        "t",
+        "contains",
         "FISH"
       ],
       [
-        "t",
+        "contains",
         "SULPHITES"
       ],
       [
@@ -74,17 +74,17 @@
       ],
       [
         "published_at",
-        "1763416960"
+        "1763511307"
       ]
     ]
   },
   {
-    "content": "**Setas al Jerez**\n\nWild mushrooms sautéed with sherry and garlic\n\nSKU: 0007",
-    "created_at": 1763416960,
-    "id": "a01f9332ab29ec955a40f4e0880d30dd911c60625edded74f5de03a53d8c9eb6",
+    "content": "**Setas al Jerez**\n\nWild mushrooms sautéed with sherry and garlic",
+    "created_at": 1763511307,
+    "id": "cb833be61cf1c8e7bf8e4d720345182b21a7b6b3b95ccd9af9821aafdeae9cac",
     "kind": 30402,
     "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
-    "sig": "d50cb66e37d3387f0015d362d489737d4cd18fc71d7bc7b3e960476b3d803849499a7903fa707c67f7b73e19a63382f20285c951ca1f0e9913fa2a7d235f0ae7",
+    "sig": "8b156136bef9402ba1f2e2e0bd8ec5329f268a29ee655e821c9e358d45be38a0bcf82f1782237c8ca05d399ae26b951b2279fec73b25558b9488dbfe2b1e73d9",
     "tags": [
       [
         "d",
@@ -161,17 +161,17 @@
       ],
       [
         "published_at",
-        "1763416960"
+        "1763511307"
       ]
     ]
   },
   {
-    "content": "**Cordero Asado**\n\nRoasted rack of lamb with rosemary and Rioja reduction\n\nSKU: 0006",
-    "created_at": 1763416960,
-    "id": "4384cdfde3562680f6613d0c3158f7273d92a1d947099a97889c120a8a9cb14b",
+    "content": "**Cordero Asado**\n\nRoasted rack of lamb with rosemary and Rioja reduction",
+    "created_at": 1763511307,
+    "id": "ab931222aac2e8f2e0b5c9893369dca2dc4fc47c28705e972748e6472dddb78e",
     "kind": 30402,
     "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
-    "sig": "de22946c8c12cff088f42c2e1975dc62bbf23edbb64f4ddf6a01e7afd843e5d4ed0d64d6cde404fae64399ddfb64914c860b7e3fc047139f4552a9b9ddefa5ff",
+    "sig": "faa556d2ccccecfc95350cd4c8c9b973f4feaea8eedae098db39599204cf52dc7289b2f02e40e8b08e1ace074ecc13b4d8e29c527e11540a39e3d7853885550a",
     "tags": [
       [
         "d",
@@ -232,17 +232,17 @@
       ],
       [
         "published_at",
-        "1763416960"
+        "1763511307"
       ]
     ]
   },
   {
-    "content": "**Ensalada de Pulpo**\n\nGrilled octopus salad with potatoes, paprika, and olive oil\n\nSKU: 0004",
-    "created_at": 1763416960,
-    "id": "51c4d4553e46311ef79435c101990993c349e92907c6479fbb660b6b3a901bea",
+    "content": "**Ensalada de Pulpo**\n\nGrilled octopus salad with potatoes, paprika, and olive oil",
+    "created_at": 1763511307,
+    "id": "64c58bb99e9b86aa386ffe593e044d65a2248db5395fb3ce868f7903aa53a0c9",
     "kind": 30402,
     "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
-    "sig": "bdcc942af1e7072acd9d6c022e89ace410a83efc5c68864a2c706f6835161e9404f0c934022e8cb1f938bf1991c18b9255fd0a1394d0fdff3a51826ae8e19e30",
+    "sig": "330aa440bee5656d3ba2ba69f4c3c7fe066c7ed546ca8398edfb262523c0d84a16285047b9cc1741cbc43f472aa38cfd9caf981239967a88142b6239d980282c",
     "tags": [
       [
         "d",
@@ -280,7 +280,7 @@
         "USD"
       ],
       [
-        "t",
+        "contains",
         "MOLLUSCS"
       ],
       [
@@ -307,17 +307,17 @@
       ],
       [
         "published_at",
-        "1763416960"
+        "1763511307"
       ]
     ]
   },
   {
-    "content": "**Pisto Manchego**\n\nVegetable stew with tomatoes, peppers, zucchini, and onions\n\nSKU: 0003",
-    "created_at": 1763416960,
-    "id": "5a3ce4e4ec6e0d585c07ef16cc69518da0b80670ccfe438894192f2c9ce51dc2",
+    "content": "**Pisto Manchego**\n\nVegetable stew with tomatoes, peppers, zucchini, and onions",
+    "created_at": 1763511307,
+    "id": "c8cfb546c6b2ee8a9e29f2b6cb9a72e729fdbb542155291e03117e62e94d381a",
     "kind": 30402,
     "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
-    "sig": "9b5e9601607c74db0cc75fb31fa9826bb3a72d72aff0245378b16a00bb6147d29c1e111b3e377dc64a01575e26be1821dd097bfb0b9035456887f3b0a6159ab7",
+    "sig": "0032a6745ba841103c9ecdffc15382a7174e7599e80b870b20773ddf66e34a965162d47b952caa029b89b302d71e3cf9988e90b499ce4690481b47ce6636b8a8",
     "tags": [
       [
         "d",
@@ -394,17 +394,17 @@
       ],
       [
         "published_at",
-        "1763416960"
+        "1763511307"
       ]
     ]
   },
   {
-    "content": "**Gambas a la Plancha**\n\nGrilled wild prawns with garlic and smoked sea salt\n\nSKU: 0002",
-    "created_at": 1763416960,
-    "id": "92cc3e93e28d1594111339e8b750acdab92b23d6f493c13877f60d29229d14fc",
+    "content": "**Gambas a la Plancha**\n\nGrilled wild prawns with garlic and smoked sea salt",
+    "created_at": 1763511307,
+    "id": "e4aaf0971f6c9ad774add49662a74ca07514d6afad48c3b45a627f5d0eeb94d2",
     "kind": 30402,
     "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
-    "sig": "809ef4d4b9888a9721249a423d29ed9d5b1a1dd7f2cf4cf4896cea2e45153db6658a246321094500d1a15d8accdcc13597caad78a074cb0cc78a73b179f68a73",
+    "sig": "45295a06cf83f7babb515d22fa715d1406753e41d8d8544a4fbb8f711aceddb0b66129d2187fa0ff37cd0238da855757f9965d5bb16894ee48358c376a1609bf",
     "tags": [
       [
         "d",
@@ -442,7 +442,7 @@
         "USD"
       ],
       [
-        "t",
+        "contains",
         "CRUSTACEANS"
       ],
       [
@@ -477,17 +477,17 @@
       ],
       [
         "published_at",
-        "1763416960"
+        "1763511307"
       ]
     ]
   },
   {
-    "content": "**Paella Valenciana**\n\nSaffron rice with chicken, rabbit, green beans, and lima beans.\n\nSKU: 0005",
-    "created_at": 1763416960,
-    "id": "e863c369acabcc229650a07e8286a98c855925d04cb5c87d2d4d1cf1a690e717",
+    "content": "**Paella Valenciana**\n\nSaffron rice with chicken, rabbit, green beans, and lima beans.",
+    "created_at": 1763511307,
+    "id": "641b3d574a0d309868747453e717b6d65497c4b1d4d9f16342babd95341af79f",
     "kind": 30402,
     "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
-    "sig": "793b76a08812773b3bc4cb41184062c7a12c5f56b31563076b29b41f7897680170c2a4120f88fcad7dbc9f11eedf099c9a2d1e8200d36ce152ab13f64e3b8998",
+    "sig": "062ab6b9ee6ee512b2c493348f2c696a08f42c10b25e40c1edcb9c21397bbe912b009dda739c3ed4c17646ec6db4eba0f16ac77c7a0fcfe7353623453e52a8b2",
     "tags": [
       [
         "d",
@@ -556,17 +556,17 @@
       ],
       [
         "published_at",
-        "1763416960"
+        "1763511307"
       ]
     ]
   },
   {
-    "content": "**Bocadillo de Jamón**\n\nTraditional Spanish baguette with cured Iberian ham and tomato spread\n\nSKU: 0001",
-    "created_at": 1763416960,
-    "id": "c059154c436297c01c74d8aaf80cdce90ec04091f9b974c01212964c80518b74",
+    "content": "**Bocadillo de Jamón**\n\nTraditional Spanish baguette with cured Iberian ham and tomato spread",
+    "created_at": 1763511307,
+    "id": "062b65a7d4338a807f69b8d2417b725a6c2f42837010ec867c010c64c75b9869",
     "kind": 30402,
     "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
-    "sig": "a59477e5d9c062aecccaf6a48507b4ef8be219587881f6653639fdb0d35300beba9103df625b6138cd6b47d9503f0ee1b9c18590c8dd5e94c39844d718e0b79b",
+    "sig": "bc9b25ad6b33fc9f92ab306a8443f97e5966e8f9b24691ec77ee314d09b59e0e09755ee277f43c5b42b12c3259d12ba06a98587f127dd208de9ad93fced72e82",
     "tags": [
       [
         "d",
@@ -604,7 +604,7 @@
         "USD"
       ],
       [
-        "t",
+        "contains",
         "GLUTEN"
       ],
       [
@@ -615,7 +615,7 @@
       ],
       [
         "published_at",
-        "1763416960"
+        "1763511307"
       ]
     ]
   }

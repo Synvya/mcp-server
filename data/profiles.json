@@ -1,11 +1,11 @@
 [
   {
     "content": "{\"name\":\"elcandado\",\"display_name\":\"Restaurante El Candado\",\"about\":\"El Candado: Authentic Spanish Flavors in Snoqualmie 🇪🇸🌲\\n\\nMore than a meal, a Mediterranean state of mind. Where the soul of Spain meets the heart of the Cascades.\\n\\nOur Story:\\nBorn from a family recipe book dating back to 1940s Málaga, we bring genuine Spanish sobremesa (the art of lingering at the table) to Snoqualmie. Chef Alejandro’s wood-fired paellas and Abuela’s secret gambas recipe will transport you to a sun-drenched plaza.\\n\\nWhat We Serve:\\n✅ Handcrafted tapas using local PNW ingredients\\n✅ Saffron-infused paellas cooked over almond wood\\n✅ Imported Spanish wines & craft sangrias\\n✅ Dedicated gluten-free/vegan menu\\n\\nEnjoy your sobremesa at our rustic-chic dining room with fireplace or at our summer patio overlooking the Snoqualmie River.\\n\\nVisit us or make a reservation with your favorite AI assistant. \",\"website\":\"https://www.synvya.com\",\"picture\":\"https://i.nostr.build/uQ6Lq7jq0nCNSRTT.png\",\"banner\":\"https://i.nostr.build/uR9UxQhO9VKSIRMu.png\",\"nip05\":\"elcandado@synvya.com\"}",
-    "created_at": 1763420921,
-    "id": "f532ec82d5f96fec838a75ed9b9eb481c83b4c9dab602c78984f486fd3dc7288",
+    "created_at": 1763510731,
+    "id": "a6d84ecaf969fd6ed222e5e2a108b0bf36a2ef1682cc6ee5459d6a8627e887c4",
     "kind": 0,
     "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
-    "sig": "a265a5dc2375628397ceaaae33f8678e21587dbee9a2286a4e03564ceb20c0273d9f5ea186cf2c23eb5575eae43f67fd4c3300c088ea9dbf0dbfc2c87f3c2ef8",
+    "sig": "1842d90fc0c0104c6faf94f3b1b47c997a5a5740f61d2877c4188890fda6aec1b5c4406d0c52a93c7951695c2d86be4bbbe7ff7e11bd1eb0cd214d36a0297dec",
     "tags": [
       [
         "l",
