@@ -8,6 +8,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "tsx src/server.ts",
     "build": "tsc",
+    "vercel-build": "npm run build",
     "deploy": "vercel --prod"
   },
   "repository": {
@@ -29,6 +30,7 @@
   "devDependencies": {
     "@types/ngeohash": "^0.6.8",
     "@types/node": "^24.10.1",
+    "@vercel/node": "^3.0.0",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3"
   }
