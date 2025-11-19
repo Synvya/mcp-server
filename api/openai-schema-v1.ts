@@ -105,7 +105,119 @@ function getOpenAPISchema(baseUrl: string) {
               content: {
                 "application/json": {
                   schema: {
-                    type: "object"
+                    type: "object",
+                    properties: {
+                      "@context": {
+                        type: "string",
+                        description: "JSON-LD context, always 'https://schema.org'"
+                      },
+                      "@type": {
+                        type: "string",
+                        description: "JSON-LD type, always 'Menu'"
+                      },
+                      "name": {
+                        type: "string",
+                        description: "Menu name"
+                      },
+                      "description": {
+                        type: "string",
+                        description: "Menu description"
+                      },
+                      "identifier": {
+                        type: "string",
+                        description: "Menu identifier"
+                      },
+                      "hasMenuItem": {
+                        type: "array",
+                        description: "Array of JSON-LD formatted menu item objects following schema.org MenuItem specification",
+                        items: {
+                          type: "object",
+                          properties: {
+                            "@context": {
+                              type: "string",
+                              description: "JSON-LD context, always 'https://schema.org'"
+                            },
+                            "@type": {
+                              type: "string",
+                              description: "JSON-LD type, always 'MenuItem'"
+                            },
+                            "name": {
+                              type: "string",
+                              description: "Name of the menu item"
+                            },
+                            "description": {
+                              type: "string",
+                              description: "Description of the menu item"
+                            },
+                            "identifier": {
+                              type: "string",
+                              description: "Menu item identifier"
+                            },
+                            "image": {
+                              type: "string",
+                              format: "uri",
+                              description: "Image URL for the menu item"
+                            },
+                            "suitableForDiet": {
+                              type: "array",
+                              description: "Array of schema.org suitableForDiet values",
+                              items: {
+                                type: "string",
+                                enum: [
+                                  "DiabeticDiet",
+                                  "GlutenFreeDiet",
+                                  "HalalDiet",
+                                  "HinduDiet",
+                                  "KosherDiet",
+                                  "LowCalorieDiet",
+                                  "LowFatDiet",
+                                  "LowLactoseDiet",
+                                  "LowSaltDiet",
+                                  "VeganDiet",
+                                  "VegetarianDiet"
+                                ]
+                              }
+                            },
+                            "offers": {
+                              type: "object",
+                              description: "Price information formatted as schema.org Offer",
+                              properties: {
+                                "@type": {
+                                  type: "string",
+                                  description: "Always 'Offer'"
+                                },
+                                "price": {
+                                  type: "number",
+                                  description: "Price as number"
+                                },
+                                "priceCurrency": {
+                                  type: "string",
+                                  description: "Currency code (e.g., 'USD')"
+                                }
+                              }
+                            },
+                            "geo": {
+                              type: "object",
+                              description: "Geographic coordinates",
+                              properties: {
+                                "@type": {
+                                  type: "string",
+                                  description: "Always 'GeoCoordinates'"
+                                },
+                                "latitude": {
+                                  type: "number",
+                                  description: "Latitude"
+                                },
+                                "longitude": {
+                                  type: "number",
+                                  description: "Longitude"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
                   }
                 }
               }
@@ -149,7 +261,167 @@ function getOpenAPISchema(baseUrl: string) {
               content: {
                 "application/json": {
                   schema: {
-                    type: "object"
+                    type: "object",
+                    properties: {
+                      "@context": {
+                        type: "string",
+                        description: "JSON-LD context, always 'https://schema.org'"
+                      },
+                      "@graph": {
+                        type: "array",
+                        description: "Array of food establishments with matching menu items",
+                        items: {
+                          type: "object",
+                          properties: {
+                            "@type": {
+                              type: "string",
+                              description: "Schema.org FoodEstablishment type (Restaurant, Bakery, etc.)"
+                            },
+                            "name": {
+                              type: "string",
+                              description: "Food establishment name"
+                            },
+                            "geo": {
+                              type: "object",
+                              description: "Geographic coordinates",
+                              properties: {
+                                "@type": {
+                                  type: "string",
+                                  description: "Always 'GeoCoordinates'"
+                                },
+                                "latitude": {
+                                  type: "number",
+                                  description: "Latitude"
+                                },
+                                "longitude": {
+                                  type: "number",
+                                  description: "Longitude"
+                                }
+                              }
+                            },
+                            "@id": {
+                              type: "string",
+                              description: "Food establishment identifier in bech32 format (nostr:npub1...)"
+                            },
+                            "hasMenu": {
+                              type: "array",
+                              description: "Array of menus with matching items",
+                              items: {
+                                type: "object",
+                                properties: {
+                                  "@type": {
+                                    type: "string",
+                                    description: "Always 'Menu'"
+                                  },
+                                  "name": {
+                                    type: "string",
+                                    description: "Menu name"
+                                  },
+                                  "description": {
+                                    type: "string",
+                                    description: "Menu description"
+                                  },
+                                  "identifier": {
+                                    type: "string",
+                                    description: "Menu identifier"
+                                  },
+                                  "hasMenuItem": {
+                                    type: "array",
+                                    description: "Array of matching menu items",
+                                    items: {
+                                      type: "object",
+                                      properties: {
+                                        "@context": {
+                                          type: "string",
+                                          description: "JSON-LD context, always 'https://schema.org'"
+                                        },
+                                        "@type": {
+                                          type: "string",
+                                          description: "JSON-LD type, always 'MenuItem'"
+                                        },
+                                        "name": {
+                                          type: "string",
+                                          description: "Name of the menu item"
+                                        },
+                                        "description": {
+                                          type: "string",
+                                          description: "Description of the menu item"
+                                        },
+                                        "identifier": {
+                                          type: "string",
+                                          description: "Menu item identifier"
+                                        },
+                                        "image": {
+                                          type: "string",
+                                          format: "uri",
+                                          description: "Image URL for the menu item"
+                                        },
+                                        "suitableForDiet": {
+                                          type: "array",
+                                          description: "Array of schema.org suitableForDiet values",
+                                          items: {
+                                            type: "string",
+                                            enum: [
+                                              "DiabeticDiet",
+                                              "GlutenFreeDiet",
+                                              "HalalDiet",
+                                              "HinduDiet",
+                                              "KosherDiet",
+                                              "LowCalorieDiet",
+                                              "LowFatDiet",
+                                              "LowLactoseDiet",
+                                              "LowSaltDiet",
+                                              "VeganDiet",
+                                              "VegetarianDiet"
+                                            ]
+                                          }
+                                        },
+                                        "offers": {
+                                          type: "object",
+                                          description: "Price information formatted as schema.org Offer",
+                                          properties: {
+                                            "@type": {
+                                              type: "string",
+                                              description: "Always 'Offer'"
+                                            },
+                                            "price": {
+                                              type: "number",
+                                              description: "Price as number"
+                                            },
+                                            "priceCurrency": {
+                                              type: "string",
+                                              description: "Currency code (e.g., 'USD')"
+                                            }
+                                          }
+                                        },
+                                        "geo": {
+                                          type: "object",
+                                          description: "Geographic coordinates",
+                                          properties: {
+                                            "@type": {
+                                              type: "string",
+                                              description: "Always 'GeoCoordinates'"
+                                            },
+                                            "latitude": {
+                                              type: "number",
+                                              description: "Latitude"
+                                            },
+                                            "longitude": {
+                                              type: "number",
+                                              description: "Longitude"
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
                   }
                 }
               }
@@ -266,4 +538,3 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Default: return OpenAI function calling format
   return res.status(200).json(openaiSchema);
 }
-
