@@ -162,28 +162,31 @@ server.registerTool(
         .map((p) => extractSchemaOrgData(p, collections))
         .filter((data): data is Record<string, any> => data !== null);
 
+      const structuredContent = {
+        food_establishments: establishmentList,
+      };
       return {
-        structuredContent: {
-          food_establishments: establishmentList,
-        },
+        structuredContent,
         content: [
           {
             type: "text",
-            text: establishmentList.length > 0
-              ? `Found ${establishmentList.length} matching food establishment${establishmentList.length > 1 ? 's' : ''}`
-              : "No food establishments match your criteria",
+            text: JSON.stringify(structuredContent, null, 2),
           },
         ],
       };
     } catch (error) {
       console.error("Error in search_food_establishments:", error);
+      const errorStructuredContent = {
+        food_establishments: [],
+      };
       return {
         content: [
           {
             type: "text",
-            text: `Error searching food establishments: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            text: JSON.stringify(errorStructuredContent, null, 2),
           },
         ],
+        structuredContent: errorStructuredContent,
       };
     }
   }
@@ -247,40 +250,42 @@ server.registerTool(
       // Find food establishment by pubkey
       const establishment = profiles.find(p => p.pubkey === establishmentPubkey);
       if (!establishment) {
+        const errorStructuredContent = {
+          "@context": "https://schema.org",
+          "@type": "Menu",
+          "name": "",
+          "identifier": "",
+          "hasMenuItem": [],
+        };
         return {
           content: [
             {
               type: "text",
-              text: `Food establishment with identifier "${restaurant_id}" not found. Use the exact '@id' from search_food_establishments results.`,
+              text: JSON.stringify(errorStructuredContent, null, 2),
             },
           ],
-          structuredContent: {
-            "@context": "https://schema.org",
-            "@type": "Menu",
-            "name": "",
-            "identifier": "",
-            "hasMenuItem": [],
-          },
+          structuredContent: errorStructuredContent,
         };
       }
       
       // Find the collection (menu)
       const collection = findCollection(collections, establishmentPubkey, menu_identifier);
       if (!collection) {
+        const errorStructuredContent = {
+          "@context": "https://schema.org",
+          "@type": "Menu",
+          "name": "",
+          "identifier": "",
+          "hasMenuItem": [],
+        };
         return {
           content: [
             {
               type: "text",
-              text: `Menu with identifier "${menu_identifier}" not found for this food establishment. Use the exact 'identifier' from the 'hasMenu' array in search_food_establishments results.`,
+              text: JSON.stringify(errorStructuredContent, null, 2),
             },
           ],
-          structuredContent: {
-            "@context": "https://schema.org",
-            "@type": "Menu",
-            "name": "",
-            "identifier": "",
-            "hasMenuItem": [],
-          },
+          structuredContent: errorStructuredContent,
         };
       }
       
@@ -316,28 +321,27 @@ server.registerTool(
         content: [
           {
             type: "text",
-            text: menuItemsJsonLd.length > 0
-              ? `Found ${menuItemsJsonLd.length} menu item${menuItemsJsonLd.length > 1 ? 's' : ''}`
-              : `No items found in menu`,
+            text: JSON.stringify(menuObject, null, 2),
           },
         ],
       };
     } catch (error) {
       console.error("Error in get_menu_items:", error);
+      const errorStructuredContent = {
+        "@context": "https://schema.org",
+        "@type": "Menu",
+        "name": "",
+        "identifier": "",
+        "hasMenuItem": [],
+      };
       return {
         content: [
           {
             type: "text",
-            text: `Error getting menu items: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            text: JSON.stringify(errorStructuredContent, null, 2),
           },
         ],
-        structuredContent: {
-          "@context": "https://schema.org",
-          "@type": "Menu",
-          "name": "",
-          "identifier": "",
-          "hasMenuItem": [],
-        },
+        structuredContent: errorStructuredContent,
       };
     }
   }
@@ -553,35 +557,34 @@ server.registerTool(
       }
       
       const totalItems = matchingProducts.length;
-      const dishNames = matchingProducts.map(p => extractDishName(p)).join(', ');
+      const structuredContent = {
+        "@context": "https://schema.org",
+        "@graph": graph,
+      };
       
       return {
-        structuredContent: {
-          "@context": "https://schema.org",
-          "@graph": graph,
-        },
+        structuredContent,
         content: [
           {
             type: "text",
-            text: totalItems > 0
-              ? `Found ${totalItems} matching menu item${totalItems > 1 ? 's' : ''}`
-              : "No dishes match your search",
+            text: JSON.stringify(structuredContent, null, 2),
           },
         ],
       };
     } catch (error) {
       console.error("Error in search_menu_items:", error);
+      const errorStructuredContent = {
+        "@context": "https://schema.org",
+        "@graph": [],
+      };
       return {
         content: [
           {
             type: "text",
-            text: `Error searching menu items: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            text: JSON.stringify(errorStructuredContent, null, 2),
           },
         ],
-        structuredContent: {
-          "@context": "https://schema.org",
-          "@graph": [],
-        },
+        structuredContent: errorStructuredContent,
       };
     }
   }

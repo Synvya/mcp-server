@@ -1,10 +1,7 @@
 {
   "version": 2,
   "functions": {
-    "api/v1.ts": {
-      "maxDuration": 30
-    },
-    "api/v2.ts": {
+    "api/mcp.ts": {
       "maxDuration": 30
     },
     "api/openai-schema-v1.ts": {
@@ -13,16 +10,12 @@
   },
   "rewrites": [
     {
-      "source": "/v1",
-      "destination": "/api/v1"
+      "source": "/mcp",
+      "destination": "/api/mcp"
     },
     {
       "source": "/v1/openai-schema",
       "destination": "/api/openai-schema-v1"
-    },
-    {
-      "source": "/v2",
-      "destination": "/api/v2"
     }
   ]
 }

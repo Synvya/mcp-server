@@ -14,8 +14,8 @@ function getOpenAPISchema(baseUrl: string) {
     },
     servers: [
       {
-        url: `${baseUrl}/v1`,
-        description: "Synvya MCP Server v1"
+        url: `${baseUrl}/mcp`,
+        description: "Synvya MCP Server"
       }
     ],
     paths: {

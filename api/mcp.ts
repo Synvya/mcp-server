@@ -1,3 +1,4 @@
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { InitializeRequestSchema, SUPPORTED_PROTOCOL_VERSIONS, LATEST_PROTOCOL_VERSION } from "@modelcontextprotocol/sdk/types.js";
@@ -16,15 +17,80 @@ import {
   extractMenuItemSchemaOrgData,
   npubToPubkey,
   type NostrEvent,
-} from './data-loader.js';
+} from '../dist/data-loader.js';
 
-// Response formatter type - determines how tool responses are formatted
-// Returns any to allow flexibility for different MCP client formats
-export type ResponseFormatter = (result: {
+// Rate limiting configuration
+interface RateLimitEntry {
+  count: number;
+  resetTime: number;
+}
+
+// In-memory rate limit store (resets on cold starts, which is acceptable)
+const rateLimitStore = new Map<string, RateLimitEntry>();
+
+// Rate limit configuration
+const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
+const RATE_LIMIT_MAX_REQUESTS = 100; // 100 requests per minute per IP
+
+function getClientIdentifier(req: VercelRequest): string {
+  // Try to get real IP from various headers (Vercel sets these)
+  const forwarded = req.headers['x-forwarded-for'];
+  const realIp = req.headers['x-real-ip'];
+  const ip = typeof forwarded === 'string' 
+    ? forwarded.split(',')[0].trim() 
+    : (typeof realIp === 'string' ? realIp : req.socket?.remoteAddress || 'unknown');
+  return ip;
+}
+
+function checkRateLimit(identifier: string): { allowed: boolean; remaining: number; resetAt: number } {
+  const now = Date.now();
+  const entry = rateLimitStore.get(identifier);
+
+  // Clean up old entries periodically (every 100 checks)
+  if (Math.random() < 0.01) {
+    for (const [key, value] of rateLimitStore.entries()) {
+      if (value.resetTime < now) {
+        rateLimitStore.delete(key);
+      }
+    }
+  }
+
+  if (!entry || entry.resetTime < now) {
+    // New window or expired entry
+    const resetTime = now + RATE_LIMIT_WINDOW_MS;
+    rateLimitStore.set(identifier, { count: 1, resetTime });
+    return { allowed: true, remaining: RATE_LIMIT_MAX_REQUESTS - 1, resetAt: resetTime };
+  }
+
+  if (entry.count >= RATE_LIMIT_MAX_REQUESTS) {
+    return { allowed: false, remaining: 0, resetAt: entry.resetTime };
+  }
+
+  entry.count++;
+  return { 
+    allowed: true, 
+    remaining: RATE_LIMIT_MAX_REQUESTS - entry.count, 
+    resetAt: entry.resetTime 
+  };
+}
+
+// Compliant formatter - always includes serialized JSON in TextContent for backwards compatibility
+function formatResponse(result: {
   structuredData: any;
   textSummary: string;
   meta?: Record<string, any>;
-}) => any;
+}) {
+  return {
+    structuredContent: result.structuredData,
+    content: [
+      {
+        type: "text",
+        text: JSON.stringify(result.structuredData, null, 2),
+      },
+    ],
+    ...(result.meta && { _meta: result.meta }),
+  };
+}
 
 // Global server instance (reused across invocations to minimize cold starts)
 let serverInstance: McpServer | null = null;
@@ -35,7 +101,7 @@ let products: NostrEvent[] = [];
 // Store protocol version per session (for stateless mode, we'll use a fallback)
 const sessionProtocolVersions = new Map<string, string>();
 
-export async function initializeServer(responseFormatter: ResponseFormatter) {
+async function initializeServer() {
   if (serverInstance && transportInstance) {
     return { server: serverInstance, transport: transportInstance };
   }
@@ -235,7 +301,7 @@ export async function initializeServer(responseFormatter: ResponseFormatter) {
           ? `Found ${establishmentList.length} matching food establishment${establishmentList.length > 1 ? 's' : ''}`
           : "No food establishments match your criteria";
 
-        return responseFormatter({
+        return formatResponse({
           structuredData: {
             food_establishments: establishmentList,
           },
@@ -254,6 +320,9 @@ export async function initializeServer(responseFormatter: ResponseFormatter) {
               text: `Error searching food establishments: ${error instanceof Error ? error.message : 'Unknown error'}`,
             },
           ],
+          structuredContent: {
+            food_establishments: [],
+          },
         };
       }
     }
@@ -333,7 +402,7 @@ export async function initializeServer(responseFormatter: ResponseFormatter) {
         const establishment = profiles.find(p => p.pubkey === establishmentPubkey);
         if (!establishment) {
           const errorText = `Food establishment with identifier "${restaurant_id}" not found. Use the exact '@id' from search_food_establishments results.`;
-          return responseFormatter({
+          return formatResponse({
             structuredData: {
               "@context": "https://schema.org",
               "@type": "Menu",
@@ -353,7 +422,7 @@ export async function initializeServer(responseFormatter: ResponseFormatter) {
         const collection = findCollection(collections, establishmentPubkey, menu_identifier);
         if (!collection) {
           const errorText = `Menu with identifier "${menu_identifier}" not found for this food establishment. Use the exact 'identifier' from the 'hasMenu' array in search_food_establishments results.`;
-          return responseFormatter({
+          return formatResponse({
             structuredData: {
               "@context": "https://schema.org",
               "@type": "Menu",
@@ -400,7 +469,7 @@ export async function initializeServer(responseFormatter: ResponseFormatter) {
           ? `Found ${menuItemsJsonLd.length} menu item${menuItemsJsonLd.length > 1 ? 's' : ''}`
           : `No items found in menu`;
 
-        return responseFormatter({
+        return formatResponse({
           structuredData: menuObject,
           textSummary,
           meta: {
@@ -418,6 +487,13 @@ export async function initializeServer(responseFormatter: ResponseFormatter) {
               text: `Error getting menu items: ${error instanceof Error ? error.message : 'Unknown error'}`,
             },
           ],
+          structuredContent: {
+            "@context": "https://schema.org",
+            "@type": "Menu",
+            "name": "",
+            "identifier": "",
+            "hasMenuItem": [],
+          },
         };
       }
     }
@@ -652,7 +728,7 @@ export async function initializeServer(responseFormatter: ResponseFormatter) {
           ? `Found ${totalItems} matching menu item${totalItems > 1 ? 's' : ''}`
           : "No dishes match your search";
 
-        return responseFormatter({
+        return formatResponse({
           structuredData: {
             "@context": "https://schema.org",
             "@graph": graph,
@@ -674,6 +750,10 @@ export async function initializeServer(responseFormatter: ResponseFormatter) {
               text: `Error searching menu items: ${error instanceof Error ? error.message : 'Unknown error'}`,
             },
           ],
+          structuredContent: {
+            "@context": "https://schema.org",
+            "@graph": [],
+          },
         };
       }
     }
@@ -687,5 +767,48 @@ export async function initializeServer(responseFormatter: ResponseFormatter) {
   await serverInstance.connect(transportInstance);
 
   return { server: serverInstance, transport: transportInstance };
+}
+
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  // Handle CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Mcp-Session-Id');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  // Rate limiting
+  const clientId = getClientIdentifier(req);
+  const rateLimit = checkRateLimit(clientId);
+
+  // Set rate limit headers (standard format)
+  res.setHeader('X-RateLimit-Limit', RATE_LIMIT_MAX_REQUESTS.toString());
+  res.setHeader('X-RateLimit-Remaining', rateLimit.remaining.toString());
+  res.setHeader('X-RateLimit-Reset', new Date(rateLimit.resetAt).toISOString());
+
+  if (!rateLimit.allowed) {
+    return res.status(429).json({
+      error: 'Too Many Requests',
+      message: `Rate limit exceeded. Maximum ${RATE_LIMIT_MAX_REQUESTS} requests per minute.`,
+      retryAfter: Math.ceil((rateLimit.resetAt - Date.now()) / 1000)
+    });
+  }
+
+  try {
+    const { transport } = await initializeServer();
+    if (!transport) {
+      return res.status(500).json({ error: 'Server not initialized' });
+    }
+
+    // Vercel already parses JSON bodies, so req.body is available
+    // The StreamableHTTPServerTransport expects Node.js request/response objects
+    // Vercel's request/response objects are compatible with Node.js IncomingMessage/ServerResponse
+    await transport.handleRequest(req as any, res as any, req.body);
+  } catch (error) {
+    console.error('Error handling request:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
 }
 
