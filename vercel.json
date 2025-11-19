@@ -1,21 +1,21 @@
 {
   "version": 2,
   "functions": {
-    "api/mcp.ts": {
+    "api/v1.ts": {
       "maxDuration": 30
     },
-    "api/openai-app.ts": {
+    "api/v2.ts": {
       "maxDuration": 30
     }
   },
   "rewrites": [
     {
-      "source": "/mcp",
-      "destination": "/api/mcp"
+      "source": "/v1",
+      "destination": "/api/v1"
     },
     {
-      "source": "/openai-app",
-      "destination": "/api/openai-app"
+      "source": "/v2",
+      "destination": "/api/v2"
     }
   ]
 }

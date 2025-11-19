@@ -57,16 +57,17 @@ function checkRateLimit(identifier: string): { allowed: boolean; remaining: numb
   };
 }
 
-// OpenAI App SDK formatter - uses structuredContent field
-const openaiAppFormatter: ResponseFormatter = (result) => {
+// V1 formatter - structured data in both content (serialized JSON) and structuredContent
+const v1Formatter: ResponseFormatter = (result) => {
   return {
     structuredContent: result.structuredData,
     content: [
       {
         type: "text",
-        text: result.textSummary,
+        text: JSON.stringify(result.structuredData, null, 2),
       },
     ],
+    ...(result.meta && { _meta: result.meta }),
   };
 };
 
@@ -98,7 +99,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const { transport } = await initializeServer(openaiAppFormatter);
+    const { transport } = await initializeServer(v1Formatter);
     if (!transport) {
       return res.status(500).json({ error: 'Server not initialized' });
     }

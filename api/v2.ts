@@ -57,29 +57,17 @@ function checkRateLimit(identifier: string): { allowed: boolean; remaining: numb
   };
 }
 
-// Standard MCP formatter - uses content array with type: "structured" and _meta field
-const standardMcpFormatter: ResponseFormatter = (result) => {
-  const response: {
-    content: Array<{ type: string; text?: string; data?: any }>;
-    _meta?: Record<string, any>;
-  } = {
+// V2 formatter - smaller text summary in content and structuredContent
+const v2Formatter: ResponseFormatter = (result) => {
+  return {
+    structuredContent: result.structuredData,
     content: [
       {
         type: "text",
         text: result.textSummary,
       },
-      {
-        type: "structured",
-        data: result.structuredData,
-      },
     ],
   };
-
-  if (result.meta) {
-    response._meta = result.meta;
-  }
-
-  return response;
 };
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -110,7 +98,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const { transport } = await initializeServer(standardMcpFormatter);
+    const { transport } = await initializeServer(v2Formatter);
     if (!transport) {
       return res.status(500).json({ error: 'Server not initialized' });
     }
@@ -124,3 +112,4 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({ error: 'Internal server error' });
   }
 }
+
