@@ -221,6 +221,82 @@ The server supports both HTTP (for testing) and stdio (for Claude Desktop) trans
    - Get menu items: `{"restaurant_id": "nostr:npub1...", "menu_identifier": "Dinner"}`
    - Search dishes: `{"dish_query": "pizza"}` or `{"dish_query": "vegan"}` (auto-detects dietary term)
 
+## Deployment
+
+### Deploy to Vercel
+
+The MCP server can be deployed to Vercel as a serverless function, making it accessible to ChatGPT over HTTPS.
+
+#### Prerequisites
+
+1. A Vercel account (Hobby plan or higher)
+2. The Vercel CLI installed (optional, for local testing):
+   ```bash
+   npm install -g vercel
+   ```
+
+#### Deployment Steps
+
+1. **Push your code to GitHub** (if not already done):
+   ```bash
+   git push origin main
+   ```
+
+2. **Import project in Vercel**:
+   - Go to [vercel.com](https://vercel.com)
+   - Click "Add New..." → "Project"
+   - Import your GitHub repository (`synvya/mcp-server`)
+   - Configure project settings:
+     - **Framework Preset**: "Other"
+     - **Root Directory**: `./`
+     - **Build Command**: `npm run build` (or leave default)
+     - **Output Directory**: Leave empty
+     - **Install Command**: `npm install` (or leave default)
+
+3. **Deploy**:
+   - Click "Deploy"
+   - Wait for the deployment to complete
+   - Note your deployment URL (e.g., `https://mcp-server.vercel.app`)
+
+4. **Test the deployment**:
+   ```bash
+   npx @modelcontextprotocol/inspector@latest https://your-app.vercel.app/mcp
+   ```
+   
+   The MCP endpoint will be available at:
+   - Primary: `https://your-app.vercel.app/api/mcp`
+   - Alias: `https://your-app.vercel.app/mcp` (via rewrite rule)
+
+#### Connect to ChatGPT
+
+1. **Enable Developer Mode in ChatGPT**:
+   - Go to ChatGPT settings
+   - Enable "Developer Mode" or "Connectors"
+
+2. **Add MCP Server**:
+   - In ChatGPT, go to the Connectors/Integrations section
+   - Add a new MCP server connector
+   - Enter your server URL: `https://your-app.vercel.app/mcp`
+   - Configure authentication if needed (currently not required)
+
+3. **Test the connection**:
+   - ChatGPT should now be able to use your MCP tools
+   - Try asking: "Find me a vegan Spanish restaurant"
+
+#### Environment Variables
+
+If you need to configure environment variables:
+- Go to your Vercel project settings
+- Navigate to "Environment Variables"
+- Add any required variables (currently none needed)
+
+#### Troubleshooting
+
+- **Data files not found**: Ensure `data/` directory is committed to git and not in `.vercelignore`
+- **Build failures**: Check that `npm run build` completes successfully locally
+- **Cold starts**: First request may be slower due to serverless cold starts
+- **CORS issues**: The server includes CORS headers for browser-based testing
+
 ## Data Files
 
 The server reads from JSON files in the `data/` directory:
