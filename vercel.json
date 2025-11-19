@@ -6,12 +6,19 @@
     },
     "api/v2.ts": {
       "maxDuration": 30
+    },
+    "api/openai-schema-v1.ts": {
+      "maxDuration": 10
     }
   },
   "rewrites": [
     {
       "source": "/v1",
       "destination": "/api/v1"
+    },
+    {
+      "source": "/v1/openai-schema",
+      "destination": "/api/openai-schema-v1"
     },
     {
       "source": "/v2",
