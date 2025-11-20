@@ -428,6 +428,187 @@ function getOpenAPISchema(baseUrl: string) {
             }
           }
         }
+      },
+      "/make_reservation": {
+        post: {
+          operationId: "make_reservation",
+          summary: "Make a reservation",
+          description: "Make a reservation at a food establishment. Returns a JSON-LD formatted FoodEstablishmentReservation object on success, or a ReserveAction with error details on failure.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  required: ["restaurant_id", "time", "party_size", "name"],
+                  properties: {
+                    restaurant_id: {
+                      type: "string",
+                      description: "Food establishment identifier in bech32 format (nostr:npub1...) - MUST be the exact '@id' value from search_food_establishments results."
+                    },
+                    time: {
+                      type: "string",
+                      description: "Reservation start time in ISO 8601 format (e.g., '2025-10-22T08:00:00-07:00')"
+                    },
+                    party_size: {
+                      type: "number",
+                      description: "Number of people in the party (must be a positive integer)",
+                      minimum: 1
+                    },
+                    name: {
+                      type: "string",
+                      description: "Customer name",
+                      minLength: 1
+                    },
+                    telephone: {
+                      type: "string",
+                      description: "Customer telephone number"
+                    },
+                    email: {
+                      type: "string",
+                      format: "email",
+                      description: "Customer email address"
+                    }
+                  },
+                  anyOf: [
+                    { required: ["telephone"] },
+                    { required: ["email"] }
+                  ],
+                  description: "At least one of telephone or email must be provided"
+                }
+              }
+            }
+          },
+          responses: {
+            "200": {
+              description: "Reservation response (success or error)",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    properties: {
+                      "@context": {
+                        type: "string",
+                        description: "JSON-LD context, always 'https://schema.org'"
+                      },
+                      "@type": {
+                        type: "string",
+                        description: "Either 'FoodEstablishmentReservation' for success or 'ReserveAction' for errors"
+                      },
+                      "reservationId": {
+                        type: "number",
+                        description: "Reservation ID (present only on success)"
+                      },
+                      "reservationStatus": {
+                        type: "string",
+                        description: "Reservation status (present only on success)"
+                      },
+                      "actionStatus": {
+                        type: "string",
+                        description: "Action status (present only on errors)"
+                      },
+                      "underName": {
+                        type: "object",
+                        description: "Customer information (present only on success)",
+                        properties: {
+                          "@type": {
+                            type: "string"
+                          },
+                          "name": {
+                            type: "string"
+                          },
+                          "email": {
+                            type: "string"
+                          },
+                          "telephone": {
+                            type: "string"
+                          }
+                        }
+                      },
+                      "broker": {
+                        type: "object",
+                        description: "Broker information (present only on success)",
+                        properties: {
+                          "@type": {
+                            type: "string"
+                          },
+                          "name": {
+                            type: "string"
+                          },
+                          "legalName": {
+                            type: "string"
+                          }
+                        }
+                      },
+                      "reservationFor": {
+                        type: "object",
+                        description: "Restaurant information (present only on success)",
+                        properties: {
+                          "@type": {
+                            type: "string"
+                          },
+                          "name": {
+                            type: "string"
+                          },
+                          "address": {
+                            type: "object",
+                            properties: {
+                              "@type": {
+                                type: "string"
+                              },
+                              "streetAddress": {
+                                type: "string"
+                              },
+                              "addressLocality": {
+                                type: "string"
+                              },
+                              "addressRegion": {
+                                type: "string"
+                              },
+                              "postalCode": {
+                                type: "string"
+                              },
+                              "addressCountry": {
+                                type: "string"
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "startTime": {
+                        type: "string",
+                        description: "Reservation start time in ISO 8601 format"
+                      },
+                      "endTime": {
+                        type: "string",
+                        description: "Reservation end time in ISO 8601 format"
+                      },
+                      "partySize": {
+                        type: "number",
+                        description: "Party size (present only on success)"
+                      },
+                      "error": {
+                        type: "object",
+                        description: "Error information (present only on errors)",
+                        properties: {
+                          "@type": {
+                            type: "string"
+                          },
+                          "name": {
+                            type: "string"
+                          },
+                          "description": {
+                            type: "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
   };
@@ -508,6 +689,46 @@ const openaiSchema = {
             }
           },
           required: ["dish_query"]
+        }
+      }
+    },
+    {
+      type: "function",
+      function: {
+        name: "make_reservation",
+        description: "Make a reservation at a food establishment. Returns a JSON-LD formatted FoodEstablishmentReservation object on success, or a ReserveAction with error details on failure. IMPORTANT: At least one of telephone or email must be provided.",
+        parameters: {
+          type: "object",
+          properties: {
+            restaurant_id: {
+              type: "string",
+              description: "Food establishment identifier in bech32 format (nostr:npub1...) - MUST be the exact '@id' value from search_food_establishments results."
+            },
+            time: {
+              type: "string",
+              description: "Reservation start time in ISO 8601 format (e.g., '2025-10-22T08:00:00-07:00')"
+            },
+            party_size: {
+              type: "number",
+              description: "Number of people in the party (must be a positive integer)",
+              minimum: 1
+            },
+            name: {
+              type: "string",
+              description: "Customer name",
+              minLength: 1
+            },
+            telephone: {
+              type: "string",
+              description: "Customer telephone number. At least one of telephone or email must be provided."
+            },
+            email: {
+              type: "string",
+              format: "email",
+              description: "Customer email address. At least one of telephone or email must be provided."
+            }
+          },
+          required: ["restaurant_id", "time", "party_size", "name"]
         }
       }
     }
