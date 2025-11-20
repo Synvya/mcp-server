@@ -1,11 +1,11 @@
 [
   {
     "content": "**Bacalao al Pil Pil**\n\nSalt cod in garlic-olive oil emulsion with guindilla peppers",
-    "created_at": 1763511307,
-    "id": "14be87de6161f6b536ecb2cad459dd922478218674be7c60b6fa2e552e1a3734",
+    "created_at": 1763624459,
+    "id": "005e45f62ba897d6ea2250df0627316ae95ebb2410391128628fcb0772f0253f",
     "kind": 30402,
     "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
-    "sig": "7b431f65779f1d09062cce92372bf45e911091245baebc057ba0e243aa5ae7e6f7d765df5bcbc986efe1ba987b85361f926a7f694eb9741461c0d4e4ff95b26d",
+    "sig": "c0dceae3abb0e032f2db91ce17701b22d4c596d930323701d5e137ee7f3f8dda3a4ae92cc809a03feb61d3f447f5041d4cd7980a802342ca471a8e06b42d29da",
     "tags": [
       [
         "d",
@@ -43,12 +43,14 @@
         "USD"
       ],
       [
-        "contains",
-        "FISH"
+        "schema.org:Recipe:recipeIngredient",
+        "FISH",
+        "https://schema.org/recipeIngredient"
       ],
       [
-        "contains",
-        "SULPHITES"
+        "schema.org:Recipe:recipeIngredient",
+        "SULPHITES",
+        "https://schema.org/recipeIngredient"
       ],
       [
         "t",
@@ -65,26 +67,28 @@
         "Dinner"
       ],
       [
-        "suitableForDiet",
-        "DAIRY_FREE"
+        "schema.org:MenuItem:suitableForDiet",
+        "DAIRY_FREE",
+        "https://schema.org/suitableForDiet"
       ],
       [
-        "suitableForDiet",
-        "GLUTEN_FREE"
+        "schema.org:MenuItem:suitableForDiet",
+        "GLUTEN_FREE",
+        "https://schema.org/suitableForDiet"
       ],
       [
         "published_at",
-        "1763511307"
+        "1763624459"
       ]
     ]
   },
   {
     "content": "**Setas al Jerez**\n\nWild mushrooms sautéed with sherry and garlic",
-    "created_at": 1763511307,
-    "id": "cb833be61cf1c8e7bf8e4d720345182b21a7b6b3b95ccd9af9821aafdeae9cac",
+    "created_at": 1763624459,
+    "id": "77712cb34d5305a375d5867e4838031377f11615258bc02d87beb1951f921d93",
     "kind": 30402,
     "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
-    "sig": "8b156136bef9402ba1f2e2e0bd8ec5329f268a29ee655e821c9e358d45be38a0bcf82f1782237c8ca05d399ae26b951b2279fec73b25558b9488dbfe2b1e73d9",
+    "sig": "18e90eafb5265e1eb930bcd57ae0bd21de5a4c4e6272a0b0a7bdef82a6fd6e011997485e3305142e9340f2f6e87dd4085a8a7bd0da9a564acf0d7fc21450f365",
     "tags": [
       [
         "d",
@@ -144,34 +148,38 @@
         "Dinner"
       ],
       [
-        "suitableForDiet",
-        "DAIRY_FREE"
+        "schema.org:MenuItem:suitableForDiet",
+        "DAIRY_FREE",
+        "https://schema.org/suitableForDiet"
       ],
       [
-        "suitableForDiet",
-        "GLUTEN_FREE"
+        "schema.org:MenuItem:suitableForDiet",
+        "GLUTEN_FREE",
+        "https://schema.org/suitableForDiet"
       ],
       [
-        "suitableForDiet",
-        "VEGAN"
+        "schema.org:MenuItem:suitableForDiet",
+        "VEGAN",
+        "https://schema.org/suitableForDiet"
       ],
       [
-        "suitableForDiet",
-        "VEGETARIAN"
+        "schema.org:MenuItem:suitableForDiet",
+        "VEGETARIAN",
+        "https://schema.org/suitableForDiet"
       ],
       [
         "published_at",
-        "1763511307"
+        "1763624459"
       ]
     ]
   },
   {
     "content": "**Cordero Asado**\n\nRoasted rack of lamb with rosemary and Rioja reduction",
-    "created_at": 1763511307,
-    "id": "ab931222aac2e8f2e0b5c9893369dca2dc4fc47c28705e972748e6472dddb78e",
+    "created_at": 1763624459,
+    "id": "b4f5b9e4ab46a5a83abcc883bdd3ba98ec08e07ce889e0d721751638234ce885",
     "kind": 30402,
     "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
-    "sig": "faa556d2ccccecfc95350cd4c8c9b973f4feaea8eedae098db39599204cf52dc7289b2f02e40e8b08e1ace074ecc13b4d8e29c527e11540a39e3d7853885550a",
+    "sig": "c640338e7b0fef7494a43be80e6ed089ffb9b737dbf9b708f4c6f6d4dfdb94bf3d9760270d01b8e6a251ccef84db3d92f25ab342f91407636cab09b1b1498dac",
     "tags": [
       [
         "d",
@@ -223,26 +231,28 @@
         "Dinner"
       ],
       [
-        "suitableForDiet",
-        "DAIRY_FREE"
+        "schema.org:MenuItem:suitableForDiet",
+        "DAIRY_FREE",
+        "https://schema.org/suitableForDiet"
       ],
       [
-        "suitableForDiet",
-        "GLUTEN_FREE"
+        "schema.org:MenuItem:suitableForDiet",
+        "GLUTEN_FREE",
+        "https://schema.org/suitableForDiet"
       ],
       [
         "published_at",
-        "1763511307"
+        "1763624459"
       ]
     ]
   },
   {
     "content": "**Ensalada de Pulpo**\n\nGrilled octopus salad with potatoes, paprika, and olive oil",
-    "created_at": 1763511307,
-    "id": "64c58bb99e9b86aa386ffe593e044d65a2248db5395fb3ce868f7903aa53a0c9",
+    "created_at": 1763624459,
+    "id": "aa24bdfc45d6501713edef0e89f2e020dd2b5515746d07b62c4330392e078029",
     "kind": 30402,
     "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
-    "sig": "330aa440bee5656d3ba2ba69f4c3c7fe066c7ed546ca8398edfb262523c0d84a16285047b9cc1741cbc43f472aa38cfd9caf981239967a88142b6239d980282c",
+    "sig": "7ad8da3fe6ef53f60b2cedb8213a5d2efb0b18bd61eff8a871be40bb8a2ffe0e166665c492da59587fc99031ef3184e4d03d89f6ff68e44be9a9b9fec7a66490",
     "tags": [
       [
         "d",
@@ -280,8 +290,9 @@
         "USD"
       ],
       [
-        "contains",
-        "MOLLUSCS"
+        "schema.org:Recipe:recipeIngredient",
+        "MOLLUSCS",
+        "https://schema.org/recipeIngredient"
       ],
       [
         "t",
@@ -298,26 +309,28 @@
         "Lunch"
       ],
       [
-        "suitableForDiet",
-        "GLUTEN_FREE"
+        "schema.org:MenuItem:suitableForDiet",
+        "GLUTEN_FREE",
+        "https://schema.org/suitableForDiet"
       ],
       [
-        "suitableForDiet",
-        "DAIRY_FREE"
+        "schema.org:MenuItem:suitableForDiet",
+        "DAIRY_FREE",
+        "https://schema.org/suitableForDiet"
       ],
       [
         "published_at",
-        "1763511307"
+        "1763624459"
       ]
     ]
   },
   {
     "content": "**Pisto Manchego**\n\nVegetable stew with tomatoes, peppers, zucchini, and onions",
-    "created_at": 1763511307,
-    "id": "c8cfb546c6b2ee8a9e29f2b6cb9a72e729fdbb542155291e03117e62e94d381a",
+    "created_at": 1763624459,
+    "id": "8605a82dea2d7aa98f3579138090f7cb6fd58d2a90bfacb8e2f4ca401339301b",
     "kind": 30402,
     "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
-    "sig": "0032a6745ba841103c9ecdffc15382a7174e7599e80b870b20773ddf66e34a965162d47b952caa029b89b302d71e3cf9988e90b499ce4690481b47ce6636b8a8",
+    "sig": "4ea494cf41ee0c34e05d836ee34e7502be0762e70ab7f5d283f95155c39d0da3ac69338bc51ca7d88a2e8eec0629f87e1a56d2d9090f88dadbed9c472dc9acbc",
     "tags": [
       [
         "d",
@@ -377,34 +390,38 @@
         "Lunch"
       ],
       [
-        "suitableForDiet",
-        "DAIRY_FREE"
+        "schema.org:MenuItem:suitableForDiet",
+        "DAIRY_FREE",
+        "https://schema.org/suitableForDiet"
       ],
       [
-        "suitableForDiet",
-        "GLUTEN_FREE"
+        "schema.org:MenuItem:suitableForDiet",
+        "GLUTEN_FREE",
+        "https://schema.org/suitableForDiet"
       ],
       [
-        "suitableForDiet",
-        "VEGAN"
+        "schema.org:MenuItem:suitableForDiet",
+        "VEGAN",
+        "https://schema.org/suitableForDiet"
       ],
       [
-        "suitableForDiet",
-        "VEGETARIAN"
+        "schema.org:MenuItem:suitableForDiet",
+        "VEGETARIAN",
+        "https://schema.org/suitableForDiet"
       ],
       [
         "published_at",
-        "1763511307"
+        "1763624459"
       ]
     ]
   },
   {
     "content": "**Gambas a la Plancha**\n\nGrilled wild prawns with garlic and smoked sea salt",
-    "created_at": 1763511307,
-    "id": "e4aaf0971f6c9ad774add49662a74ca07514d6afad48c3b45a627f5d0eeb94d2",
+    "created_at": 1763624459,
+    "id": "17b3fff2edd63e1ebaef3fdaf20648db1f68c36a22b5fc14095e57eb0a12b4ef",
     "kind": 30402,
     "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
-    "sig": "45295a06cf83f7babb515d22fa715d1406753e41d8d8544a4fbb8f711aceddb0b66129d2187fa0ff37cd0238da855757f9965d5bb16894ee48358c376a1609bf",
+    "sig": "5f2e148d8d3dd0bf8a2c4d9df7b0ded886613839a85d1166cb284ad3de2bd731c997fcbed5d358df5dff027248466679a0e0645737d3ef5e8f1086fc7292967e",
     "tags": [
       [
         "d",
@@ -442,8 +459,9 @@
         "USD"
       ],
       [
-        "contains",
-        "CRUSTACEANS"
+        "schema.org:Recipe:recipeIngredient",
+        "CRUSTACEANS",
+        "https://schema.org/recipeIngredient"
       ],
       [
         "t",
@@ -464,30 +482,33 @@
         "Lunch"
       ],
       [
-        "suitableForDiet",
-        "DAIRY_FREE"
+        "schema.org:MenuItem:suitableForDiet",
+        "DAIRY_FREE",
+        "https://schema.org/suitableForDiet"
       ],
       [
-        "suitableForDiet",
-        "GLUTEN_FREE"
+        "schema.org:MenuItem:suitableForDiet",
+        "GLUTEN_FREE",
+        "https://schema.org/suitableForDiet"
       ],
       [
-        "suitableForDiet",
-        "NUT_FREE"
+        "schema.org:MenuItem:suitableForDiet",
+        "NUT_FREE",
+        "https://schema.org/suitableForDiet"
       ],
       [
         "published_at",
-        "1763511307"
+        "1763624459"
       ]
     ]
   },
   {
     "content": "**Paella Valenciana**\n\nSaffron rice with chicken, rabbit, green beans, and lima beans.",
-    "created_at": 1763511307,
-    "id": "641b3d574a0d309868747453e717b6d65497c4b1d4d9f16342babd95341af79f",
+    "created_at": 1763624459,
+    "id": "1fb137e48520b066a9c3e48cf09c1ce72afae57195a324e171e141fdfebb5ca2",
     "kind": 30402,
     "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
-    "sig": "062ab6b9ee6ee512b2c493348f2c696a08f42c10b25e40c1edcb9c21397bbe912b009dda739c3ed4c17646ec6db4eba0f16ac77c7a0fcfe7353623453e52a8b2",
+    "sig": "7e3daf3a642087c48a9db3138ce70f1c57dc1673a7bd4a1c09b452173d84bd2b8e3a582b53a0a85a3aef20f52777991173b926ff91d1b14de2a4aa1301abe8a1",
     "tags": [
       [
         "d",
@@ -543,30 +564,33 @@
         "Dinner"
       ],
       [
-        "suitableForDiet",
-        "GLUTEN_FREE"
+        "schema.org:MenuItem:suitableForDiet",
+        "GLUTEN_FREE",
+        "https://schema.org/suitableForDiet"
       ],
       [
-        "suitableForDiet",
-        "DAIRY_FREE"
+        "schema.org:MenuItem:suitableForDiet",
+        "DAIRY_FREE",
+        "https://schema.org/suitableForDiet"
       ],
       [
-        "suitableForDiet",
-        "NUT_FREE"
+        "schema.org:MenuItem:suitableForDiet",
+        "NUT_FREE",
+        "https://schema.org/suitableForDiet"
       ],
       [
         "published_at",
-        "1763511307"
+        "1763624459"
       ]
     ]
   },
   {
     "content": "**Bocadillo de Jamón**\n\nTraditional Spanish baguette with cured Iberian ham and tomato spread",
-    "created_at": 1763511307,
-    "id": "062b65a7d4338a807f69b8d2417b725a6c2f42837010ec867c010c64c75b9869",
+    "created_at": 1763624459,
+    "id": "0f9876654b4b11353957b460ac50efef0b2aa1d99a406f4234c3c32d51d75195",
     "kind": 30402,
     "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
-    "sig": "bc9b25ad6b33fc9f92ab306a8443f97e5966e8f9b24691ec77ee314d09b59e0e09755ee277f43c5b42b12c3259d12ba06a98587f127dd208de9ad93fced72e82",
+    "sig": "984e2b23b38b3a435b77e90afb6d937ca107452ea00cbd1e7932c315fca5993ac037c0b7e258d3be75617e0356685bb29eafdcf9de58312eef9cd1723e1bfdfa",
     "tags": [
       [
         "d",
@@ -604,8 +628,9 @@
         "USD"
       ],
       [
-        "contains",
-        "GLUTEN"
+        "schema.org:Recipe:recipeIngredient",
+        "GLUTEN",
+        "https://schema.org/recipeIngredient"
       ],
       [
         "a",
@@ -615,7 +640,7 @@
       ],
       [
         "published_at",
-        "1763511307"
+        "1763624459"
       ]
     ]
   }

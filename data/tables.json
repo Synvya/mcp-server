@@ -1,0 +1,142 @@
+[
+  {
+    "id": "a93b73e6379d23c3c9c1f8a895a29db6185428b2f4ec5be4866d39fa93c59834",
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "created_at": 1763668800,
+    "kind": 30906,
+    "tags": [
+      [
+        "d",
+        "elcandado.table-0001"
+      ],
+      [
+        "capacity",
+        "2"
+      ],
+      [
+        "zone",
+        "Main Dining"
+      ]
+    ],
+    "content": "Intimate two-seater by the window",
+    "sig": "4d08c4c9a1091d237d66b093c6a619b55bb1dde01c8acdcca555ee36cea397d80ec14b4902f312dea814b3a34517b2c4f338e4bbe78561dbc103c6bb19ca67b0"
+  },
+  {
+    "id": "69742f85f9f8976c540a47b27b6fbb3b7f4c8fa171624fdb5a2d64a7fcb9ea5f",
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "created_at": 1763668800,
+    "kind": 30906,
+    "tags": [
+      [
+        "d",
+        "elcandado.table-0002"
+      ],
+      [
+        "capacity",
+        "4"
+      ],
+      [
+        "zone",
+        "Main Dining"
+      ]
+    ],
+    "content": "Four-seater in the main dining area",
+    "sig": "8731745b9c43699808f2331e119441642544c744440436f9a1af39d79d11276f2e50fa0a838a8405fca721b7c307c89078c26c93b01458b44b942426b41c73e1"
+  },
+  {
+    "id": "f513367a3d8758263441ee2ccd984871788b83e7f4e3682508c4970a7ec85da5",
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "created_at": 1763668800,
+    "kind": 30906,
+    "tags": [
+      [
+        "d",
+        "elcandado.table-0003"
+      ],
+      [
+        "capacity",
+        "4"
+      ],
+      [
+        "zone",
+        "Patio"
+      ]
+    ],
+    "content": "Four-seater on the patio overlooking the river",
+    "sig": "c3558c295903861f1ebfc1d75e5b6f8aa67eb840d92a8d85b58dd9a134b66d83e7057b492324472433b937465ec157d65eb1f621b88161f052e0aa4f2b804571"
+  },
+  {
+    "id": "5f0469aac3b82f5fa7faa4151a6f57ca4623565f6647b9a4ada7595d6cb8bac2",
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "created_at": 1763668800,
+    "kind": 30906,
+    "tags": [
+      [
+        "d",
+        "elcandado.table-0004"
+      ],
+      [
+        "capacity",
+        "6"
+      ],
+      [
+        "zone",
+        "Main Dining"
+      ]
+    ],
+    "content": "Six-seater in the main dining room",
+    "sig": "86b15a8b3476fcd3b05a43bb3dfcf21fc49239fbbe82866229de12a67faaca250196ae279a293777a26e8f5fb02f95346d93d62594be133627e59f67259a41cd"
+  },
+  {
+    "id": "2bb124d4b54525a8c138016be66df051549217c5a17bd18f5e386439a3c1b35e",
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "created_at": 1763668800,
+    "kind": 30906,
+    "tags": [
+      [
+        "d",
+        "elcandado.table-0005"
+      ],
+      [
+        "capacity",
+        "8"
+      ],
+      [
+        "zone",
+        "Private Room"
+      ]
+    ],
+    "content": "Private room for up to 8 guests",
+    "sig": "3529a41034c2221e79d209d11f1387c0058673e79f3d712cfc44ddfbb3e299f11055551c27b78cdce21ed5e9ab5154093c47c1c15528cab401a546128ddf9eb6"
+  },
+  {
+    "id": "09809e84decabde40d2f93464a7b4941d91b32d2138158c0b7db11293ecdf113",
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "created_at": 1763668860,
+    "kind": 10907,
+    "tags": [
+      [
+        "a",
+        "30906:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:elcandado.table-0001"
+      ],
+      [
+        "a",
+        "30906:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:elcandado.table-0002"
+      ],
+      [
+        "a",
+        "30906:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:elcandado.table-0003"
+      ],
+      [
+        "a",
+        "30906:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:elcandado.table-0004"
+      ],
+      [
+        "a",
+        "30906:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:elcandado.table-0005"
+      ]
+    ],
+    "content": "",
+    "sig": "88c523fd0e105098982dbfae2e91d09befdc72c0991bb1fdb0acb1f293750a292b43e72adfce51c6351b647dafcc884a4cf68bf93c25850ded9ddfdff85b7631"
+  }
+]

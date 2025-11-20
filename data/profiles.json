@@ -1,15 +1,16 @@
 [
   {
     "content": "{\"name\":\"elcandado\",\"display_name\":\"Restaurante El Candado\",\"about\":\"El Candado: Authentic Spanish Flavors in Snoqualmie 🇪🇸🌲\\n\\nMore than a meal, a Mediterranean state of mind. Where the soul of Spain meets the heart of the Cascades.\\n\\nOur Story:\\nBorn from a family recipe book dating back to 1940s Málaga, we bring genuine Spanish sobremesa (the art of lingering at the table) to Snoqualmie. Chef Alejandro’s wood-fired paellas and Abuela’s secret gambas recipe will transport you to a sun-drenched plaza.\\n\\nWhat We Serve:\\n✅ Handcrafted tapas using local PNW ingredients\\n✅ Saffron-infused paellas cooked over almond wood\\n✅ Imported Spanish wines & craft sangrias\\n✅ Dedicated gluten-free/vegan menu\\n\\nEnjoy your sobremesa at our rustic-chic dining room with fireplace or at our summer patio overlooking the Snoqualmie River.\\n\\nVisit us or make a reservation with your favorite AI assistant. \",\"website\":\"https://www.synvya.com\",\"picture\":\"https://i.nostr.build/uQ6Lq7jq0nCNSRTT.png\",\"banner\":\"https://i.nostr.build/uR9UxQhO9VKSIRMu.png\",\"nip05\":\"elcandado@synvya.com\"}",
-    "created_at": 1763510731,
-    "id": "a6d84ecaf969fd6ed222e5e2a108b0bf36a2ef1682cc6ee5459d6a8627e887c4",
+    "created_at": 1763621702,
+    "id": "d6fcf837edd671fcf5e48090c4eb932face9b25fb260aacd84ac4da3723ed3dc",
     "kind": 0,
     "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
-    "sig": "1842d90fc0c0104c6faf94f3b1b47c997a5a5740f61d2877c4188890fda6aec1b5c4406d0c52a93c7951695c2d86be4bbbe7ff7e11bd1eb0cd214d36a0297dec",
+    "sig": "2ea0ee93257538e82d9fa02f1ec0803106b4464b2cd4b16a281876743508d4dbfa96315f653c85f4f47603960f9d45e5f226be5923daa19b7c54cb7cba75c10e",
     "tags": [
       [
-        "l",
-        "https://schema.org:Restaurant"
+        "schema.org:FoodEstablishment",
+        "Restaurant",
+        "https://schema.org/FoodEstablishment"
       ],
       [
         "t",
@@ -32,86 +33,49 @@
         "paella"
       ],
       [
-        "schema.org:servesCuisine",
-        "Spanish",
-        "https://schema.org/servesCuisine"
-      ],
-      [
-        "i",
-        "schema.org:telephone:+155512345678",
+        "schema.org:FoodEstablishment:telephone",
+        "tel:+155512345678",
         "https://datatracker.ietf.org/doc/html/rfc3966"
       ],
       [
-        "i",
-        "schema.org:email:mailto:synvya@synvya.com",
+        "schema.org:FoodEstablishment:email",
+        "mailto:synvya@synvya.com",
         "https://schema.org/email"
       ],
       [
-        "k",
-        "schema.org:email"
-      ],
-      [
-        "i",
-        "schema.org:PostalAddress:streetAddress:123 Main Street",
+        "schema.org:PostalAddress:streetAddress",
+        "123 Main Street",
         "https://schema.org/streetAddress"
       ],
       [
-        "k",
-        "schema.org:PostalAddress:streetAddress"
-      ],
-      [
-        "i",
-        "schema.org:PostalAddress:addressLocality:Snoqualmie",
+        "schema.org:PostalAddress:addressLocality",
+        "Snoqualmie",
         "https://schema.org/addressLocality"
       ],
       [
-        "k",
-        "schema.org:PostalAddress:addressLocality"
-      ],
-      [
-        "i",
-        "schema.org:PostalAddress:addressRegion:WA",
+        "schema.org:PostalAddress:addressRegion",
+        "WA",
         "https://schema.org/addressRegion"
       ],
       [
-        "k",
-        "schema.org:PostalAddress:addressRegion"
-      ],
-      [
-        "i",
-        "schema.org:PostalAddress:postalCode:98065",
+        "schema.org:PostalAddress:postalCode",
+        "98065",
         "https://schema.org/postalCode"
       ],
       [
-        "k",
-        "schema.org:PostalAddress:postalCode"
-      ],
-      [
-        "i",
-        "schema.org:PostalAddress:addressCountry:US",
+        "schema.org:PostalAddress:addressCountry",
+        "US",
         "https://schema.org/addressCountry"
       ],
       [
-        "k",
-        "schema.org:PostalAddress:addressCountry"
-      ],
-      [
-        "i",
-        "schema.org:GeoCoordinates:latitude:47.5289527",
-        "https://schema.org/latitude"
-      ],
-      [
-        "k",
-        "schema.org:GeoCoordinates:latitude"
-      ],
-      [
-        "i",
-        "schema.org:GeoCoordinates:longitude:-121.827093",
+        "schema.org:GeoCoordinates:longitude",
+        "-121.827093",
         "https://schema.org/longitude"
       ],
       [
-        "k",
-        "schema.org:GeoCoordinates:longitude"
+        "schema.org:GeoCoordinates:latitude",
+        "47.5289527",
+        "https://schema.org/latitude"
       ],
       [
         "i",
@@ -123,8 +87,9 @@
         "geo"
       ],
       [
-        "schema.org:acceptsReservations",
-        "https://dinedirect.app"
+        "schema.org:FoodEstablishment:acceptsReservations",
+        "https://dinedirect.app",
+        "https://schema.org/acceptsReservations"
       ],
       [
         "i",
@@ -134,10 +99,6 @@
       [
         "k",
         "nip"
-      ],
-      [
-        "schema.org:openingHours",
-        "Tu-Th 11:00-21:00, Fr-Sa 11:00-00:00, Su 11:00-21:00"
       ]
     ]
   }

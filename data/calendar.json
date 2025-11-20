@@ -1,0 +1,834 @@
+[
+  {
+    "id": "1cef09ca668df1b13f5a4edae9dca9a5dcff2aaf684cde3486a65dbdd3b3c205",
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "created_at": 1763733600,
+    "kind": 31923,
+    "tags": [
+      [
+        "d",
+        "0000000000000000000000000000000000000000000000000000000000000001"
+      ],
+      [
+        "title",
+        "Reservation for table 1"
+      ],
+      [
+        "start",
+        "1763753400"
+      ],
+      [
+        "end",
+        "1763760600"
+      ],
+      [
+        "start_tzid",
+        "America/Los_Angeles"
+      ],
+      [
+        "end_tzid",
+        "America/Los_Angeles"
+      ]
+    ],
+    "content": "Reservation for table 1",
+    "sig": "e116267aba8fcd364f809f32f33cd77d30296ae467ee183c0f5fdbfefb73d2be97b0acc3e3b83a4e5f61e6a456a66a6cabafd59e7b1a1ec0719238d61eb9502c"
+  },
+  {
+    "id": "4b1880a300db5f93dbea15bad2b3ccac0f1977f86ec89474c0901c90ad5d298f",
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "created_at": 1763733660,
+    "kind": 31923,
+    "tags": [
+      [
+        "d",
+        "0000000000000000000000000000000000000000000000000000000000000002"
+      ],
+      [
+        "title",
+        "Reservation for table 1"
+      ],
+      [
+        "start",
+        "1763755200"
+      ],
+      [
+        "end",
+        "1763762400"
+      ],
+      [
+        "start_tzid",
+        "America/Los_Angeles"
+      ],
+      [
+        "end_tzid",
+        "America/Los_Angeles"
+      ]
+    ],
+    "content": "Reservation for table 1",
+    "sig": "4c2eb3bec6f57f785da7db13986c86dab103cac8d55d3247b1e2e35ccf830cb743f550774f46f7fa950e05a9fad54219d2beeed7b5d59c8180aa8950014f18f7"
+  },
+  {
+    "id": "aec0f69cf897b8e2802527c36cd629f59e5a2d4062c51e219113fb0ad543f884",
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "created_at": 1763733720,
+    "kind": 31923,
+    "tags": [
+      [
+        "d",
+        "0000000000000000000000000000000000000000000000000000000000000003"
+      ],
+      [
+        "title",
+        "Reservation for table 1"
+      ],
+      [
+        "start",
+        "1763757000"
+      ],
+      [
+        "end",
+        "1763764200"
+      ],
+      [
+        "start_tzid",
+        "America/Los_Angeles"
+      ],
+      [
+        "end_tzid",
+        "America/Los_Angeles"
+      ]
+    ],
+    "content": "Reservation for table 1",
+    "sig": "37f6f503c1d60d4b0c6e3d32875966999f4499419b940cd59ace8e7114c3db4f7a1def190e9c9f2363692968d02903f16c0b42cb84e40214b4ddf28dea78c73c"
+  },
+  {
+    "id": "0a909754a68f807724107816b709c5bbbff29769814bc565a7965e9d0008f207",
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "created_at": 1763733780,
+    "kind": 31923,
+    "tags": [
+      [
+        "d",
+        "0000000000000000000000000000000000000000000000000000000000000004"
+      ],
+      [
+        "title",
+        "Reservation for table 1"
+      ],
+      [
+        "start",
+        "1763758800"
+      ],
+      [
+        "end",
+        "1763766000"
+      ],
+      [
+        "start_tzid",
+        "America/Los_Angeles"
+      ],
+      [
+        "end_tzid",
+        "America/Los_Angeles"
+      ]
+    ],
+    "content": "Reservation for table 1",
+    "sig": "b2cf2171b9eb5c2c1551add2a9dea5bf30d4587a4ea909d08c9f8b0db00462ca69b151d679b826f2cdcf3c1c2de00f7281e7bdaa275645a307a1072016a8e03c"
+  },
+  {
+    "id": "0c13f6776325da5c37ce6edf775fcfc4501f26876d558de62622662100e77b26",
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "created_at": 1763733600,
+    "kind": 31923,
+    "tags": [
+      [
+        "d",
+        "0000000000000000000000000000000000000000000000000000000000000005"
+      ],
+      [
+        "title",
+        "Reservation for table 2"
+      ],
+      [
+        "start",
+        "1763773200"
+      ],
+      [
+        "end",
+        "1763784000"
+      ],
+      [
+        "start_tzid",
+        "America/Los_Angeles"
+      ],
+      [
+        "end_tzid",
+        "America/Los_Angeles"
+      ]
+    ],
+    "content": "Reservation for table 2",
+    "sig": "284140c224cf64d18a4cd206c0dd17135a339d3aecfbe3cdbaeb8b23e5f5ec16022209ea56fc93252e55c0d8a58bbbd01eaa27019e0a3c4a9df37dcca14ecb5c"
+  },
+  {
+    "id": "e4a28fa63a3c7a632a8ec94b9aaab1490c1ad9b5c9463a8bf5b99b401266142e",
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "created_at": 1763733660,
+    "kind": 31923,
+    "tags": [
+      [
+        "d",
+        "0000000000000000000000000000000000000000000000000000000000000006"
+      ],
+      [
+        "title",
+        "Reservation for table 2"
+      ],
+      [
+        "start",
+        "1763775000"
+      ],
+      [
+        "end",
+        "1763785800"
+      ],
+      [
+        "start_tzid",
+        "America/Los_Angeles"
+      ],
+      [
+        "end_tzid",
+        "America/Los_Angeles"
+      ]
+    ],
+    "content": "Reservation for table 2",
+    "sig": "90a74085c8aac16a09d9c0a53d2692c7d01af169a916317d200a4a0a2ca9602b28eee0ed8cd8286557eb7c0334379c14d196b7d81948dfc8a9ea801fde39457c"
+  },
+  {
+    "id": "c250c3338f07ae653cca7b4d454938c248e0efc84e79fe4ae67cd1db966aae35",
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "created_at": 1763733720,
+    "kind": 31923,
+    "tags": [
+      [
+        "d",
+        "0000000000000000000000000000000000000000000000000000000000000007"
+      ],
+      [
+        "title",
+        "Reservation for table 2"
+      ],
+      [
+        "start",
+        "1763776800"
+      ],
+      [
+        "end",
+        "1763787600"
+      ],
+      [
+        "start_tzid",
+        "America/Los_Angeles"
+      ],
+      [
+        "end_tzid",
+        "America/Los_Angeles"
+      ]
+    ],
+    "content": "Reservation for table 2",
+    "sig": "06244f10f626a35a2efac2c6cbacb18b5592ca857220e0d2c76c721d6a2d3c8fb5fc4047167e68cce278448bc80bc3b434eaab46c8cdcbf105cb27fe8f4c0cfb"
+  },
+  {
+    "id": "0882584a7b3253f6bd00ff4b0f06fe3453b73810670d628120463b6efa664795",
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "created_at": 1763733600,
+    "kind": 31923,
+    "tags": [
+      [
+        "d",
+        "0000000000000000000000000000000000000000000000000000000000000008"
+      ],
+      [
+        "title",
+        "Reservation for table 3"
+      ],
+      [
+        "start",
+        "1763778600"
+      ],
+      [
+        "end",
+        "1763789400"
+      ],
+      [
+        "start_tzid",
+        "America/Los_Angeles"
+      ],
+      [
+        "end_tzid",
+        "America/Los_Angeles"
+      ]
+    ],
+    "content": "Reservation for table 3",
+    "sig": "83f5ad48581c31925c9629688e52c78a5fe36bd1ab9358feafbff0c4e3d2cd83fb18fa26a716899a46b2d4e5034b0b3d0de824e5f592fa1126e2b70ba751c08d"
+  },
+  {
+    "id": "1c07ab88281bbfd8175f48ddcb470ac5ba594851b0e004998f3978530906bac4",
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "created_at": 1763733660,
+    "kind": 31923,
+    "tags": [
+      [
+        "d",
+        "0000000000000000000000000000000000000000000000000000000000000009"
+      ],
+      [
+        "title",
+        "Reservation for table 3"
+      ],
+      [
+        "start",
+        "1763780400"
+      ],
+      [
+        "end",
+        "1763791200"
+      ],
+      [
+        "start_tzid",
+        "America/Los_Angeles"
+      ],
+      [
+        "end_tzid",
+        "America/Los_Angeles"
+      ]
+    ],
+    "content": "Reservation for table 3",
+    "sig": "82a64bc6548fdf35230f509ac7e21a2231f3f05a663469c4ec4da3dc519d7d5c6eb5bd1ad5493c270fbb4b7100708e297e8899ca579e41de6d031c79f7f0aa1e"
+  },
+  {
+    "id": "9ce6d57e26ee64d827444493a466957f2545b1f1addde59278644f3f4890b512",
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "created_at": 1763733720,
+    "kind": 31923,
+    "tags": [
+      [
+        "d",
+        "000000000000000000000000000000000000000000000000000000000000000a"
+      ],
+      [
+        "title",
+        "Reservation for table 3"
+      ],
+      [
+        "start",
+        "1763782200"
+      ],
+      [
+        "end",
+        "1763793000"
+      ],
+      [
+        "start_tzid",
+        "America/Los_Angeles"
+      ],
+      [
+        "end_tzid",
+        "America/Los_Angeles"
+      ]
+    ],
+    "content": "Reservation for table 3",
+    "sig": "c54ea0c783a2ed82c133ab74191508e8a9c616e8aea4657730c9a244273e872eead11882e9bca8a3329ee327f18e7262473e1ad20e5fc41eb63dec4a3b547894"
+  },
+  {
+    "id": "d6898ba88fbf582e28ec1b68f0f0cca19b43a7f889d2034bdd1afe2a80ce2094",
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "created_at": 1763733780,
+    "kind": 31923,
+    "tags": [
+      [
+        "d",
+        "000000000000000000000000000000000000000000000000000000000000000b"
+      ],
+      [
+        "title",
+        "Reservation for table 3"
+      ],
+      [
+        "start",
+        "1763784000"
+      ],
+      [
+        "end",
+        "1763794800"
+      ],
+      [
+        "start_tzid",
+        "America/Los_Angeles"
+      ],
+      [
+        "end_tzid",
+        "America/Los_Angeles"
+      ]
+    ],
+    "content": "Reservation for table 3",
+    "sig": "cdc41e9a766bf0a9cbcb9a1510a2de19adb437d591ec2254cace425663318d93894b5dc243ed6e036434bac665b83409a8ac13ba714a447d103812c1044e6c44"
+  },
+  {
+    "id": "b1f89b32ff930e6ce216a37bccba588d41ae118e25d450a8297a84a32be2797e",
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "created_at": 1763733840,
+    "kind": 31923,
+    "tags": [
+      [
+        "d",
+        "000000000000000000000000000000000000000000000000000000000000000c"
+      ],
+      [
+        "title",
+        "Reservation for table 3"
+      ],
+      [
+        "start",
+        "1763753400"
+      ],
+      [
+        "end",
+        "1763760600"
+      ],
+      [
+        "start_tzid",
+        "America/Los_Angeles"
+      ],
+      [
+        "end_tzid",
+        "America/Los_Angeles"
+      ]
+    ],
+    "content": "Reservation for table 3",
+    "sig": "ce3b8c2e42d9ae577ced75c264ded1701a119e56d2e936338bb5b46dadd9d4581a2e102a66ce9a0349c1a67d436a6ba41bd348b8774d4213b54e8c4afb85abea"
+  },
+  {
+    "id": "cadb528ad66f85158de6d84e17bba9dd8f58e23dea2a8a12d38c895caf166308",
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "created_at": 1763733600,
+    "kind": 31923,
+    "tags": [
+      [
+        "d",
+        "000000000000000000000000000000000000000000000000000000000000000d"
+      ],
+      [
+        "title",
+        "Reservation for table 4"
+      ],
+      [
+        "start",
+        "1763755200"
+      ],
+      [
+        "end",
+        "1763762400"
+      ],
+      [
+        "start_tzid",
+        "America/Los_Angeles"
+      ],
+      [
+        "end_tzid",
+        "America/Los_Angeles"
+      ]
+    ],
+    "content": "Reservation for table 4",
+    "sig": "2ba95ee052ab5915dd79e873e2c0884e0605406e2fe824ab1beacb20a137f8a2f6dd164a9eba43c1329ff71f174e9d6ef8928757091e0197b41ed51bc81ca7e0"
+  },
+  {
+    "id": "1b93a82a7674c534aed2c622158998765e4e4a7cb19721674f3c4f288f139629",
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "created_at": 1763733660,
+    "kind": 31923,
+    "tags": [
+      [
+        "d",
+        "000000000000000000000000000000000000000000000000000000000000000e"
+      ],
+      [
+        "title",
+        "Reservation for table 4"
+      ],
+      [
+        "start",
+        "1763757000"
+      ],
+      [
+        "end",
+        "1763764200"
+      ],
+      [
+        "start_tzid",
+        "America/Los_Angeles"
+      ],
+      [
+        "end_tzid",
+        "America/Los_Angeles"
+      ]
+    ],
+    "content": "Reservation for table 4",
+    "sig": "0e803144ac9a52f86f6747c18983ecdf5f37b8142825192f9d410e15411d72f0a45f434d2cc96fc7d290f59733e171f1f35a341b28fecf3872ddc6ff5d265bf1"
+  },
+  {
+    "id": "ca4ebeb31f56e1913f2ce5c66a47abe19f12ac106cc944705182d4f5d632917a",
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "created_at": 1763733720,
+    "kind": 31923,
+    "tags": [
+      [
+        "d",
+        "000000000000000000000000000000000000000000000000000000000000000f"
+      ],
+      [
+        "title",
+        "Reservation for table 4"
+      ],
+      [
+        "start",
+        "1763758800"
+      ],
+      [
+        "end",
+        "1763766000"
+      ],
+      [
+        "start_tzid",
+        "America/Los_Angeles"
+      ],
+      [
+        "end_tzid",
+        "America/Los_Angeles"
+      ]
+    ],
+    "content": "Reservation for table 4",
+    "sig": "d70b1a5f5cdb067c7b651394bd8be944c9ac1574ca350aa39d57a8657216669247b44ccb0b9aae5ed0c64b97ba3cd19bb8491339a9fdbe09be0ce0d927aa5bab"
+  },
+  {
+    "id": "8102b8544316d501b7248d37576c080dab983b0d0395eb849c7e2f02c98b367d",
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "created_at": 1763733780,
+    "kind": 31923,
+    "tags": [
+      [
+        "d",
+        "0000000000000000000000000000000000000000000000000000000000000010"
+      ],
+      [
+        "title",
+        "Reservation for table 4"
+      ],
+      [
+        "start",
+        "1763773200"
+      ],
+      [
+        "end",
+        "1763784000"
+      ],
+      [
+        "start_tzid",
+        "America/Los_Angeles"
+      ],
+      [
+        "end_tzid",
+        "America/Los_Angeles"
+      ]
+    ],
+    "content": "Reservation for table 4",
+    "sig": "621b824ba0daed64a5cdc806f117dc91971e2e8a9a69770a0e835163a8847960cfb6cf6716ef4ac1ce03aa6923d6c3c5b3949733e68e4b5eef6b07ff6396b2d9"
+  },
+  {
+    "id": "dc84571b58535bfbc6a3f6e48d4305371662d9939050270b88f9b454f09cba8a",
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "created_at": 1763733600,
+    "kind": 31923,
+    "tags": [
+      [
+        "d",
+        "0000000000000000000000000000000000000000000000000000000000000011"
+      ],
+      [
+        "title",
+        "Reservation for table 5"
+      ],
+      [
+        "start",
+        "1763775000"
+      ],
+      [
+        "end",
+        "1763785800"
+      ],
+      [
+        "start_tzid",
+        "America/Los_Angeles"
+      ],
+      [
+        "end_tzid",
+        "America/Los_Angeles"
+      ]
+    ],
+    "content": "Reservation for table 5",
+    "sig": "8ada02b034b4ab832124f9240ed9264ffae141339cd4c38963d2539115385d0da56f42f9b216c76b8fe6c92bd17c93c00d5f1ca2e23431608b2b6b6d645d2880"
+  },
+  {
+    "id": "c8365b53c460963307135a12946f22abdb68403e4a80031e581f87f7a13fcc39",
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "created_at": 1763733660,
+    "kind": 31923,
+    "tags": [
+      [
+        "d",
+        "0000000000000000000000000000000000000000000000000000000000000012"
+      ],
+      [
+        "title",
+        "Reservation for table 5"
+      ],
+      [
+        "start",
+        "1763776800"
+      ],
+      [
+        "end",
+        "1763787600"
+      ],
+      [
+        "start_tzid",
+        "America/Los_Angeles"
+      ],
+      [
+        "end_tzid",
+        "America/Los_Angeles"
+      ]
+    ],
+    "content": "Reservation for table 5",
+    "sig": "cd5365cb092e8ec728edd6104a111d4a18d84bd16ec3f401e8b3f4bf6947e325cee989f20b1275f30e79629073aababaec14343e8dae709ef21126f1acfdf93b"
+  },
+  {
+    "id": "126ba5f55850e03efdd273ecb107591ad16982dd29f478cdeaea5a6420d2e0fe",
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "created_at": 1763733720,
+    "kind": 31923,
+    "tags": [
+      [
+        "d",
+        "0000000000000000000000000000000000000000000000000000000000000013"
+      ],
+      [
+        "title",
+        "Reservation for table 5"
+      ],
+      [
+        "start",
+        "1763778600"
+      ],
+      [
+        "end",
+        "1763789400"
+      ],
+      [
+        "start_tzid",
+        "America/Los_Angeles"
+      ],
+      [
+        "end_tzid",
+        "America/Los_Angeles"
+      ]
+    ],
+    "content": "Reservation for table 5",
+    "sig": "39db93f75bf354b4e1b708d301105e198399d9568bf93f0448e8a44298c70ff73b75eac9d935a114f91fe6de2e23895d5afa49c45568819e002f7d9ffcf1db15"
+  },
+  {
+    "id": "367a79390d918fef16b45def466ea5b46960f6801b5bc930a4eb973e7d341c79",
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "created_at": 1763712060,
+    "kind": 31924,
+    "tags": [
+      [
+        "d",
+        "elcandado.table-0001.calendar"
+      ],
+      [
+        "title",
+        "Reservation Calendar Table 0001"
+      ],
+      [
+        "a",
+        "30906:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:elcandado.table-0001"
+      ],
+      [
+        "a",
+        "31923:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:0000000000000000000000000000000000000000000000000000000000000001"
+      ],
+      [
+        "a",
+        "31923:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:0000000000000000000000000000000000000000000000000000000000000002"
+      ],
+      [
+        "a",
+        "31923:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:0000000000000000000000000000000000000000000000000000000000000003"
+      ],
+      [
+        "a",
+        "31923:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:0000000000000000000000000000000000000000000000000000000000000004"
+      ]
+    ],
+    "content": "Reservation calendar for table 1",
+    "sig": "4df5f7db8414de667ed03ea9d01ef0062dfb9116f5d1187d2229dba038ace560ef4cf1d15b69de849d81c63412c863b3319e3c65f78c00f7446440cb0e19894d"
+  },
+  {
+    "id": "e79841ed38ba476796813d4a204d341b7ac8ff11eb1ec37be275b27e00882d42",
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "created_at": 1763712120,
+    "kind": 31924,
+    "tags": [
+      [
+        "d",
+        "elcandado.table-0002.calendar"
+      ],
+      [
+        "title",
+        "Reservation Calendar Table 0002"
+      ],
+      [
+        "a",
+        "30906:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:elcandado.table-0002"
+      ],
+      [
+        "a",
+        "31923:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:0000000000000000000000000000000000000000000000000000000000000005"
+      ],
+      [
+        "a",
+        "31923:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:0000000000000000000000000000000000000000000000000000000000000006"
+      ],
+      [
+        "a",
+        "31923:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:0000000000000000000000000000000000000000000000000000000000000007"
+      ]
+    ],
+    "content": "Reservation calendar for table 2",
+    "sig": "a6a48c0d4165f6d3fc171235fa1ceaab9b29885569d7fb8fe3d27fc7f5434c09e103fa4c2097aa9fac81d9d65e88632a853e0e067a06efa4a8326d11412fd7c9"
+  },
+  {
+    "id": "b40a46eabb0f4158dac20ff24223031ae3bc05bb71cf54d89da791c8602cdb6a",
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "created_at": 1763712180,
+    "kind": 31924,
+    "tags": [
+      [
+        "d",
+        "elcandado.table-0003.calendar"
+      ],
+      [
+        "title",
+        "Reservation Calendar Table 0003"
+      ],
+      [
+        "a",
+        "30906:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:elcandado.table-0003"
+      ],
+      [
+        "a",
+        "31923:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:0000000000000000000000000000000000000000000000000000000000000008"
+      ],
+      [
+        "a",
+        "31923:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:0000000000000000000000000000000000000000000000000000000000000009"
+      ],
+      [
+        "a",
+        "31923:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:000000000000000000000000000000000000000000000000000000000000000a"
+      ],
+      [
+        "a",
+        "31923:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:000000000000000000000000000000000000000000000000000000000000000b"
+      ],
+      [
+        "a",
+        "31923:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:000000000000000000000000000000000000000000000000000000000000000c"
+      ]
+    ],
+    "content": "Reservation calendar for table 3",
+    "sig": "ebee6258ce30b03b84019eb5e86b804b8e54fa3c0ab5d3b273beafe240dc2ab45aee67e4b8f30a49a9b4017af2d1b1df2e4f13f7f6dad2bb9891ade6457a832c"
+  },
+  {
+    "id": "b636426fde666ebed4bba389b6d361ac162e788e6cef4e9c00eae6582536ecfb",
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "created_at": 1763712240,
+    "kind": 31924,
+    "tags": [
+      [
+        "d",
+        "elcandado.table-0004.calendar"
+      ],
+      [
+        "title",
+        "Reservation Calendar Table 0004"
+      ],
+      [
+        "a",
+        "30906:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:elcandado.table-0004"
+      ],
+      [
+        "a",
+        "31923:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:000000000000000000000000000000000000000000000000000000000000000d"
+      ],
+      [
+        "a",
+        "31923:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:000000000000000000000000000000000000000000000000000000000000000e"
+      ],
+      [
+        "a",
+        "31923:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:000000000000000000000000000000000000000000000000000000000000000f"
+      ],
+      [
+        "a",
+        "31923:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:0000000000000000000000000000000000000000000000000000000000000010"
+      ]
+    ],
+    "content": "Reservation calendar for table 4",
+    "sig": "e695fb7cd86b14e974778fc1426ebef3803b1c975641427e6d05277e89e368dea1fc8730ec1b97f4f1e0d98a0463a34edd036692e1b348981735427bf27a7a6c"
+  },
+  {
+    "id": "55f0143012cbfd82c6de69bf62a34666a48a1af2363c04f3f87acb1e40edf082",
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "created_at": 1763712300,
+    "kind": 31924,
+    "tags": [
+      [
+        "d",
+        "elcandado.table-0005.calendar"
+      ],
+      [
+        "title",
+        "Reservation Calendar Table 0005"
+      ],
+      [
+        "a",
+        "30906:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:elcandado.table-0005"
+      ],
+      [
+        "a",
+        "31923:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:0000000000000000000000000000000000000000000000000000000000000011"
+      ],
+      [
+        "a",
+        "31923:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:0000000000000000000000000000000000000000000000000000000000000012"
+      ],
+      [
+        "a",
+        "31923:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:0000000000000000000000000000000000000000000000000000000000000013"
+      ]
+    ],
+    "content": "Reservation calendar for table 5",
+    "sig": "c3a49bab61e3c00a33a617c32c28c1a8fa4c3ef1220f3dbcd7c48545b33379a68fc8b59145bd65fce79975b17b55afa4030e3d7936144e4ec403b8f82887489d"
+  }
+]

@@ -18,15 +18,15 @@
 
 | Event Type | Kind | Purpose | Critical Tag | Discoverable By |
 |------------|------|---------|--------------|-----------------|
-| **Profile** | `0` | Food establishment (restaurant, bakery, etc.) | `l` tag with `https://schema.org:Restaurant` | `search_food_establishments` |
-| **Menu Item** | `30402` | Individual dish/product | `d` tag (identifier) + `a` tag (menu link) | `get_menu_items`, `search_menu_items` |
-| **Menu Collection** | `30405` | Menu grouping (Lunch, Dinner, etc.) | `d` tag (menu identifier) | `get_menu_items` |
+| **Profile** | `0` | Food establishment type (restaurant, bakery, etc.) | `schema.org:FoodEstablishment` | `search_food_establishments` |
+| **Menu Item** | `30402` | Individual dish/product identifier | `d`  + `a` (menu link) | `get_menu_items`, `search_menu_items` |
+| **Menu Collection** | `30405` | Menu identifier (Lunch, Dinner, etc.) | `d` | `get_menu_items` |
 
 ## Minimum Required Tags
 
 **kind:0 (Profile)**:
 ```json
-["l", "https://schema.org:Restaurant"]  // CRITICAL - without this, event is ignored
+["schema.org:FoodEstablishment", "<FoodEstablishmentType>", "https://schema.org/FoodEstablishment"]  // CRITICAL - without this, event is ignored
 ```
 
 **kind:30402 (Menu Item)**:
@@ -63,12 +63,11 @@ Represents a food establishment that can be discovered via `search_food_establis
 
 #### Food Establishment type
 
-Format: `["l", "https://schema.org:<FoodEstablishmentType>"]` 
+Format: `["schema.org:FoodEstablishment", "<FoodEstablishmentType>", "https://schema.org/FoodEstablishment"]` 
 
-**Events without a valid `l` tag will be IGNORED by `search_food_establishments`.**
+**Events without a valid `schema.org:FoodEstablishment` tag will be IGNORED by `search_food_establishments`.**
 
-Valid values:
-Values of `Food Establishment` type as defined by https://schema.org/FoodEstablishment.
+Valid `FoodEstablishmentType` values, as defined by https://schema.org/FoodEstablishment:
 - `Restaurant`
 - `Bakery`
 - `BarOrPub`
@@ -81,43 +80,29 @@ Values of `Food Establishment` type as defined by https://schema.org/FoodEstabli
 
 Example:
 ```json
-["l", "https://schema.org:Restaurant"]
+["schema.org:FoodEstablishment", "Restaurant", "https://schema.org/FoodEstablishment"] 
 ```
-
-Common Mistake: Using `"https://schema.org/Restaurant"` (forward slash) instead of `"https://schema.org:Restaurant"` (colon). The colon format is required to denote the namespace for the food establishment label.
 
 ### Recommended Tags
 
 #### Cuisine
 ```json
-["schema.org:servesCuisine", "Spanish", "https://schema.org/servesCuisine"]
+["schema.org:FoodEstablishment:servesCuisine", "Spanish", "https://schema.org/servesCuisine"]
 ```
 
 #### Address (PostalAddress)
 ```json
-["i", "schema.org:PostalAddress:streetAddress:123 Main Street", "https://schema.org/streetAddress"],
-["k", "schema.org:PostalAddress:streetAddress"],
-
-["i", "schema.org:PostalAddress:addressLocality:Snoqualmie", "https://schema.org/addressLocality"],
-["k", "schema.org:PostalAddress:addressLocality"],
-
-["i", "schema.org:PostalAddress:addressRegion:WA", "https://schema.org/addressRegion"],
-["k", "schema.org:PostalAddress:addressRegion"],
-
-["i", "schema.org:PostalAddress:postalCode:98065", "https://schema.org/postalCode"],
-["k", "schema.org:PostalAddress:postalCode"],
-
-["i", "schema.org:PostalAddress:addressCountry:US", "https://schema.org/addressCountry"],
-["k", "schema.org:PostalAddress:addressCountry"]
+["schema.org:PostalAddress:streetAddress", "123 Main Street", "https://schema.org/streetAddress"],
+["schema.org:PostalAddress:addressLocality", "Snoqualmie", "https://schema.org/addressLocality"],
+["schema.org:PostalAddress:addressRegion", "WA", "https://schema.org/addressRegion"],
+["schema.org:PostalAddress:postalCode", "98065", "https://schema.org/postalCode"],
+["schema.org:PostalAddress:addressCountry", "US", "https://schema.org/addressCountry"],
 ```
 
 #### Geographic Coordinates
 ```json
-["i", "schema.org:GeoCoordinates:latitude:47.5289527", "https://schema.org/latitude"],
-["k", "schema.org:GeoCoordinates:latitude"],
-
-["i", "schema.org:GeoCoordinates:longitude:-121.827093", "https://schema.org/longitude"],
-["k", "schema.org:GeoCoordinates:longitude"]
+["schema.org:GeoCoordinates:latitude", "47.5289527", "https://schema.org/latitude"],
+["schema.org:GeoCoordinates:longitud", "-121.827093", "https://schema.org/longitude"],
 ```
 
 or 
@@ -129,17 +114,14 @@ or
 
 #### Contact Information
 ```json
-["i", "schema.org:telephone:+155512345678", "https://datatracker.ietf.org/doc/html/rfc3966"],
-["k", "schema.org:telephone"],
-
-["i", "schema.org:email:mailto:contact@example.com", "https://schema.org/email"],
-["k", "schema.org:email"]
+["schema.org:FoodEstablishment:telephone", "tel:+155512345678", "https://datatracker.ietf.org/doc/html/rfc3966"],
+["schema.org:FoodEstablishment:email", "mailto:contact@example.com", "https://schema.org/email"],
 ```
 
 #### Reservations & Hours
 ```json
-["schema.org:acceptsReservations", "https://dinedirect.app"],  // or "True" or "False"
-["schema.org:openingHours", "Tu-Th 11:00-21:00, Fr-Sa 11:00-00:00, Su 11:00-21:00"]
+["schema.org:FoodEstablishment:acceptsReservations", "https://dinedirect.app", "https://schema.org/acceptsReservations"],  // or "True" or "False"
+["schema.org:FoodEstablishment:openingHours", "Tu-Th 11:00-21:00, Fr-Sa 11:00-00:00, Su 11:00-21:00", "https://schema.org/openingHours"]
 ```
 
 #### Keywords (Dietary & General)
@@ -162,16 +144,14 @@ Note: Dietary tags in profiles use **lowercase** format (e.g., `"vegan"`, `"glut
   "created_at": 1763510731,
   "content": "{\"name\":\"elcandado\",\"display_name\":\"Restaurante El Candado\",\"about\":\"Authentic Spanish restaurant...\",\"website\":\"https://www.synvya.com\",\"banner\":\"https://example.com/banner.png\"}",
   "tags": [
-    ["l", "https://schema.org:Restaurant"],
+    ["schema.org:FoodEstablishment", "Restaurant", "https://schema.org/FoodEstablishment"],
     ["t", "vegan"],
     ["t", "gluten free"],
-    ["schema.org:servesCuisine", "Spanish", "https://schema.org/servesCuisine"],
-    ["i", "schema.org:PostalAddress:streetAddress:123 Main Street", "https://schema.org/streetAddress"],
-    ["k", "schema.org:PostalAddress:streetAddress"],
-    ["i", "schema.org:GeoCoordinates:latitude:47.5289527", "https://schema.org/latitude"],
-    ["k", "schema.org:GeoCoordinates:latitude"],
-    ["schema.org:acceptsReservations", "https://dinedirect.app"],
-    ["schema.org:openingHours", "Tu-Th 11:00-21:00, Fr-Sa 11:00-00:00, Su 11:00-21:00"]
+    ["schema.org:FoodEstablishment:servesCuisine", "Spanish", "https://schema.org/servesCuisine"],
+    ["schema.org:PostalAddress:streetAddress", "123 Main Street", "https://schema.org/streetAddress"],
+    ["schema.org:GeoCoordinates:latitude", "47.5289527", "https://schema.org/latitude"],
+    ["schema.org:FoodEstablishment:acceptsReservations", "https://dinedirect.app", "https://schema.org/acceptsReservations"],
+    ["schema.org:FoodEstablishment:openingHours", "Tu-Th 11:00-21:00, Fr-Sa 11:00-00:00, Su 11:00-21:00", "https://schema.org/openingHours"]
   ],
   "sig": "..."
 }
@@ -236,8 +216,8 @@ Fallback: If missing, name is extracted from content markdown (`**Dish Name**`)
 
 Diet tags use both schema.org notation and `t` tag notation
 ```json
-["suitableForDiet", "VEGAN"],
-["suitableForDiet", "GLUTEN_FREE"]
+["schema.org:MenuItem:suitableForDiet", "VEGAN", "https://schema.org/suitableForDiet"],
+["schema.org:MenuItem:suitableForDiet", "GLUTEN_FREE", "https://schema.org/suitableForDiet"]
 ```
 
 ```json
@@ -247,15 +227,15 @@ Diet tags use both schema.org notation and `t` tag notation
 ["t", "VEGETARIAN"]
 ```
 
-Note: Both `t` and `suitableForDiet` tags are checked and mapped to schema.org `suitableForDiet` values (e.g., `VEGAN` → `VeganDiet`, `GLUTEN_FREE` → `GlutenFreeDiet`).
+Note: Both `t` and `schema.org:MenuItem:suitableForDiet` tags are checked and mapped to `schema.org:MenuItem:suitableForDiet` values (e.g., `VEGAN` → `VeganDiet`, `GLUTEN_FREE` → `GlutenFreeDiet`).
 
 ####  Allergens
 ```json
-["contains", "FISH"],
-["contains", "SULPHITES"],
-["contains", "GLUTEN"],
-["contains", "CRUSTACEANS"],
-["contains", "MOLLUSCS"]
+["schema.org:Recipe:recipeIngredient", "FISH", "https://schema.org/recipeIngredient"],
+["schema.org:Recipe:recipeIngredient", "SULPHITES", "https://schema.org/recipeIngredient"],
+["schema.org:Recipe:recipeIngredient", "GLUTEN", "https://schema.org/recipeIngredient"],
+["schema.org:Recipe:recipeIngredient", "CRUSTACEANS", "https://schema.org/recipeIngredient"],
+["schema.org:Recipe:recipeIngredient", "MOLLUSCS", "https://schema.org/recipeIngredient"]
 ```
 
 These are automatically appended to the description as: "Contains FISH, SULPHITES"
@@ -276,13 +256,13 @@ These are automatically appended to the description as: "Contains FISH, SULPHITE
     ["price", "26.99", "USD"],
     ["image", "https://example.com/bacalao.png", ""],
     ["g", "c23q7u2hn"],
-    ["contains", "FISH"],
-    ["contains", "SULPHITES"],
+    ["schema.org:Recipe:recipeIngredient", "FISH", "https://schema.org/recipeIngredient"],
+    ["schema.org:Recipe:recipeIngredient", "SULPHITES", "https://schema.org/recipeIngredient"],
     ["t", "DAIRY_FREE"],
     ["t", "GLUTEN_FREE"],
     ["a", "30405", "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f", "Dinner"],
-    ["suitableForDiet", "DAIRY_FREE"],
-    ["suitableForDiet", "GLUTEN_FREE"]
+    ["schema.org:MenuItem:suitableForDiet", "DAIRY_FREE", "https://schema.org/suitableForDiet"],
+    ["schema.org:MenuItem:suitableForDiet", "GLUTEN_FREE", "https://schema.org/suitableForDiet"]
   ],
   "sig": "..."
 }
@@ -403,7 +383,10 @@ kind:0 (Profile)
 {
   "kind": 0,
   "pubkey": "abc123...",
-  "tags": [["l", "https://schema.org:Restaurant"]],
+  "tags": [
+    ["schema.org:FoodEstablishment", "Restaurant", "https://schema.org/FoodEstablishment"]
+    // more tags
+  ],
   "content": "{\"display_name\":\"My Restaurant\"}"
 }
 ```
