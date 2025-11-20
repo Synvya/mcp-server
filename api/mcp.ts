@@ -10,6 +10,7 @@ import {
   parseContent,
   extractDishName,
   matchesDietaryTag,
+  normalizeDietaryTag,
   findProductsInCollection,
   findCollection,
   productMatchesDietary,
@@ -601,8 +602,23 @@ async function initializeServer() {
           const description = summaryTag?.[1] || '';
           const contentText = typeof product.content === 'string' ? product.content : '';
           
-          // Match dish name/description
-          const searchText = `${dishName} ${description} ${contentText}`.toLowerCase();
+          // Extract ingredient tags (schema.org:Recipe:recipeIngredient)
+          const ingredientTags = product.tags
+            .filter((t: string[]) => t[0] === 'schema.org:Recipe:recipeIngredient')
+            .map((t: string[]) => t[1])
+            .filter(Boolean)
+            .join(' ');
+          
+          // Extract dietary tags (normalized for search)
+          const dietaryTags = product.tags
+            .filter((t: string[]) => t[0] === 't' || t[0] === 'schema.org:MenuItem:suitableForDiet')
+            .map((t: string[]) => t[1])
+            .filter(Boolean)
+            .map((tag: string) => normalizeDietaryTag(tag)) // Normalize "GLUTEN_FREE" -> "gluten free"
+            .join(' ');
+          
+          // Match dish name/description/ingredients/dietary tags
+          const searchText = `${dishName} ${description} ${contentText} ${ingredientTags} ${dietaryTags}`.toLowerCase();
           const matchesDish = searchText.includes(dish_query.toLowerCase());
           
           // Match dietary tags if provided or if query looks like dietary term
