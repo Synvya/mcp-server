@@ -7,6 +7,8 @@ import {
   loadProfileData,
   loadCollectionsData,
   loadProductsData,
+  loadCalendarData,
+  loadTablesData,
   parseContent,
   extractDishName,
   matchesDietaryTag,
@@ -17,6 +19,7 @@ import {
   extractSchemaOrgData,
   extractMenuItemSchemaOrgData,
   npubToPubkey,
+  checkTableAvailability,
   type NostrEvent,
 } from '../dist/data-loader.js';
 
@@ -99,6 +102,8 @@ let transportInstance: StreamableHTTPServerTransport | null = null;
 let profiles: NostrEvent[] = [];
 let collections: NostrEvent[] = [];
 let products: NostrEvent[] = [];
+let calendar: NostrEvent[] = [];
+let tables: NostrEvent[] = [];
 // Store protocol version per session (for stateless mode, we'll use a fallback)
 const sessionProtocolVersions = new Map<string, string>();
 
@@ -112,10 +117,14 @@ async function initializeServer() {
     profiles = await loadProfileData();
     collections = await loadCollectionsData();
     products = await loadProductsData();
+    calendar = await loadCalendarData();
+    tables = await loadTablesData();
     console.error("✅ Data loaded:", {
       profiles: profiles.length,
       collections: collections.length,
       products: products.length,
+      calendar: calendar.length,
+      tables: tables.length,
     });
   } catch (error) {
     console.error("❌ Failed to load data:", error);
@@ -995,6 +1004,44 @@ async function initializeServer() {
               "@type": "Thing",
               "name": "InvalidReservationRequest",
               "description": "Restaurant profile is invalid or incomplete.",
+            },
+          };
+          return {
+            structuredContent: errorResponse,
+            content: [
+              {
+                type: "text",
+                text: JSON.stringify(errorResponse, null, 2),
+              },
+            ],
+          };
+        }
+
+        // Convert ISO 8601 time strings to Unix timestamps for availability check
+        const requestStartTimestamp = Math.floor(new Date(startTimeStr).getTime() / 1000);
+        const requestEndTimestamp = Math.floor(new Date(endTimeStr).getTime() / 1000);
+
+        // Check table availability
+        const availability = checkTableAvailability(
+          establishmentPubkey,
+          requestStartTimestamp,
+          requestEndTimestamp,
+          party_size,
+          tables,
+          calendar
+        );
+
+        if (!availability.available) {
+          const errorResponse = {
+            "@context": "https://schema.org",
+            "@type": "ReserveAction",
+            "actionStatus": "FailedActionStatus",
+            "startTime": startTimeStr,
+            "endTime": endTimeStr,
+            "error": {
+              "@type": "Thing",
+              "name": "ReservationDenied",
+              "description": availability.reason || "The restaurant is fully booked at the requested time.",
             },
           };
           return {

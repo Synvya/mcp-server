@@ -88,6 +88,26 @@ export async function loadProductsData(): Promise<NostrEvent[]> {
   }
 }
 
+export async function loadCalendarData(): Promise<NostrEvent[]> {
+  try {
+    const data = await fs.readFile(join(projectRoot, 'data', 'calendar.json'), 'utf-8');
+    return JSON.parse(data);
+  } catch (error) {
+    console.error('Error loading calendar data:', error);
+    throw new Error('Failed to load calendar data');
+  }
+}
+
+export async function loadTablesData(): Promise<NostrEvent[]> {
+  try {
+    const data = await fs.readFile(join(projectRoot, 'data', 'tables.json'), 'utf-8');
+    return JSON.parse(data);
+  } catch (error) {
+    console.error('Error loading tables data:', error);
+    throw new Error('Failed to load tables data');
+  }
+}
+
 // Parse Nostr event content (may be JSON or plain text with markdown)
 export function parseContent(event: NostrEvent): Record<string, any> {
   if (typeof event.content === 'string') {
@@ -521,5 +541,282 @@ export function extractMenuItemSchemaOrgData(product: NostrEvent, includeSeller:
   }
 
   return schemaData;
+}
+
+// Extract table number from reservation content
+// Parses content like "Reservation for table 1" and extracts the number
+export function extractTableNumberFromContent(content: string): number | null {
+  if (typeof content !== 'string') {
+    return null;
+  }
+  
+  // Try various patterns: "table 1", "table-1", "table1", "Reservation for table 1", etc.
+  const patterns = [
+    /table\s*[#-]?\s*(\d+)/i,
+    /table\s+(\d+)/i,
+    /(\d+)/, // Fallback: just find a number
+  ];
+  
+  for (const pattern of patterns) {
+    const match = content.match(pattern);
+    if (match && match[1]) {
+      const num = parseInt(match[1], 10);
+      if (!isNaN(num) && num > 0) {
+        return num;
+      }
+    }
+  }
+  
+  return null;
+}
+
+// Construct table identifier from restaurant name and table number
+// Format: "<restaurant-name>.table-<zero-padded-number>"
+export function getTableIdentifier(restaurantName: string, tableNumber: number): string {
+  const normalizedName = restaurantName.toLowerCase().replace(/\s+/g, '');
+  const paddedNumber = tableNumber.toString().padStart(4, '0');
+  return `${normalizedName}.table-${paddedNumber}`;
+}
+
+// Find reservations for a specific table by looking up calendar events
+// Calendar events (kind:31924) link reservations to tables via "a" tags
+export function findReservationsForTable(
+  calendarEvents: NostrEvent[],
+  tableId: string,
+  restaurantPubkey: string
+): NostrEvent[] {
+  // Find calendar event for this table (kind:31924 with d tag = "${tableId}.calendar")
+  const calendarEvent = calendarEvents.find(event => {
+    if (event.kind !== 31924) return false;
+    if (event.pubkey !== restaurantPubkey) return false;
+    const dTag = event.tags.find(t => t[0] === 'd');
+    return dTag && dTag[1] === `${tableId}.calendar`;
+  });
+  
+  if (!calendarEvent) {
+    return [];
+  }
+  
+  // Extract reservation references from "a" tags
+  // Format: ["a", "31923:pubkey:reservation-d-id"]
+  const reservationRefs = calendarEvent.tags
+    .filter(tag => tag[0] === 'a' && tag[1]?.startsWith('31923:'))
+    .map(tag => {
+      const parts = tag[1].split(':');
+      if (parts.length >= 3 && parts[1] === restaurantPubkey) {
+        return parts[2]; // reservation d-id
+      }
+      return null;
+    })
+    .filter((id): id is string => id !== null);
+  
+  if (reservationRefs.length === 0) {
+    return [];
+  }
+  
+  // Find actual reservation events (kind:31923) by matching d tags
+  const reservations = calendarEvents.filter(event => {
+    if (event.kind !== 31923) return false;
+    if (event.pubkey !== restaurantPubkey) return false;
+    const dTag = event.tags.find(t => t[0] === 'd');
+    return dTag && reservationRefs.includes(dTag[1]);
+  });
+  
+  return reservations;
+}
+
+// Check if two time ranges overlap
+// Returns true if the ranges overlap (including touching boundaries)
+export function checkTimeOverlap(
+  requestStart: number,
+  requestEnd: number,
+  reservationStart: number,
+  reservationEnd: number
+): boolean {
+  // Two ranges overlap if: requestStart < reservationEnd && requestEnd > reservationStart
+  // This handles all cases including touching boundaries
+  return requestStart < reservationEnd && requestEnd > reservationStart;
+}
+
+// Check if a table is available for the requested time slot
+// Returns true if available (no overlapping reservations), false otherwise
+export function isTableAvailable(
+  table: NostrEvent,
+  reservations: NostrEvent[],
+  requestStart: number,
+  requestEnd: number
+): boolean {
+  // Check each reservation for time overlap
+  for (const reservation of reservations) {
+    const startTag = reservation.tags.find(t => t[0] === 'start');
+    const endTag = reservation.tags.find(t => t[0] === 'end');
+    
+    if (!startTag || !startTag[1] || !endTag || !endTag[1]) {
+      continue; // Skip invalid reservations
+    }
+    
+    const reservationStart = parseInt(startTag[1], 10);
+    const reservationEnd = parseInt(endTag[1], 10);
+    
+    if (isNaN(reservationStart) || isNaN(reservationEnd)) {
+      continue; // Skip invalid timestamps
+    }
+    
+    // Check for overlap
+    if (checkTimeOverlap(requestStart, requestEnd, reservationStart, reservationEnd)) {
+      return false; // Table is booked
+    }
+  }
+  
+  return true; // No conflicts found
+}
+
+// Main function to check table availability for a given time slot and party size
+// Returns availability status with table IDs if available
+export function checkTableAvailability(
+  restaurantPubkey: string,
+  requestStartTime: number,
+  requestEndTime: number,
+  partySize: number,
+  tables: NostrEvent[],
+  calendarEvents: NostrEvent[]
+): { available: boolean; tables?: string[]; reason?: string } {
+  // Filter tables by restaurant pubkey
+  const restaurantTables = tables.filter(
+    table => table.kind === 30906 && table.pubkey === restaurantPubkey
+  );
+  
+  if (restaurantTables.length === 0) {
+    return {
+      available: false,
+      reason: "No tables found for this restaurant",
+    };
+  }
+  
+  // Group tables by zone (tables without zone tag are in same group)
+  const tablesByZone = new Map<string | undefined, NostrEvent[]>();
+  for (const table of restaurantTables) {
+    const zoneTag = table.tags.find(t => t[0] === 'zone');
+    const zone = zoneTag && zoneTag[1] ? zoneTag[1] : undefined;
+    
+    if (!tablesByZone.has(zone)) {
+      tablesByZone.set(zone, []);
+    }
+    tablesByZone.get(zone)!.push(table);
+  }
+  
+  // Helper function to get table capacity
+  const getTableCapacity = (table: NostrEvent): number => {
+    const capacityTag = table.tags.find(t => t[0] === 'capacity');
+    if (capacityTag && capacityTag[1]) {
+      const capacity = parseInt(capacityTag[1], 10);
+      return isNaN(capacity) ? 0 : capacity;
+    }
+    return 0;
+  };
+  
+  // Helper function to get table identifier
+  const getTableId = (table: NostrEvent): string | null => {
+    const dTag = table.tags.find(t => t[0] === 'd');
+    return dTag && dTag[1] ? dTag[1] : null;
+  };
+  
+  // Check single table availability first
+  for (const table of restaurantTables) {
+    const capacity = getTableCapacity(table);
+    if (capacity < partySize) {
+      continue; // Table too small
+    }
+    
+    const tableId = getTableId(table);
+    if (!tableId) {
+      continue; // Invalid table
+    }
+    
+    const reservations = findReservationsForTable(calendarEvents, tableId, restaurantPubkey);
+    if (isTableAvailable(table, reservations, requestStartTime, requestEndTime)) {
+      return {
+        available: true,
+        tables: [tableId],
+      };
+    }
+  }
+  
+  // If no single table fits, try combinations within same zone
+  for (const [zone, zoneTables] of tablesByZone.entries()) {
+    // Try all combinations of tables in this zone
+    // We'll try combinations of increasing size (2, 3, 4, ...)
+    const maxCombinationSize = Math.min(zoneTables.length, 10); // Limit to reasonable combinations
+    
+    for (let comboSize = 2; comboSize <= maxCombinationSize; comboSize++) {
+      // Generate combinations of comboSize tables
+      const combinations = generateCombinations(zoneTables, comboSize);
+      
+      for (const combo of combinations) {
+        // Check combined capacity
+        const totalCapacity = combo.reduce((sum, table) => sum + getTableCapacity(table), 0);
+        if (totalCapacity < partySize) {
+          continue; // Not enough capacity
+        }
+        
+        // Check if all tables in combination are available
+        const tableIds: string[] = [];
+        let allAvailable = true;
+        
+        for (const table of combo) {
+          const tableId = getTableId(table);
+          if (!tableId) {
+            allAvailable = false;
+            break;
+          }
+          
+          const reservations = findReservationsForTable(calendarEvents, tableId, restaurantPubkey);
+          if (!isTableAvailable(table, reservations, requestStartTime, requestEndTime)) {
+            allAvailable = false;
+            break;
+          }
+          
+          tableIds.push(tableId);
+        }
+        
+        if (allAvailable && tableIds.length === combo.length) {
+          return {
+            available: true,
+            tables: tableIds,
+          };
+        }
+      }
+    }
+  }
+  
+  return {
+    available: false,
+    reason: "No available tables for the requested time slot and party size",
+  };
+}
+
+// Helper function to generate combinations of array elements
+// Returns all combinations of size k from the input array
+function generateCombinations<T>(arr: T[], k: number): T[][] {
+  if (k === 0) return [[]];
+  if (k > arr.length) return [];
+  
+  const combinations: T[][] = [];
+  
+  function combine(start: number, combo: T[]) {
+    if (combo.length === k) {
+      combinations.push([...combo]);
+      return;
+    }
+    
+    for (let i = start; i < arr.length; i++) {
+      combo.push(arr[i]);
+      combine(i + 1, combo);
+      combo.pop();
+    }
+  }
+  
+  combine(0, []);
+  return combinations;
 }
 

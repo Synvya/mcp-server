@@ -7,6 +7,8 @@ import {
   loadProfileData,
   loadCollectionsData,
   loadProductsData,
+  loadCalendarData,
+  loadTablesData,
   parseContent,
   extractDishName,
   matchesDietaryTag,
@@ -18,6 +20,7 @@ import {
   extractSchemaOrgData,
   extractMenuItemSchemaOrgData,
   npubToPubkey,
+  checkTableAvailability,
   type NostrEvent,
 } from './data-loader.js';
 
@@ -30,16 +33,22 @@ const server = new McpServer({
 let profiles: NostrEvent[] = [];
 let collections: NostrEvent[] = [];
 let products: NostrEvent[] = [];
+let calendar: NostrEvent[] = [];
+let tables: NostrEvent[] = [];
 
 async function initializeData() {
   try {
     profiles = await loadProfileData();
     collections = await loadCollectionsData();
     products = await loadProductsData();
+    calendar = await loadCalendarData();
+    tables = await loadTablesData();
     console.error("✅ Data loaded:", {
       profiles: profiles.length,
       collections: collections.length,
       products: products.length,
+      calendar: calendar.length,
+      tables: tables.length,
     });
   } catch (error) {
     console.error("❌ Failed to load data:", error);
@@ -833,6 +842,43 @@ server.registerTool(
         };
       }
 
+      // Convert ISO 8601 time strings to Unix timestamps for availability check
+      const requestStartTimestamp = Math.floor(new Date(startTimeStr).getTime() / 1000);
+      const requestEndTimestamp = Math.floor(new Date(endTimeStr).getTime() / 1000);
+
+      // Check table availability
+      const availability = checkTableAvailability(
+        establishmentPubkey,
+        requestStartTimestamp,
+        requestEndTimestamp,
+        party_size,
+        tables,
+        calendar
+      );
+
+      if (!availability.available) {
+        const errorResponse = {
+          "@context": "https://schema.org",
+          "@type": "ReserveAction",
+          "actionStatus": "FailedActionStatus",
+          "startTime": startTimeStr,
+          "endTime": endTimeStr,
+          "error": {
+            "@type": "Thing",
+            "name": "ReservationDenied",
+            "description": availability.reason || "The restaurant is fully booked at the requested time.",
+          },
+        };
+        return {
+          structuredContent: errorResponse,
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(errorResponse, null, 2),
+            },
+          ],
+        };
+      }
 
       // Generate random reservation ID (number for now)
       const reservationId = Math.floor(Math.random() * 1000000000);
