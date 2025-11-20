@@ -603,52 +603,44 @@ server.registerTool(
         path: ["telephone", "email"],
       }
     ),
-    outputSchema: z.union([
-      z.object({
-        "@context": z.string(),
-        "@type": z.literal("FoodEstablishmentReservation"),
-        "reservationId": z.number(),
-        "reservationStatus": z.literal("ReservationConfirmed"),
-        "underName": z.object({
-          "@type": z.literal("Person"),
-          "name": z.string(),
-          "email": z.string().optional(),
-          "telephone": z.string().optional(),
-        }),
-        "broker": z.object({
-          "@type": z.literal("Organization"),
-          "name": z.literal("Synvya"),
-          "legalName": z.literal("Synvya Inc."),
-        }),
-        "reservationFor": z.object({
-          "@type": z.literal("FoodEstablishment"),
-          "name": z.string(),
-          "address": z.object({
-            "@type": z.literal("PostalAddress"),
-            "streetAddress": z.string().optional(),
-            "addressLocality": z.string().optional(),
-            "addressRegion": z.string().optional(),
-            "postalCode": z.string().optional(),
-            "addressCountry": z.string().optional(),
-          }).optional(),
-        }),
-        "startTime": z.string(),
-        "endTime": z.string(),
-        "partySize": z.number(),
-      }),
-      z.object({
-        "@context": z.string(),
-        "@type": z.literal("ReserveAction"),
-        "actionStatus": z.literal("FailedActionStatus"),
-        "startTime": z.string().optional(),
-        "endTime": z.string().optional(),
-        "error": z.object({
-          "@type": z.literal("Thing"),
-          "name": z.string(),
-          "description": z.string(),
-        }),
-      }),
-    ]),
+    outputSchema: z.object({
+      "@context": z.string(),
+      "@type": z.string().describe("Either 'FoodEstablishmentReservation' for success or 'ReserveAction' for errors"),
+      "reservationId": z.number().optional().describe("Reservation ID (present only on success)"),
+      "reservationStatus": z.string().optional().describe("Reservation status (present only on success)"),
+      "actionStatus": z.string().optional().describe("Action status (present only on errors)"),
+      "underName": z.object({
+        "@type": z.string(),
+        "name": z.string(),
+        "email": z.string().optional(),
+        "telephone": z.string().optional(),
+      }).optional().describe("Customer information (present only on success)"),
+      "broker": z.object({
+        "@type": z.string(),
+        "name": z.string(),
+        "legalName": z.string(),
+      }).optional().describe("Broker information (present only on success)"),
+      "reservationFor": z.object({
+        "@type": z.string(),
+        "name": z.string(),
+        "address": z.object({
+          "@type": z.string(),
+          "streetAddress": z.string().optional(),
+          "addressLocality": z.string().optional(),
+          "addressRegion": z.string().optional(),
+          "postalCode": z.string().optional(),
+          "addressCountry": z.string().optional(),
+        }).optional(),
+      }).optional().describe("Restaurant information (present only on success)"),
+      "startTime": z.string().optional(),
+      "endTime": z.string().optional(),
+      "partySize": z.number().optional().describe("Party size (present only on success)"),
+      "error": z.object({
+        "@type": z.string(),
+        "name": z.string(),
+        "description": z.string(),
+      }).optional().describe("Error information (present only on errors)"),
+    }),
   },
   async (args) => {
     try {
