@@ -178,9 +178,9 @@ export function productMatchesDietary(product: NostrEvent, dietary: string): boo
     .map(t => t[1])
     .filter(Boolean);
   
-  // Also check "suitableForDiet" tags
+  // Also check "schema.org:MenuItem:suitableForDiet" tags
   const suitableForDietTags = product.tags
-    .filter(t => t[0] === 'suitableForDiet')
+    .filter(t => t[0] === 'schema.org:MenuItem:suitableForDiet')
     .map(t => t[1])
     .filter(Boolean);
   
@@ -203,21 +203,15 @@ const VALID_FOOD_ESTABLISHMENT_TYPES = [
 ] as const;
 
 // Extract schema.org data from Nostr profile tags and format as JSON-LD
-// Returns null if profile doesn't have a valid l tag with FoodEstablishment type
+// Returns null if profile doesn't have a valid schema.org:FoodEstablishment tag
 export function extractSchemaOrgData(profile: NostrEvent, collections?: NostrEvent[]): Record<string, any> | null {
-  // Extract FoodEstablishment type from l tag: ["l", "https://schema.org:<type>"]
-  const lTag = profile.tags.find(t => t[0] === 'l' && t[1]?.startsWith('https://schema.org:'));
-  if (!lTag || !lTag[1]) {
-    return null; // STRICT: Ignore profiles without valid l tag
+  // Extract FoodEstablishment type from schema.org:FoodEstablishment tag: ["schema.org:FoodEstablishment", "Restaurant", "https://schema.org/FoodEstablishment"]
+  const foodEstablishmentTag = profile.tags.find(t => t[0] === 'schema.org:FoodEstablishment');
+  if (!foodEstablishmentTag || !foodEstablishmentTag[1]) {
+    return null; // STRICT: Ignore profiles without valid schema.org:FoodEstablishment tag
   }
 
-  // Extract type from URL: "https://schema.org:Restaurant" -> "Restaurant"
-  const typeMatch = lTag[1].match(/^https:\/\/schema\.org:(.+)$/);
-  if (!typeMatch || !typeMatch[1]) {
-    return null; // STRICT: Ignore profiles with invalid l tag format
-  }
-
-  const establishmentType = typeMatch[1];
+  const establishmentType = foodEstablishmentTag[1];
   
   // STRICT: Only accept valid FoodEstablishment types
   if (!VALID_FOOD_ESTABLISHMENT_TYPES.includes(establishmentType as any)) {
@@ -233,7 +227,7 @@ export function extractSchemaOrgData(profile: NostrEvent, collections?: NostrEve
   };
 
   // Extract servesCuisine (always as array)
-  const cuisineTags = profile.tags.filter(t => t[0] === 'schema.org:servesCuisine');
+  const cuisineTags = profile.tags.filter(t => t[0] === 'schema.org:FoodEstablishment:servesCuisine');
   if (cuisineTags.length > 0) {
     schemaData.servesCuisine = cuisineTags
       .map(t => t[1])
@@ -243,11 +237,11 @@ export function extractSchemaOrgData(profile: NostrEvent, collections?: NostrEve
   // Extract address components
   const address: Record<string, string> = {};
   profile.tags.forEach(tag => {
-    if (tag[0] === 'i' && tag[1]?.startsWith('schema.org:PostalAddress:')) {
-      const parts = tag[1].split(':');
-      if (parts.length >= 4) {
+    if (tag[0]?.startsWith('schema.org:PostalAddress:')) {
+      const parts = tag[0].split(':');
+      if (parts.length >= 3) {
         const prop = parts[2]; // e.g., "streetAddress", "addressLocality" (after "schema.org:PostalAddress:")
-        const value = parts.slice(3).join(':'); // Handle values that might contain colons
+        const value = tag[1]; // Value is in tag[1]
         if (prop && value) {
           address[prop] = value;
         }
@@ -264,11 +258,11 @@ export function extractSchemaOrgData(profile: NostrEvent, collections?: NostrEve
   // Extract geo coordinates
   const geo: Record<string, number> = {};
   profile.tags.forEach(tag => {
-    if (tag[0] === 'i' && tag[1]?.startsWith('schema.org:GeoCoordinates:')) {
-      const parts = tag[1].split(':');
-      if (parts.length >= 4) {
+    if (tag[0]?.startsWith('schema.org:GeoCoordinates:')) {
+      const parts = tag[0].split(':');
+      if (parts.length >= 3) {
         const prop = parts[2]; // "latitude" or "longitude" (after "schema.org:GeoCoordinates:")
-        const value = parseFloat(parts[3]);
+        const value = parseFloat(tag[1]); // Value is in tag[1]
         if (prop && !isNaN(value)) {
           geo[prop] = value;
         }
@@ -283,23 +277,15 @@ export function extractSchemaOrgData(profile: NostrEvent, collections?: NostrEve
   }
 
   // Extract telephone
-  const telephoneTag = profile.tags.find(t => t[0] === 'i' && t[1]?.startsWith('schema.org:telephone:'));
+  const telephoneTag = profile.tags.find(t => t[0] === 'schema.org:FoodEstablishment:telephone');
   if (telephoneTag && telephoneTag[1]) {
-    const parts = telephoneTag[1].split(':');
-    if (parts.length >= 3) {
-      const phone = parts.slice(2).join(':'); // Handle phone numbers with colons (after "schema.org:telephone:")
-      if (phone) schemaData.telephone = phone;
-    }
+    schemaData.telephone = telephoneTag[1]; // Value is in tag[1]
   }
 
   // Extract email (keep mailto: format)
-  const emailTag = profile.tags.find(t => t[0] === 'i' && t[1]?.startsWith('schema.org:email:'));
+  const emailTag = profile.tags.find(t => t[0] === 'schema.org:FoodEstablishment:email');
   if (emailTag && emailTag[1]) {
-    const parts = emailTag[1].split(':');
-    if (parts.length >= 3) {
-      const email = parts.slice(2).join(':'); // Keep mailto: format (after "schema.org:email:")
-      if (email) schemaData.email = email;
-    }
+    schemaData.email = emailTag[1]; // Value is in tag[1]
   }
 
   // Extract website
@@ -435,7 +421,7 @@ export function extractMenuItemSchemaOrgData(product: NostrEvent, includeSeller:
     schemaData.name = extractDishName(product);
   }
 
-  // Extract description: content + contains + unmapped dietary tags
+  // Extract description: content + allergens + unmapped dietary tags
   let description = '';
   
   // Base description from content field
@@ -448,21 +434,21 @@ export function extractMenuItemSchemaOrgData(product: NostrEvent, includeSeller:
       .trim();
   }
   
-  // Add contains tag values if present
-  const containsTags = product.tags.filter(t => t[0] === 'contains');
-  if (containsTags.length > 0) {
-    const containsValues = containsTags
+  // Add allergen tag values if present (schema.org:Recipe:recipeIngredient)
+  const allergenTags = product.tags.filter(t => t[0] === 'schema.org:Recipe:recipeIngredient');
+  if (allergenTags.length > 0) {
+    const allergenValues = allergenTags
       .map(t => t[1])
       .filter(Boolean);
-    if (containsValues.length > 0) {
-      description += `. Contains ${containsValues.join(', ')}`;
+    if (allergenValues.length > 0) {
+      description += `. Contains ${allergenValues.join(', ')}`;
     }
   }
   
-  // Get tags from "t" tags and "suitableForDiet" tags (deduplicate)
+  // Get tags from "t" tags and "schema.org:MenuItem:suitableForDiet" tags (deduplicate)
   const dietaryTagsSet = new Set<string>();
   product.tags
-    .filter(t => t[0] === 't' || t[0] === 'suitableForDiet')
+    .filter(t => t[0] === 't' || t[0] === 'schema.org:MenuItem:suitableForDiet')
     .forEach(t => {
       if (t[1]) dietaryTagsSet.add(t[1]);
     });

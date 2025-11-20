@@ -99,19 +99,13 @@ server.registerTool(
       const { foodEstablishmentType, cuisine, query, dietary } = args;
       
       const results = profiles.filter((profile) => {
-        // STRICT: First check if profile has valid l tag with FoodEstablishment type
-        const lTag = profile.tags.find(t => t[0] === 'l' && t[1]?.startsWith('https://schema.org:'));
-        if (!lTag || !lTag[1]) {
-          return false; // Ignore profiles without valid l tag
+        // STRICT: First check if profile has valid schema.org:FoodEstablishment tag
+        const foodEstablishmentTag = profile.tags.find(t => t[0] === 'schema.org:FoodEstablishment');
+        if (!foodEstablishmentTag || !foodEstablishmentTag[1]) {
+          return false; // Ignore profiles without valid schema.org:FoodEstablishment tag
         }
 
-        // Extract type from l tag
-        const typeMatch = lTag[1].match(/^https:\/\/schema\.org:(.+)$/);
-        if (!typeMatch || !typeMatch[1]) {
-          return false; // Ignore profiles with invalid l tag format
-        }
-
-        const establishmentType = typeMatch[1];
+        const establishmentType = foodEstablishmentTag[1];
 
         // Filter by foodEstablishmentType if provided
         if (foodEstablishmentType && establishmentType !== foodEstablishmentType) {
@@ -125,8 +119,8 @@ server.registerTool(
         // Match cuisine - check tags and content
         const matchesCuisine = cuisine
           ? profile.tags.some(tag => {
-              // Check schema.org:servesCuisine tag
-              if (tag[0] === 'schema.org:servesCuisine' && tag[1]) {
+              // Check schema.org:FoodEstablishment:servesCuisine tag
+              if (tag[0] === 'schema.org:FoodEstablishment:servesCuisine' && tag[1]) {
                 return tag[1].toLowerCase().includes(cuisine.toLowerCase());
               }
               return false;
@@ -139,7 +133,7 @@ server.registerTool(
             about.toLowerCase().includes(query.toLowerCase()) ||
             profile.tags.some(tag => {
               // Check location tags
-              if (tag[0] === 'i' && tag[1] && tag[1].includes('schema.org:PostalAddress')) {
+              if (tag[0]?.startsWith('schema.org:PostalAddress:') && tag[1]) {
                 return tag[1].toLowerCase().includes(query.toLowerCase());
               }
               return false;
