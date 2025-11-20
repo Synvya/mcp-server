@@ -1,183 +1,33 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
-import { InitializeRequestSchema, SUPPORTED_PROTOCOL_VERSIONS, LATEST_PROTOCOL_VERSION } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
 import {
-  loadProfileData,
-  loadCollectionsData,
-  loadProductsData,
-  loadCalendarData,
-  loadTablesData,
+  parseContent,
+  extractDishName,
+  matchesDietaryTag,
+  normalizeDietaryTag,
+  findProductsInCollection,
+  findCollection,
+  productMatchesDietary,
+  extractSchemaOrgData,
+  extractMenuItemSchemaOrgData,
+  npubToPubkey,
+  checkTableAvailability,
   type NostrEvent,
-} from '../dist/data-loader.js';
-import { registerTools } from '../dist/register-tools.js';
+} from './data-loader.js';
 
-// Rate limiting configuration
-interface RateLimitEntry {
-  count: number;
-  resetTime: number;
+export interface ToolData {
+  profiles: NostrEvent[];
+  collections: NostrEvent[];
+  products: NostrEvent[];
+  calendar: NostrEvent[];
+  tables: NostrEvent[];
 }
 
-// In-memory rate limit store (resets on cold starts, which is acceptable)
-const rateLimitStore = new Map<string, RateLimitEntry>();
+export function registerTools(server: McpServer, data: ToolData) {
+  const { profiles, collections, products, calendar, tables } = data;
 
-// Rate limit configuration
-const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
-const RATE_LIMIT_MAX_REQUESTS = 100; // 100 requests per minute per IP
-
-function getClientIdentifier(req: VercelRequest): string {
-  // Try to get real IP from various headers (Vercel sets these)
-  const forwarded = req.headers['x-forwarded-for'];
-  const realIp = req.headers['x-real-ip'];
-  const ip = typeof forwarded === 'string' 
-    ? forwarded.split(',')[0].trim() 
-    : (typeof realIp === 'string' ? realIp : req.socket?.remoteAddress || 'unknown');
-  return ip;
-}
-
-function checkRateLimit(identifier: string): { allowed: boolean; remaining: number; resetAt: number } {
-  const now = Date.now();
-  const entry = rateLimitStore.get(identifier);
-
-  // Clean up old entries periodically (every 100 checks)
-  if (Math.random() < 0.01) {
-    for (const [key, value] of rateLimitStore.entries()) {
-      if (value.resetTime < now) {
-        rateLimitStore.delete(key);
-      }
-    }
-  }
-
-  if (!entry || entry.resetTime < now) {
-    // New window or expired entry
-    const resetTime = now + RATE_LIMIT_WINDOW_MS;
-    rateLimitStore.set(identifier, { count: 1, resetTime });
-    return { allowed: true, remaining: RATE_LIMIT_MAX_REQUESTS - 1, resetAt: resetTime };
-  }
-
-  if (entry.count >= RATE_LIMIT_MAX_REQUESTS) {
-    return { allowed: false, remaining: 0, resetAt: entry.resetTime };
-  }
-
-  entry.count++;
-  return { 
-    allowed: true, 
-    remaining: RATE_LIMIT_MAX_REQUESTS - entry.count, 
-    resetAt: entry.resetTime 
-  };
-}
-
-// Compliant formatter - always includes serialized JSON in TextContent for backwards compatibility
-function formatResponse(result: {
-  structuredData: any;
-  textSummary: string;
-  meta?: Record<string, any>;
-}) {
-  return {
-    structuredContent: result.structuredData,
-    content: [
-      {
-        type: "text",
-        text: JSON.stringify(result.structuredData, null, 2),
-      },
-    ],
-    ...(result.meta && { _meta: result.meta }),
-  };
-}
-
-// Global server instance (reused across invocations to minimize cold starts)
-let serverInstance: McpServer | null = null;
-let transportInstance: StreamableHTTPServerTransport | null = null;
-let profiles: NostrEvent[] = [];
-let collections: NostrEvent[] = [];
-let products: NostrEvent[] = [];
-let calendar: NostrEvent[] = [];
-let tables: NostrEvent[] = [];
-// Store protocol version per session (for stateless mode, we'll use a fallback)
-const sessionProtocolVersions = new Map<string, string>();
-
-async function initializeServer() {
-  if (serverInstance && transportInstance) {
-    return { server: serverInstance, transport: transportInstance };
-  }
-
-  // Load data
-  try {
-    profiles = await loadProfileData();
-    collections = await loadCollectionsData();
-    products = await loadProductsData();
-    calendar = await loadCalendarData();
-    tables = await loadTablesData();
-    console.error("✅ Data loaded:", {
-      profiles: profiles.length,
-      collections: collections.length,
-      products: products.length,
-      calendar: calendar.length,
-      tables: tables.length,
-    });
-  } catch (error) {
-    console.error("❌ Failed to load data:", error);
-    throw error;
-  }
-
-  // Create server
-  serverInstance = new McpServer({
-    name: "synvya-restaurant",
-    version: "1.0.0",
-  });
-
-  // Override initialize handler to log protocol version
-  if (!serverInstance) {
-    throw new Error('Failed to create server instance');
-  }
-  
-  serverInstance.server.setRequestHandler(InitializeRequestSchema, async (request, extra) => {
-    const requestedVersion = request.params.protocolVersion;
-    const protocolVersion = SUPPORTED_PROTOCOL_VERSIONS.includes(requestedVersion) ? requestedVersion : LATEST_PROTOCOL_VERSION;
-    
-    // Store client info (same as default handler does)
-    (serverInstance!.server as any)._clientCapabilities = request.params.capabilities;
-    (serverInstance!.server as any)._clientVersion = request.params.clientInfo;
-    
-    // Store protocol version for this session
-    const sessionIdHeader = extra.requestInfo?.headers?.['mcp-session-id'];
-    const sessionId = extra.sessionId || (typeof sessionIdHeader === 'string' ? sessionIdHeader : Array.isArray(sessionIdHeader) ? sessionIdHeader[0] : 'default');
-    sessionProtocolVersions.set(sessionId, protocolVersion);
-    
-    console.error("🔌 Client initialize:", {
-      requestedVersion,
-      negotiatedVersion: protocolVersion,
-      sessionId,
-      clientInfo: request.params.clientInfo,
-      headers: extra.requestInfo?.headers ? {
-        'mcp-protocol-version': extra.requestInfo.headers['mcp-protocol-version'],
-        'mcp-session-id': extra.requestInfo.headers['mcp-session-id'],
-      } : undefined,
-    });
-
-    // Return initialize response (same format as default handler)
-    return {
-      protocolVersion,
-      capabilities: (serverInstance!.server as any).getCapabilities(),
-      serverInfo: (serverInstance!.server as any)._serverInfo,
-      ...((serverInstance!.server as any)._instructions && { instructions: (serverInstance!.server as any)._instructions }),
-    };
-  });
-
-  // Register all tools with the server (after data is loaded)
-  registerTools(serverInstance, {
-    profiles,
-    collections,
-    products,
-    calendar,
-    tables,
-  });
-
-  // OLD TOOL REGISTRATION CODE REMOVED - NOW IN register-tools.ts
-  /*
   // Tool 1: Food Establishment Search
-  serverInstance.registerTool(
+  server.registerTool(
     "search_food_establishments",
     {
       description: "Find food establishments (restaurants, bakeries, cafes, etc.) by type, cuisine, dietary needs, or free-text search. All filters are combined with AND logic. Returns an array of JSON-LD formatted food establishment objects following schema.org FoodEstablishment specification. Example: {'foodEstablishmentType': 'Restaurant', 'cuisine': 'Spanish', 'dietary': 'vegan'} to find vegan Spanish restaurants.",
@@ -224,32 +74,13 @@ async function initializeServer() {
         })).describe("Array of JSON-LD formatted food establishment objects following schema.org FoodEstablishment specification. May contain mixed types (Restaurant, Bakery, etc.)"),
       }),
     },
-    async (args, extra) => {
+    async (args) => {
       try {
-        // Get protocol version from headers or session storage
-        const headerVersionRaw = extra.requestInfo?.headers?.['mcp-protocol-version'];
-        const headerVersion = typeof headerVersionRaw === 'string' ? headerVersionRaw : Array.isArray(headerVersionRaw) ? headerVersionRaw[0] : undefined;
-        const sessionIdHeader = extra.requestInfo?.headers?.['mcp-session-id'];
-        const sessionId = extra.sessionId || (typeof sessionIdHeader === 'string' ? sessionIdHeader : Array.isArray(sessionIdHeader) ? sessionIdHeader[0] : 'default');
-        const storedVersion = sessionProtocolVersions.get(sessionId);
-        const protocolVersion = headerVersion || storedVersion || '2025-03-26'; // Default fallback
-        
-        console.error("🔍 search_food_establishments called:", {
-          protocolVersionFromHeader: headerVersion,
-          protocolVersionFromSession: storedVersion,
-          finalProtocolVersion: protocolVersion,
-          sessionId,
-          allHeaders: extra.requestInfo?.headers ? Object.keys(extra.requestInfo.headers) : undefined,
-        });
-
         const { foodEstablishmentType, cuisine, query, dietary } = args;
-        
-        console.error("DEBUG search_food_establishments: profiles.length =", profiles.length);
-        console.error("DEBUG search_food_establishments: args =", JSON.stringify(args));
         
         const results = profiles.filter((profile) => {
           // STRICT: First check if profile has valid schema.org:FoodEstablishment tag
-          const foodEstablishmentTag = profile.tags.find((t: string[]) => t[0] === 'schema.org:FoodEstablishment');
+          const foodEstablishmentTag = profile.tags.find(t => t[0] === 'schema.org:FoodEstablishment');
           if (!foodEstablishmentTag || !foodEstablishmentTag[1]) {
             return false; // Ignore profiles without valid schema.org:FoodEstablishment tag
           }
@@ -267,7 +98,7 @@ async function initializeServer() {
           
           // Match cuisine - check tags and content
           const matchesCuisine = cuisine
-            ? profile.tags.some((tag: string[]) => {
+            ? profile.tags.some(tag => {
                 // Check schema.org:FoodEstablishment:servesCuisine tag
                 if (tag[0] === 'schema.org:FoodEstablishment:servesCuisine' && tag[1]) {
                   return tag[1].toLowerCase().includes(cuisine.toLowerCase());
@@ -280,7 +111,7 @@ async function initializeServer() {
           const matchesQuery = query
             ? profileName.toLowerCase().includes(query.toLowerCase()) ||
               about.toLowerCase().includes(query.toLowerCase()) ||
-              profile.tags.some((tag: string[]) => {
+              profile.tags.some(tag => {
                 // Check location tags
                 if (tag[0]?.startsWith('schema.org:PostalAddress:') && tag[1]) {
                   return tag[1].toLowerCase().includes(query.toLowerCase());
@@ -291,7 +122,7 @@ async function initializeServer() {
           
           // Match dietary tags (profiles use lowercase tags in "t" tags)
           const matchesDietary = dietary
-            ? profile.tags.some((tag: string[]) => 
+            ? profile.tags.some(tag => 
                 tag[0] === 't' && tag[1] && matchesDietaryTag(tag[1], dietary)
               )
             : true;
@@ -301,45 +132,42 @@ async function initializeServer() {
 
         // Format as JSON-LD with schema.org structure
         // Filter out null results (profiles without valid schema.org:FoodEstablishment tag)
-        console.error("DEBUG search_food_establishments: results.length =", results.length);
         const establishmentList = results
           .map((p) => extractSchemaOrgData(p, collections))
           .filter((data): data is Record<string, any> => data !== null);
-        console.error("DEBUG search_food_establishments: establishmentList.length =", establishmentList.length);
 
-        const textSummary = establishmentList.length > 0
-          ? `Found ${establishmentList.length} matching food establishment${establishmentList.length > 1 ? 's' : ''}`
-          : "No food establishments match your criteria";
-
-        return formatResponse({
-          structuredData: {
-            food_establishments: establishmentList,
-          },
-          textSummary,
-          meta: {
-            result_count: establishmentList.length,
-            filters: { foodEstablishmentType, cuisine, query, dietary },
-          },
-        });
+        const structuredContent = {
+          food_establishments: establishmentList,
+        };
+        return {
+          structuredContent,
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(structuredContent, null, 2),
+            },
+          ],
+        };
       } catch (error) {
         console.error("Error in search_food_establishments:", error);
+        const errorStructuredContent = {
+          food_establishments: [],
+        };
         return {
           content: [
             {
               type: "text",
-              text: `Error searching food establishments: ${error instanceof Error ? error.message : 'Unknown error'}`,
+              text: JSON.stringify(errorStructuredContent, null, 2),
             },
           ],
-          structuredContent: {
-            food_establishments: [],
-          },
+          structuredContent: errorStructuredContent,
         };
       }
     }
   );
 
   // Tool 2: Get Menu Items
-  serverInstance.registerTool(
+  server.registerTool(
     "get_menu_items",
     {
       description: "Get all dishes from a specific food establishment menu. IMPORTANT: Use the exact '@id' field from search_food_establishments results as restaurant_id, and use the 'identifier' from the 'hasMenu' array for menu_identifier. Do NOT use establishment names or guess menu names. Example: {'restaurant_id': 'nostr:npub1...', 'menu_identifier': 'Dinner'}",
@@ -386,23 +214,8 @@ async function initializeServer() {
         })).describe("Array of JSON-LD formatted menu item objects following schema.org MenuItem specification"),
       }),
     },
-    async (args, extra) => {
+    async (args) => {
       try {
-        // Get protocol version from headers or session storage
-        const headerVersionRaw = extra.requestInfo?.headers?.['mcp-protocol-version'];
-        const headerVersion = typeof headerVersionRaw === 'string' ? headerVersionRaw : Array.isArray(headerVersionRaw) ? headerVersionRaw[0] : undefined;
-        const sessionIdHeader = extra.requestInfo?.headers?.['mcp-session-id'];
-        const sessionId = extra.sessionId || (typeof sessionIdHeader === 'string' ? sessionIdHeader : Array.isArray(sessionIdHeader) ? sessionIdHeader[0] : 'default');
-        const storedVersion = sessionProtocolVersions.get(sessionId);
-        const protocolVersion = headerVersion || storedVersion || '2025-03-26'; // Default fallback
-        
-        console.error("🍽️ get_menu_items called:", {
-          protocolVersionFromHeader: headerVersion,
-          protocolVersionFromSession: storedVersion,
-          finalProtocolVersion: protocolVersion,
-          sessionId,
-        });
-
         const { restaurant_id, menu_identifier } = args;
         
         // Convert npub to hex pubkey for lookup
@@ -411,41 +224,43 @@ async function initializeServer() {
         // Find food establishment by pubkey
         const establishment = profiles.find(p => p.pubkey === establishmentPubkey);
         if (!establishment) {
-          const errorText = `Food establishment with identifier "${restaurant_id}" not found. Use the exact '@id' from search_food_establishments results.`;
-          return formatResponse({
-            structuredData: {
-              "@context": "https://schema.org",
-              "@type": "Menu",
-              "name": "",
-              "identifier": "",
-              "hasMenuItem": [],
-            },
-            textSummary: errorText,
-            meta: {
-              restaurant_id,
-              menu_identifier,
-            },
-          });
+          const errorStructuredContent = {
+            "@context": "https://schema.org",
+            "@type": "Menu",
+            "name": "",
+            "identifier": "",
+            "hasMenuItem": [],
+          };
+          return {
+            content: [
+              {
+                type: "text",
+                text: JSON.stringify(errorStructuredContent, null, 2),
+              },
+            ],
+            structuredContent: errorStructuredContent,
+          };
         }
         
         // Find the collection (menu)
         const collection = findCollection(collections, establishmentPubkey, menu_identifier);
         if (!collection) {
-          const errorText = `Menu with identifier "${menu_identifier}" not found for this food establishment. Use the exact 'identifier' from the 'hasMenu' array in search_food_establishments results.`;
-          return formatResponse({
-            structuredData: {
-              "@context": "https://schema.org",
-              "@type": "Menu",
-              "name": "",
-              "identifier": "",
-              "hasMenuItem": [],
-            },
-            textSummary: errorText,
-            meta: {
-              restaurant_id,
-              menu_identifier,
-            },
-          });
+          const errorStructuredContent = {
+            "@context": "https://schema.org",
+            "@type": "Menu",
+            "name": "",
+            "identifier": "",
+            "hasMenuItem": [],
+          };
+          return {
+            content: [
+              {
+                type: "text",
+                text: JSON.stringify(errorStructuredContent, null, 2),
+              },
+            ],
+            structuredContent: errorStructuredContent,
+          };
         }
         
         // Find products in this collection
@@ -453,13 +268,13 @@ async function initializeServer() {
         
         // Convert to JSON-LD MenuItem format (without seller since restaurant_id is already specified)
         const menuItemsJsonLd = menuItems
-          .map((item: NostrEvent) => extractMenuItemSchemaOrgData(item, false))
+          .map(item => extractMenuItemSchemaOrgData(item, false))
           .filter((item): item is Record<string, any> => item !== null);
         
         // Extract menu properties from collection (same as in search_food_establishments)
-        const titleTag = collection.tags.find((t: string[]) => t[0] === 'title');
-        const summaryTag = collection.tags.find((t: string[]) => t[0] === 'summary');
-        const dTag = collection.tags.find((t: string[]) => t[0] === 'd');
+        const titleTag = collection.tags.find(t => t[0] === 'title');
+        const summaryTag = collection.tags.find(t => t[0] === 'summary');
+        const dTag = collection.tags.find(t => t[0] === 'd');
         
         const menuObject = {
           "@context": "https://schema.org",
@@ -475,42 +290,39 @@ async function initializeServer() {
           delete menuObject.description;
         }
         
-        const textSummary = menuItemsJsonLd.length > 0
-          ? `Found ${menuItemsJsonLd.length} menu item${menuItemsJsonLd.length > 1 ? 's' : ''}`
-          : `No items found in menu`;
-
-        return formatResponse({
-          structuredData: menuObject,
-          textSummary,
-          meta: {
-            restaurant_id,
-            menu_identifier,
-            item_count: menuItemsJsonLd.length,
-          },
-        });
+        return {
+          structuredContent: menuObject,
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(menuObject, null, 2),
+            },
+          ],
+        };
       } catch (error) {
         console.error("Error in get_menu_items:", error);
+        const errorStructuredContent = {
+          "@context": "https://schema.org",
+          "@type": "Menu",
+          "name": "",
+          "identifier": "",
+          "hasMenuItem": [],
+        };
         return {
           content: [
             {
               type: "text",
-              text: `Error getting menu items: ${error instanceof Error ? error.message : 'Unknown error'}`,
+              text: JSON.stringify(errorStructuredContent, null, 2),
             },
           ],
-          structuredContent: {
-            "@context": "https://schema.org",
-            "@type": "Menu",
-            "name": "",
-            "identifier": "",
-            "hasMenuItem": [],
-          },
+          structuredContent: errorStructuredContent,
         };
       }
     }
   );
 
   // Tool 3: Search Menu Items
-  serverInstance.registerTool(
+  server.registerTool(
     "search_menu_items",
     {
       description: "Find specific dishes across all food establishments by name, ingredient, or dietary preference. Returns a JSON-LD graph structure with food establishments grouped by their matching menu items. Automatically detects if dish_query is a dietary term (vegan, vegetarian, gluten-free, etc.) and matches against dietary tags. Example: {'dish_query': 'pizza', 'dietary': 'vegan'} or {'dish_query': 'vegan'} (auto-detects as dietary term).",
@@ -570,23 +382,8 @@ async function initializeServer() {
         })),
       }),
     },
-    async (args, extra) => {
+    async (args) => {
       try {
-        // Get protocol version from headers or session storage
-        const headerVersionRaw = extra.requestInfo?.headers?.['mcp-protocol-version'];
-        const headerVersion = typeof headerVersionRaw === 'string' ? headerVersionRaw : Array.isArray(headerVersionRaw) ? headerVersionRaw[0] : undefined;
-        const sessionIdHeader = extra.requestInfo?.headers?.['mcp-session-id'];
-        const sessionId = extra.sessionId || (typeof sessionIdHeader === 'string' ? sessionIdHeader : Array.isArray(sessionIdHeader) ? sessionIdHeader[0] : 'default');
-        const storedVersion = sessionProtocolVersions.get(sessionId);
-        const protocolVersion = headerVersion || storedVersion || '2025-03-26'; // Default fallback
-        
-        console.error("🔎 search_menu_items called:", {
-          protocolVersionFromHeader: headerVersion,
-          protocolVersionFromSession: storedVersion,
-          finalProtocolVersion: protocolVersion,
-          sessionId,
-        });
-
         const { dish_query, dietary, restaurant_id } = args;
         
         // Filter products by food establishment if specified
@@ -597,7 +394,7 @@ async function initializeServer() {
         // Check if dish_query might be a dietary term
         const commonDietaryTerms = ['vegan', 'vegetarian', 'gluten free', 'gluten-free', 'dairy free', 'dairy-free', 'nut free', 'nut-free'];
         const queryLower = dish_query.toLowerCase();
-        const mightBeDietaryQuery = commonDietaryTerms.some((term: string) => queryLower.includes(term));
+        const mightBeDietaryQuery = commonDietaryTerms.some(term => queryLower.includes(term));
         
         // If no dietary parameter but query looks like a dietary term, use it as dietary filter too
         const effectiveDietary = dietary || (mightBeDietaryQuery ? dish_query : undefined);
@@ -607,23 +404,23 @@ async function initializeServer() {
         
         for (const product of productsToSearch) {
           const dishName = extractDishName(product);
-          const summaryTag = product.tags.find((t: string[]) => t[0] === 'summary');
+          const summaryTag = product.tags.find(t => t[0] === 'summary');
           const description = summaryTag?.[1] || '';
           const contentText = typeof product.content === 'string' ? product.content : '';
           
           // Extract ingredient tags (schema.org:Recipe:recipeIngredient)
           const ingredientTags = product.tags
-            .filter((t: string[]) => t[0] === 'schema.org:Recipe:recipeIngredient')
-            .map((t: string[]) => t[1])
+            .filter(t => t[0] === 'schema.org:Recipe:recipeIngredient')
+            .map(t => t[1])
             .filter(Boolean)
             .join(' ');
           
           // Extract dietary tags (normalized for search)
           const dietaryTags = product.tags
-            .filter((t: string[]) => t[0] === 't' || t[0] === 'schema.org:MenuItem:suitableForDiet')
-            .map((t: string[]) => t[1])
+            .filter(t => t[0] === 't' || t[0] === 'schema.org:MenuItem:suitableForDiet')
+            .map(t => t[1])
             .filter(Boolean)
-            .map((tag: string) => normalizeDietaryTag(tag)) // Normalize "GLUTEN_FREE" -> "gluten free"
+            .map(tag => normalizeDietaryTag(tag)) // Normalize "GLUTEN_FREE" -> "gluten free"
             .join(' ');
           
           // Match dish name/description/ingredients/dietary tags
@@ -654,8 +451,8 @@ async function initializeServer() {
           
           // Get menus this product belongs to
           const menuTags = product.tags
-            .filter((t: string[]) => t[0] === 'a' && t[1] === '30405')
-            .map((t: string[]) => t[3])
+            .filter(t => t[0] === 'a' && t[1] === '30405')
+            .map(t => t[3])
             .filter(Boolean);
           
           if (!establishmentMap.has(establishmentPubkey)) {
@@ -705,15 +502,15 @@ async function initializeServer() {
             const collection = findCollection(collections, establishmentPubkey, menuId);
             if (!collection) continue;
             
-            const titleTag = collection.tags.find((t: string[]) => t[0] === 'title');
-            const summaryTag = collection.tags.find((t: string[]) => t[0] === 'summary');
-            const dTag = collection.tags.find((t: string[]) => t[0] === 'd');
+            const titleTag = collection.tags.find(t => t[0] === 'title');
+            const summaryTag = collection.tags.find(t => t[0] === 'summary');
+            const dTag = collection.tags.find(t => t[0] === 'd');
             
             // Convert products to MenuItem format
             // Note: menuProducts only contains products that matched the search query
             // Seller not included since results are organized by restaurant
             const menuItems = menuProducts
-              .map((item: NostrEvent) => extractMenuItemSchemaOrgData(item, false))
+              .map(item => extractMenuItemSchemaOrgData(item, false))
               .filter((item): item is Record<string, any> => item !== null);
             
             const menuObject: Record<string, any> = {
@@ -748,44 +545,41 @@ async function initializeServer() {
           graph.push(establishmentObject);
         }
         
-        const totalItems = matchingProducts.length;
-        const textSummary = totalItems > 0
-          ? `Found ${totalItems} matching menu item${totalItems > 1 ? 's' : ''}`
-          : "No dishes match your search";
-
-        return formatResponse({
-          structuredData: {
-            "@context": "https://schema.org",
-            "@graph": graph,
-          },
-          textSummary,
-          meta: {
-            dish_query,
-            dietary,
-            restaurant_id,
-            result_count: totalItems,
-          },
-        });
+        const structuredContent = {
+          "@context": "https://schema.org",
+          "@graph": graph,
+        };
+        
+        return {
+          structuredContent,
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(structuredContent, null, 2),
+            },
+          ],
+        };
       } catch (error) {
         console.error("Error in search_menu_items:", error);
+        const errorStructuredContent = {
+          "@context": "https://schema.org",
+          "@graph": [],
+        };
         return {
           content: [
             {
               type: "text",
-              text: `Error searching menu items: ${error instanceof Error ? error.message : 'Unknown error'}`,
+              text: JSON.stringify(errorStructuredContent, null, 2),
             },
           ],
-          structuredContent: {
-            "@context": "https://schema.org",
-            "@graph": [],
-          },
+          structuredContent: errorStructuredContent,
         };
       }
     }
   );
 
   // Tool 4: Make Reservation
-  serverInstance.registerTool(
+  server.registerTool(
     "make_reservation",
     {
       description: "Make a reservation at a food establishment. Returns a JSON-LD formatted FoodEstablishmentReservation object on success, or a ReserveAction with error details on failure.",
@@ -842,7 +636,7 @@ async function initializeServer() {
         }).optional().describe("Error information (present only on errors)"),
       }),
     },
-    async (args, extra) => {
+    async (args) => {
       try {
         const { restaurant_id, time, party_size, name, telephone, email } = args;
 
@@ -1130,58 +924,5 @@ async function initializeServer() {
       }
     }
   );
-  */
-
-  // Create transport
-  transportInstance = new StreamableHTTPServerTransport({
-    sessionIdGenerator: undefined, // Stateless mode
-  });
-
-  await serverInstance.connect(transportInstance);
-
-  return { server: serverInstance, transport: transportInstance };
-}
-
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // Handle CORS
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Mcp-Session-Id');
-
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  // Rate limiting
-  const clientId = getClientIdentifier(req);
-  const rateLimit = checkRateLimit(clientId);
-
-  // Set rate limit headers (standard format)
-  res.setHeader('X-RateLimit-Limit', RATE_LIMIT_MAX_REQUESTS.toString());
-  res.setHeader('X-RateLimit-Remaining', rateLimit.remaining.toString());
-  res.setHeader('X-RateLimit-Reset', new Date(rateLimit.resetAt).toISOString());
-
-  if (!rateLimit.allowed) {
-    return res.status(429).json({
-      error: 'Too Many Requests',
-      message: `Rate limit exceeded. Maximum ${RATE_LIMIT_MAX_REQUESTS} requests per minute.`,
-      retryAfter: Math.ceil((rateLimit.resetAt - Date.now()) / 1000)
-    });
-  }
-
-  try {
-    const { transport } = await initializeServer();
-    if (!transport) {
-      return res.status(500).json({ error: 'Server not initialized' });
-    }
-
-    // Vercel already parses JSON bodies, so req.body is available
-    // The StreamableHTTPServerTransport expects Node.js request/response objects
-    // Vercel's request/response objects are compatible with Node.js IncomingMessage/ServerResponse
-    await transport.handleRequest(req as any, res as any, req.body);
-  } catch (error) {
-    console.error('Error handling request:', error);
-    return res.status(500).json({ error: 'Internal server error' });
-  }
 }
 
