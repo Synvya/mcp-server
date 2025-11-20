@@ -5,7 +5,9 @@
   "description": "Synvya MCP Server. Disvover Restaurants directly from your AI assistant.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
     "dev": "tsx src/server.ts",
     "build": "tsc",
     "vercel-build": "npm run build",
@@ -31,7 +33,9 @@
     "@types/ngeohash": "^0.6.8",
     "@types/node": "^24.10.1",
     "@vercel/node": "^3.0.0",
+    "@vitest/ui": "^4.0.12",
     "tsx": "^4.20.6",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.12"
   }
 }
