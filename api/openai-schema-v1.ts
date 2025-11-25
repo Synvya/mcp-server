@@ -14,12 +14,12 @@ function getOpenAPISchema(baseUrl: string) {
     },
     servers: [
       {
-        url: `${baseUrl}/mcp`,
+        url: baseUrl,
         description: "Synvya MCP Server"
       }
     ],
     paths: {
-      "/search_food_establishments": {
+      "/api/search_food_establishments": {
         post: {
           operationId: "search_food_establishments",
           summary: "Find food establishments",
@@ -73,7 +73,7 @@ function getOpenAPISchema(baseUrl: string) {
           }
         }
       },
-      "/get_menu_items": {
+      "/api/get_menu_items": {
         post: {
           operationId: "get_menu_items",
           summary: "Get menu items from a restaurant",
@@ -225,7 +225,7 @@ function getOpenAPISchema(baseUrl: string) {
           }
         }
       },
-      "/search_menu_items": {
+      "/api/search_menu_items": {
         post: {
           operationId: "search_menu_items",
           summary: "Search for menu items",
@@ -429,7 +429,7 @@ function getOpenAPISchema(baseUrl: string) {
           }
         }
       },
-      "/make_reservation": {
+      "/api/make_reservation": {
         post: {
           operationId: "make_reservation",
           summary: "Make a reservation",
