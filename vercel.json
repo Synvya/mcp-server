@@ -6,6 +6,18 @@
     },
     "api/openai-schema-v1.ts": {
       "maxDuration": 10
+    },
+    "api/search_food_establishments.ts": {
+      "maxDuration": 30
+    },
+    "api/get_menu_items.ts": {
+      "maxDuration": 30
+    },
+    "api/search_menu_items.ts": {
+      "maxDuration": 30
+    },
+    "api/make_reservation.ts": {
+      "maxDuration": 30
     }
   },
   "rewrites": [
