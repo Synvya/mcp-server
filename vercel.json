@@ -4,7 +4,7 @@
     "api/mcp.ts": {
       "maxDuration": 30
     },
-    "api/openai-schema-v1.ts": {
+    "api/schema-v1.ts": {
       "maxDuration": 10
     },
     "api/search_food_establishments.ts": {
@@ -26,8 +26,8 @@
       "destination": "/api/mcp"
     },
     {
-      "source": "/v1/openai-schema",
-      "destination": "/api/openai-schema-v1"
+      "source": "/v1/schema",
+      "destination": "/api/schema-v1"
     }
   ]
 }
