@@ -98,14 +98,14 @@ async function loadData() {
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Handle CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
 
-  if (req.method !== 'POST') {
+  if (req.method !== 'GET' && req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
@@ -129,10 +129,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Load data
     await loadData();
 
-    // Parse and validate request body
-    const body = req.body || {};
+    // Parse parameters from query string (GET) or body (POST)
+    const params = req.method === 'GET' ? req.query : (req.body || {});
     
-    if (!body.dish_query) {
+    if (!params.dish_query) {
       return res.status(400).json({
         error: 'Bad Request',
         message: 'Missing required field: dish_query',
@@ -142,9 +142,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const args = {
-      dish_query: body.dish_query,
-      dietary: body.dietary,
-      restaurant_id: body.restaurant_id,
+      dish_query: params.dish_query,
+      dietary: params.dietary,
+      restaurant_id: params.restaurant_id,
     };
 
     // Call handler

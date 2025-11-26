@@ -20,39 +20,49 @@ function getOpenAPISchema(baseUrl: string) {
     ],
     paths: {
       "/api/search_food_establishments": {
-        post: {
+        get: {
           operationId: "search_food_establishments",
           summary: "Find food establishments",
           description: "Find food establishments (restaurants, bakeries, cafes, etc.) by type, cuisine, dietary needs, or free-text search. All filters are combined with AND logic. Returns an array of JSON-LD formatted food establishment objects following schema.org FoodEstablishment specification.",
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  properties: {
-                    foodEstablishmentType: {
-                      type: "string",
-                      enum: ['Bakery', 'BarOrPub', 'Brewery', 'CafeOrCoffeeShop', 'Distillery', 'FastFoodRestaurant', 'IceCreamShop', 'Restaurant', 'Winery'],
-                      description: "Filter by schema.org FoodEstablishment type. If not provided, returns all FoodEstablishment types."
-                    },
-                    cuisine: {
-                      type: "string",
-                      description: "Cuisine type (e.g., 'Spanish', 'Italian', 'Mexican'). Searches schema.org:servesCuisine tags first, then falls back to description text matching."
-                    },
-                    query: {
-                      type: "string",
-                      description: "Free-text search matching establishment name, location (schema.org:PostalAddress), or description. Example: 'Snoqualmie' to find establishments in that location."
-                    },
-                    dietary: {
-                      type: "string",
-                      description: "Dietary requirement (e.g., 'vegan', 'gluten free'). Matches against lowercase dietary tags in profiles."
-                    }
-                  }
-                }
-              }
+          parameters: [
+            {
+              name: "foodEstablishmentType",
+              in: "query",
+              required: false,
+              schema: {
+                type: "string",
+                enum: ['Bakery', 'BarOrPub', 'Brewery', 'CafeOrCoffeeShop', 'Distillery', 'FastFoodRestaurant', 'IceCreamShop', 'Restaurant', 'Winery']
+              },
+              description: "Filter by schema.org FoodEstablishment type. If not provided, returns all FoodEstablishment types."
+            },
+            {
+              name: "cuisine",
+              in: "query",
+              required: false,
+              schema: {
+                type: "string"
+              },
+              description: "Cuisine type (e.g., 'Spanish', 'Italian', 'Mexican'). Searches schema.org:servesCuisine tags first, then falls back to description text matching."
+            },
+            {
+              name: "query",
+              in: "query",
+              required: false,
+              schema: {
+                type: "string"
+              },
+              description: "Free-text search matching establishment name, location (schema.org:PostalAddress), or description. Example: 'Snoqualmie' to find establishments in that location."
+            },
+            {
+              name: "dietary",
+              in: "query",
+              required: false,
+              schema: {
+                type: "string"
+              },
+              description: "Dietary requirement (e.g., 'vegan', 'gluten free'). Matches against lowercase dietary tags in profiles."
             }
-          },
+          ],
           responses: {
             "200": {
               description: "Successfully found food establishments",
@@ -74,31 +84,30 @@ function getOpenAPISchema(baseUrl: string) {
         }
       },
       "/api/get_menu_items": {
-        post: {
+        get: {
           operationId: "get_menu_items",
           summary: "Get menu items from a restaurant",
           description: "Get all dishes from a specific food establishment menu. IMPORTANT: Use the exact '@id' field from search_food_establishments results as restaurant_id, and use the 'identifier' from the 'hasMenu' array for menu_identifier.",
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  required: ["restaurant_id", "menu_identifier"],
-                  properties: {
-                    restaurant_id: {
-                      type: "string",
-                      description: "Food establishment identifier in bech32 format (nostr:npub1...) - MUST be the exact '@id' value from search_food_establishments results."
-                    },
-                    menu_identifier: {
-                      type: "string",
-                      description: "Menu identifier - MUST be the exact 'identifier' value from the 'hasMenu' array in search_food_establishments results."
-                    }
-                  }
-                }
-              }
+          parameters: [
+            {
+              name: "restaurant_id",
+              in: "query",
+              required: true,
+              schema: {
+                type: "string"
+              },
+              description: "Food establishment identifier in bech32 format (nostr:npub1...) - MUST be the exact '@id' value from search_food_establishments results."
+            },
+            {
+              name: "menu_identifier",
+              in: "query",
+              required: true,
+              schema: {
+                type: "string"
+              },
+              description: "Menu identifier - MUST be the exact 'identifier' value from the 'hasMenu' array in search_food_establishments results."
             }
-          },
+          ],
           responses: {
             "200": {
               description: "Successfully retrieved menu items",
@@ -226,35 +235,39 @@ function getOpenAPISchema(baseUrl: string) {
         }
       },
       "/api/search_menu_items": {
-        post: {
+        get: {
           operationId: "search_menu_items",
           summary: "Search for menu items",
           description: "Find specific dishes across all food establishments by name, ingredient, or dietary preference. Returns a JSON-LD graph structure with food establishments grouped by their matching menu items.",
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  required: ["dish_query"],
-                  properties: {
-                    dish_query: {
-                      type: "string",
-                      description: "Dish name, ingredient, or dietary term to search for. Searches dish names and descriptions."
-                    },
-                    dietary: {
-                      type: "string",
-                      description: "Additional dietary filter (e.g., 'vegan', 'gluten free'). Combined with dish_query using AND logic."
-                    },
-                    restaurant_id: {
-                      type: "string",
-                      description: "Optional: Filter results to a specific food establishment. Use the '@id' from search_food_establishments results."
-                    }
-                  }
-                }
-              }
+          parameters: [
+            {
+              name: "dish_query",
+              in: "query",
+              required: true,
+              schema: {
+                type: "string"
+              },
+              description: "Dish name, ingredient, or dietary term to search for. Searches dish names and descriptions."
+            },
+            {
+              name: "dietary",
+              in: "query",
+              required: false,
+              schema: {
+                type: "string"
+              },
+              description: "Additional dietary filter (e.g., 'vegan', 'gluten free'). Combined with dish_query using AND logic."
+            },
+            {
+              name: "restaurant_id",
+              in: "query",
+              required: false,
+              schema: {
+                type: "string"
+              },
+              description: "Optional: Filter results to a specific food establishment. Use the '@id' from search_food_establishments results."
             }
-          },
+          ],
           responses: {
             "200": {
               description: "Successfully found menu items",

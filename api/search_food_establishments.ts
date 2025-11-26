@@ -98,14 +98,14 @@ async function loadData() {
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Handle CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
 
-  if (req.method !== 'POST') {
+  if (req.method !== 'GET' && req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
@@ -129,13 +129,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Load data
     await loadData();
 
-    // Parse and validate request body
-    const body = req.body || {};
+    // Parse parameters from query string (GET) or body (POST)
+    const params = req.method === 'GET' ? req.query : (req.body || {});
     const args = {
-      foodEstablishmentType: body.foodEstablishmentType,
-      cuisine: body.cuisine,
-      query: body.query,
-      dietary: body.dietary,
+      foodEstablishmentType: params.foodEstablishmentType,
+      cuisine: params.cuisine,
+      query: params.query,
+      dietary: params.dietary,
     };
 
     // Call handler
