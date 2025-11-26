@@ -449,7 +449,7 @@ function getOpenAPISchema(baseUrl: string) {
         post: {
           operationId: "make_reservation",
           summary: "Make a reservation",
-          description: "Make a reservation at a food establishment. Returns a JSON-LD formatted FoodEstablishmentReservation object on success, or a ReserveAction with error details on failure.",
+          description: "Make a reservation at a food establishment. Returns a JSON-LD formatted FoodEstablishmentReservation object on success, or a ReserveAction with error details on failure. IMPORTANT: You must provide either telephone OR email (or both), but at least one is required. Do not ask for both if the user only provides one.",
           requestBody: {
             required: true,
             content: {
@@ -478,19 +478,19 @@ function getOpenAPISchema(baseUrl: string) {
                     },
                     telephone: {
                       type: "string",
-                      description: "Customer telephone number"
+                      description: "Customer telephone number. OPTIONAL: Provide this OR email (at least one required, but not both required)."
                     },
                     email: {
                       type: "string",
                       format: "email",
-                      description: "Customer email address"
+                      description: "Customer email address. OPTIONAL: Provide this OR telephone (at least one required, but not both required)."
                     }
                   },
                   anyOf: [
                     { required: ["telephone"] },
                     { required: ["email"] }
                   ],
-                  description: "At least one of telephone or email must be provided"
+                  description: "At least one of telephone or email must be provided. Both fields are optional individually, but you must provide at least one of them."
                 }
               }
             }
