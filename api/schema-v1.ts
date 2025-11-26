@@ -63,6 +63,7 @@ function getOpenAPISchema(baseUrl: string) {
               description: "Dietary requirement (e.g., 'vegan', 'gluten free'). Matches against lowercase dietary tags in profiles."
             }
           ],
+          deprecated: false,
           responses: {
             "200": {
               description: "Successfully found food establishments",
@@ -108,6 +109,7 @@ function getOpenAPISchema(baseUrl: string) {
               description: "Menu identifier - MUST be the exact 'identifier' value from the 'hasMenu' array in search_food_establishments results."
             }
           ],
+          deprecated: false,
           responses: {
             "200": {
               description: "Successfully retrieved menu items",
@@ -268,6 +270,7 @@ function getOpenAPISchema(baseUrl: string) {
               description: "Optional: Filter results to a specific food establishment. Use the '@id' from search_food_establishments results."
             }
           ],
+          deprecated: false,
           responses: {
             "200": {
               description: "Successfully found menu items",
@@ -492,6 +495,7 @@ function getOpenAPISchema(baseUrl: string) {
               }
             }
           },
+          deprecated: false,
           responses: {
             "200": {
               description: "Reservation response (success or error)",
@@ -623,6 +627,9 @@ function getOpenAPISchema(baseUrl: string) {
           }
         }
       }
+    },
+    components: {
+      schemas: {}
     }
   };
 }
