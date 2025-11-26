@@ -449,7 +449,7 @@ function getOpenAPISchema(baseUrl: string) {
         post: {
           operationId: "make_reservation",
           summary: "Make a reservation",
-          description: "Make a reservation at a food establishment. Returns a JSON-LD formatted FoodEstablishmentReservation object on success, or a ReserveAction with error details on failure. IMPORTANT: You must provide either telephone OR email (or both), but at least one is required. Do not ask for both if the user only provides one.",
+          description: "Make a reservation at a food establishment. Returns JSON-LD FoodEstablishmentReservation on success, or ReserveAction on failure. IMPORTANT: Provide either telephone OR email (at least one required). Do not ask for both if user provides only one.",
           requestBody: {
             required: true,
             content: {
