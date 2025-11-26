@@ -645,6 +645,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const format = (req.query.format as string | undefined) || 'openapi';
 
   if (format === 'openapi' || req.headers.accept?.includes('application/openapi+json')) {
+    res.setHeader('Content-Type', 'application/openapi+json; charset=utf-8');
     return res.status(200).json(getOpenAPISchema(BASE_URL));
   }
 
@@ -656,7 +657,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
   }
 
-  // Default: return OpenAPI schema
+  // Default: return OpenAPI schema with proper Content-Type
+  res.setHeader('Content-Type', 'application/openapi+json; charset=utf-8');
   return res.status(200).json(getOpenAPISchema(BASE_URL));
 }
 
