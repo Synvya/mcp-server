@@ -319,7 +319,7 @@ export function extractSchemaOrgData(profile: NostrEvent, collections?: NostrEve
   }
 
   // Extract acceptsReservations
-  const acceptsReservationsTag = profile.tags.find(t => t[0] === 'schema.org:acceptsReservations');
+  const acceptsReservationsTag = profile.tags.find(t => t[0] === 'schema.org:FoodEstablishment:acceptsReservations');
   if (acceptsReservationsTag) {
     // Use tag value if present, otherwise default to "False"
     schemaData.acceptsReservations = acceptsReservationsTag[1] || "False";
