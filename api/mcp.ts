@@ -123,7 +123,7 @@ async function initializeServer() {
 
   // Create server
   serverInstance = new McpServer({
-    name: "synvya-restaurant",
+    name: "dinedirect-mcp",
     version: "1.0.0",
   });
 
@@ -1088,8 +1088,8 @@ async function initializeServer() {
           "underName": underName,
           "broker": {
             "@type": "Organization",
-            "name": "Synvya",
-            "legalName": "Synvya Inc.",
+            "name": "DineDirect",
+            "legalName": "Synvya Inc. d/b/a DineDirect",
           },
           "reservationFor": reservationFor,
           "startTime": startTimeStr,

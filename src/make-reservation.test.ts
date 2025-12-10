@@ -69,8 +69,8 @@ describe('make_reservation tool', () => {
         },
         "broker": {
           "@type": "Organization",
-          "name": "Synvya",
-          "legalName": "Synvya Inc.",
+          "name": "DineDirect",
+          "legalName": "Synvya Inc. d/b/a DineDirect",
         },
         "reservationFor": {
           "@type": "FoodEstablishment",
@@ -84,8 +84,8 @@ describe('make_reservation tool', () => {
       expect(successResponse["@context"]).toBe("https://schema.org");
       expect(successResponse["@type"]).toBe("FoodEstablishmentReservation");
       expect(successResponse.reservationStatus).toBe("ReservationConfirmed");
-      expect(successResponse.broker.name).toBe("Synvya");
-      expect(successResponse.broker.legalName).toBe("Synvya Inc.");
+      expect(successResponse.broker.name).toBe("DineDirect");
+      expect(successResponse.broker.legalName).toBe("Synvya Inc. d/b/a DineDirect");
       expect(successResponse.underName["@type"]).toBe("Person");
       expect(successResponse.reservationFor["@type"]).toBe("FoodEstablishment");
     });

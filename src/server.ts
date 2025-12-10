@@ -13,7 +13,7 @@ import {
 import { registerTools } from './register-tools.js';
 
 const server = new McpServer({
-  name: "synvya-restaurant",
+  name: "DineDirect MCP Server",
   version: "1.0.0",
 });
 
