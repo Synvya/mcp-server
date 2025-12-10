@@ -1,4 +1,4 @@
-# Synvya MCP Server
+# DineDirect MCP Server
 
 Discover and book restaurants and other food establishments directly from your AI assistant.
 
@@ -206,7 +206,7 @@ The server supports both HTTP (for testing) and stdio (for Claude Desktop) trans
    ```json
    {
      "mcpServers": {
-       "synvya": {
+       "dinedirect": {
          "command": "node",
          "args": ["/absolute/path/to/mcp-server/dist/server.js"]
        }
