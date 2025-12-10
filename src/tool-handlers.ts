@@ -568,8 +568,8 @@ export function makeReservation(
     "underName": underName,
     "broker": {
       "@type": "Organization",
-      "name": "Synvya",
-      "legalName": "Synvya Inc.",
+      "name": "DineDirect",
+      "legalName": "Synvya Inc. d/b/a DineDirect",
     },
     "reservationFor": reservationFor,
     "startTime": startTimeStr,

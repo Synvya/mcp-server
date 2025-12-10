@@ -518,8 +518,8 @@ describe('Tool Handlers', () => {
       if (result['@type'] === 'FoodEstablishmentReservation') {
         expect(result.broker).toBeDefined();
         expect(result.broker['@type']).toBe('Organization');
-        expect(result.broker.name).toBe('Synvya');
-        expect(result.broker.legalName).toBe('Synvya Inc.');
+        expect(result.broker.name).toBe('DineDirect');
+        expect(result.broker.legalName).toBe('Synvya Inc. d/b/a DineDirect');
       }
     });
 

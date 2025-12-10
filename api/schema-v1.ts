@@ -1,21 +1,21 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 // Hardcoded base URL
-const BASE_URL = 'https://mcp-server-synvya.vercel.app';
+const BASE_URL = 'https://mcp.dinedirect.app';
 
 // OpenAPI 3.0 schema for Custom GPT Actions
 function getOpenAPISchema(baseUrl: string) {
   return {
     openapi: "3.1.0",
     info: {
-      title: "Synvya Restaurant MCP Server",
-      description: "Discover restaurants and menus directly from your AI assistant. Search food establishments, get menu items, and find dishes by dietary preferences.",
+      title: "DineDirect MCP Server",
+      description: "Discover restaurants and menus, and make reservations directly from your AI assistant. Search food establishments, get menu items, and find dishes by dietary preferences.",
       version: "1.0.0"
     },
     servers: [
       {
         url: baseUrl,
-        description: "Synvya MCP Server"
+        description: "DineDirect MCP Server"
       }
     ],
     paths: {

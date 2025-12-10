@@ -1,6 +1,6 @@
 # Nostr Event Schema Documentation
 
-> **Quick Reference**: This document describes the required format for Nostr events used by the Synvya MCP Server. Events must follow these schemas to be properly discovered and processed.
+> **Quick Reference**: This document describes the required format for Nostr events used by the DineDirect MCP Server. Events must follow these schemas to be properly discovered and processed.
 
 ## Table of Contents
 
@@ -142,7 +142,7 @@ Note: Dietary tags in profiles use **lowercase** format (e.g., `"vegan"`, `"glut
   "kind": 0,
   "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
   "created_at": 1763510731,
-  "content": "{\"name\":\"elcandado\",\"display_name\":\"Restaurante El Candado\",\"about\":\"Authentic Spanish restaurant...\",\"website\":\"https://www.synvya.com\",\"banner\":\"https://example.com/banner.png\"}",
+  "content": "{\"name\":\"elcandado\",\"display_name\":\"Restaurante El Candado\",\"about\":\"Authentic Spanish restaurant...\",\"website\":\"https://www.dinedirect.app/demo/elcandado\",\"banner\":\"https://example.com/banner.png\"}",
   "tags": [
     ["schema.org:FoodEstablishment", "Restaurant", "https://schema.org/FoodEstablishment"],
     ["t", "vegan"],
