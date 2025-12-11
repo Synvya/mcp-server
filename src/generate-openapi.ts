@@ -1,6 +1,10 @@
 import { zodToJsonSchema } from "zod-to-json-schema";
 import {
   FoodEstablishmentTypeEnum,
+  PostalAddressSchema,
+  GeoCoordinatesSchema,
+  MenuSectionSchema,
+  MenuSchema,
   FoodEstablishmentSchema,
   SearchFoodEstablishmentsOutputSchema,
   GetMenuItemsOutputSchema,
@@ -16,6 +20,144 @@ import {
  * SINGLE SOURCE OF TRUTH: All schemas are defined in schemas.ts and imported here.
  * When you update schemas.ts, both MCP and OpenAPI schemas automatically update.
  */
+
+/**
+ * Helper function to manually construct FoodEstablishment schema
+ * zodToJsonSchema has compatibility issues with Zod v4, so we manually construct
+ * the full schema structure to ensure all nested properties are included.
+ */
+function expandFoodEstablishmentSchema(): any {
+  return {
+    type: "object",
+    properties: {
+      "@context": { 
+        type: "string", 
+        description: "JSON-LD context (https://schema.org)" 
+      },
+      "@type": { 
+        type: "string", 
+        description: "Schema.org FoodEstablishment type: Bakery, BarOrPub, Brewery, CafeOrCoffeeShop, Distillery, FastFoodRestaurant, IceCreamShop, Restaurant, or Winery" 
+      },
+      name: { 
+        type: "string", 
+        description: "Restaurant name" 
+      },
+      description: { 
+        type: "string", 
+        description: "Restaurant description" 
+      },
+      address: {
+        type: "object",
+        description: "PostalAddress from schema.org",
+        properties: {
+          "@type": { type: "string" },
+          streetAddress: { type: "string" },
+          addressLocality: { type: "string" },
+          addressRegion: { type: "string" },
+          postalCode: { type: "string" },
+          addressCountry: { type: "string" }
+        }
+      },
+      telephone: { type: "string" },
+      email: { 
+        type: "string", 
+        description: "Email in mailto: format" 
+      },
+      openingHours: { 
+        type: "array", 
+        items: { type: "string" }, 
+        description: "Opening hours in format: ['Mo-Fr 10:00-19:00', 'Sa 10:00-22:00']" 
+      },
+      image: { 
+        type: "string", 
+        description: "Banner image URL" 
+      },
+      servesCuisine: { 
+        type: "array", 
+        items: { type: "string" }, 
+        description: "Array of cuisine types" 
+      },
+      geo: {
+        type: "object",
+        description: "GeoCoordinates from schema.org",
+        properties: {
+          "@type": { type: "string" },
+          latitude: { type: "number" },
+          longitude: { type: "number" }
+        }
+      },
+      url: { 
+        type: "string", 
+        description: "Website URL" 
+      },
+      acceptsReservations: { 
+        oneOf: [
+          { type: "string" },
+          { type: "boolean" }
+        ],
+        description: "True, False, or URL"
+      },
+      keywords: { 
+        type: "string", 
+        description: "Comma-separated keywords from tags" 
+      },
+      "@id": { 
+        type: "string", 
+        description: "Food establishment identifier in bech32 format (nostr:npub1...) - use this as restaurant_id for get_menu_items" 
+      },
+      hasMenu: {
+        type: "array",
+        description: "Array of menus available at this establishment",
+        items: {
+          type: "object",
+          properties: {
+            "@type": { 
+              type: "string", 
+              description: "Menu" 
+            },
+            name: { 
+              type: "string", 
+              description: "Menu name" 
+            },
+            description: { 
+              type: "string", 
+              description: "Menu description" 
+            },
+            identifier: { 
+              type: "string", 
+              description: "Menu identifier - use this as menu_identifier for get_menu_items" 
+            },
+            hasMenuSection: {
+              type: "array",
+              description: "Array of menu sections within this menu",
+              items: {
+                type: "object",
+                properties: {
+                  "@type": { 
+                    type: "string", 
+                    description: "MenuSection" 
+                  },
+                  name: { 
+                    type: "string", 
+                    description: "Section name (e.g., 'Appetizers', 'Entrees', 'Sides')" 
+                  },
+                  description: { 
+                    type: "string", 
+                    description: "Section description" 
+                  },
+                  identifier: { 
+                    type: "string", 
+                    description: "Section identifier" 
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  };
+}
 
 /**
  * Generate OpenAPI 3.1.0 schema from Zod schemas
@@ -82,9 +224,7 @@ export function generateOpenAPISchema(baseUrl: string) {
                       food_establishments: {
                         type: "array",
                         description: "Array of JSON-LD formatted food establishment objects following schema.org FoodEstablishment specification. May contain mixed types (Restaurant, Bakery, etc.)",
-                        items: zodToJsonSchema(FoodEstablishmentSchema as any, { 
-                          $refStrategy: "none"
-                        })
+                        items: expandFoodEstablishmentSchema()
                       }
                     }
                   }
