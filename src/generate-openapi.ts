@@ -1,6 +1,7 @@
 import { zodToJsonSchema } from "zod-to-json-schema";
 import {
   FoodEstablishmentTypeEnum,
+  FoodEstablishmentSchema,
   SearchFoodEstablishmentsOutputSchema,
   GetMenuItemsOutputSchema,
   SearchMenuItemsOutputSchema,
@@ -75,7 +76,18 @@ export function generateOpenAPISchema(baseUrl: string) {
               description: "Successfully found food establishments",
               content: {
                 "application/json": {
-                  schema: zodToJsonSchema(SearchFoodEstablishmentsOutputSchema as any, { $refStrategy: "none" })
+                  schema: {
+                    type: "object",
+                    properties: {
+                      food_establishments: {
+                        type: "array",
+                        description: "Array of JSON-LD formatted food establishment objects following schema.org FoodEstablishment specification. May contain mixed types (Restaurant, Bakery, etc.)",
+                        items: zodToJsonSchema(FoodEstablishmentSchema as any, { 
+                          $refStrategy: "none"
+                        })
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -109,7 +121,9 @@ export function generateOpenAPISchema(baseUrl: string) {
               description: "Successfully retrieved menu items",
               content: {
                 "application/json": {
-                  schema: zodToJsonSchema(GetMenuItemsOutputSchema as any, { $refStrategy: "none" })
+                  schema: zodToJsonSchema(GetMenuItemsOutputSchema as any, { 
+                    $refStrategy: "none"
+                  })
                 }
               }
             }
@@ -150,7 +164,9 @@ export function generateOpenAPISchema(baseUrl: string) {
               description: "Successfully found menu items",
               content: {
                 "application/json": {
-                  schema: zodToJsonSchema(SearchMenuItemsOutputSchema as any, { $refStrategy: "none" })
+                  schema: zodToJsonSchema(SearchMenuItemsOutputSchema as any, { 
+                    $refStrategy: "none"
+                  })
                 }
               }
             }
@@ -191,7 +207,9 @@ export function generateOpenAPISchema(baseUrl: string) {
               description: "Reservation response (success or error)",
               content: {
                 "application/json": {
-                  schema: zodToJsonSchema(MakeReservationOutputSchema as any, { $refStrategy: "none" })
+                  schema: zodToJsonSchema(MakeReservationOutputSchema as any, { 
+                    $refStrategy: "none"
+                  })
                 }
               }
             }
