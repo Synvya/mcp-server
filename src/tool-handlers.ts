@@ -158,11 +158,68 @@ export function getMenuItems(
     };
   }
   
-  // Find products in this collection
-  const menuItems = findProductsInCollection(products, establishmentPubkey, menu_identifier);
+  // Collect all unique products using Set to avoid duplicates
+  const menuItemSet = new Set<NostrEvent>();
+  
+  // 1. Find products directly linked to this menu
+  const directMenuItems = findProductsInCollection(products, establishmentPubkey, menu_identifier);
+  directMenuItems.forEach(item => menuItemSet.add(item));
+  
+  // 2. Find products directly referenced by the menu's "a" tags (compact format: "30402:pubkey:productId")
+  collection.tags
+    .filter(tag => tag[0] === 'a' && tag[1] && typeof tag[1] === 'string' && tag[1].includes(':'))
+    .forEach(tag => {
+      const parts = tag[1].split(':');
+      if (parts.length >= 3 && parts[0] === '30402' && parts[1] === establishmentPubkey) {
+        const productId = parts[2];
+        const product = products.find(p => {
+          const dTag = p.tags.find(t => t[0] === 'd');
+          return dTag && dTag[1] === productId && p.pubkey === establishmentPubkey;
+        });
+        if (product) menuItemSet.add(product);
+      }
+    });
+  
+  // 3. Find all menu sections (collections with same pubkey that are not the main menu)
+  const menuSections = collections.filter(c => 
+    c.kind === 30405 &&
+    c.pubkey === establishmentPubkey &&
+    c.tags.some(t => t[0] === 'd' && t[1] && t[1] !== menu_identifier)
+  );
+  
+  // 4. For each menu section, check if any of its products are also linked to the menu
+  // If so, include all products from that section
+  for (const section of menuSections) {
+    const sectionId = section.tags.find(t => t[0] === 'd')?.[1];
+    if (!sectionId) continue;
+    
+    const sectionProducts = findProductsInCollection(products, establishmentPubkey, sectionId);
+    
+    // Check if any section product is also linked to the menu
+    const sectionHasMenuProducts = sectionProducts.some(product => {
+      // Check if product has an "a" tag linking to the menu (compact format)
+      return product.tags.some(tag => {
+        if (tag[0] !== 'a' || !tag[1] || typeof tag[1] !== 'string' || !tag[1].includes(':')) {
+          return false;
+        }
+        
+        const parts = tag[1].split(':');
+        if (parts.length >= 3 && parts[0] === '30405') {
+          return parts[1] === establishmentPubkey && parts[2] === menu_identifier;
+        }
+        
+        return false;
+      });
+    });
+    
+    // If section shares products with menu, include all its products
+    if (sectionHasMenuProducts) {
+      sectionProducts.forEach(product => menuItemSet.add(product));
+    }
+  }
   
   // Convert to JSON-LD MenuItem format (without seller since restaurant_id is already specified)
-  const menuItemsJsonLd = menuItems
+  const menuItemsJsonLd = Array.from(menuItemSet)
     .map(item => extractMenuItemSchemaOrgData(item, false))
     .filter((item): item is Record<string, any> => item !== null);
   
@@ -259,11 +316,16 @@ export function searchMenuItems(
   for (const product of matchingProducts) {
     const establishmentPubkey = product.pubkey;
     
-    // Get menus this product belongs to
-    const menuTags = product.tags
-      .filter(t => t[0] === 'a' && t[1] === '30405')
-      .map(t => t[3])
-      .filter(Boolean);
+    // Get menus this product belongs to (parse compact format: "30405:pubkey:collectionId")
+    const menuTags: string[] = [];
+    product.tags
+      .filter(t => t[0] === 'a' && t[1] && typeof t[1] === 'string' && t[1].includes(':'))
+      .forEach(tag => {
+        const parts = tag[1].split(':');
+        if (parts.length >= 3 && parts[0] === '30405' && parts[1] === establishmentPubkey) {
+          menuTags.push(parts[2]); // collectionId
+        }
+      });
     
     if (!establishmentMap.has(establishmentPubkey)) {
       establishmentMap.set(establishmentPubkey, new Map());

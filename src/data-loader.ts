@@ -153,19 +153,28 @@ export function matchesDietaryTag(tag1: string, tag2: string): boolean {
 }
 
 // Find products linked to a collection via "a" tag
-// Products reference collections via: ["a", "30405", pubkey, collection_id]
+// Products reference collections via: ["a", "30405:pubkey:collection_id"] (NIP-99 compact format)
 export function findProductsInCollection(
   products: NostrEvent[],
   restaurantPubkey: string,
   collectionId: string
 ): NostrEvent[] {
   return products.filter(product => {
-    return product.tags.some(tag => 
-      tag[0] === 'a' &&
-      tag[1] === '30405' &&
-      tag[2] === restaurantPubkey &&
-      tag[3] === collectionId
-    );
+    return product.tags.some(tag => {
+      if (tag[0] !== 'a' || !tag[1] || typeof tag[1] !== 'string') return false;
+      
+      // Parse compact format: ["a", "30405:pubkey:collectionId"]
+      if (tag[1].includes(':')) {
+        const parts = tag[1].split(':');
+        if (parts.length >= 3 && parts[0] === '30405') {
+          const tagPubkey = parts[1];
+          const tagCollectionId = parts[2];
+          return tagPubkey === restaurantPubkey && tagCollectionId === collectionId;
+        }
+      }
+      
+      return false;
+    });
   });
 }
 
