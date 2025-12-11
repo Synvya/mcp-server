@@ -1,154 +1,20 @@
 import { zodToJsonSchema } from "zod-to-json-schema";
-import { z } from "zod";
+import {
+  FoodEstablishmentTypeEnum,
+  SearchFoodEstablishmentsOutputSchema,
+  GetMenuItemsOutputSchema,
+  SearchMenuItemsOutputSchema,
+  MakeReservationOutputSchema,
+} from './schemas.js';
 
 /**
  * Automated OpenAPI Schema Generation
  * 
- * This module automatically generates an OpenAPI 3.1.0 schema from Zod schemas.
- * The Zod schemas define the structure once, and this converts them to OpenAPI format.
+ * This module automatically generates an OpenAPI 3.1.0 schema from shared Zod schemas.
  * 
- * This eliminates the need to manually maintain two separate schema definitions.
+ * SINGLE SOURCE OF TRUTH: All schemas are defined in schemas.ts and imported here.
+ * When you update schemas.ts, both MCP and OpenAPI schemas automatically update.
  */
-
-// Define Zod schemas matching the MCP tool definitions
-const FoodEstablishmentTypeEnum = z.enum([
-  'Bakery', 'BarOrPub', 'Brewery', 'CafeOrCoffeeShop', 'Distillery', 
-  'FastFoodRestaurant', 'IceCreamShop', 'Restaurant', 'Winery'
-]);
-
-const DietEnum = z.enum([
-  "DiabeticDiet", "GlutenFreeDiet", "HalalDiet", "HinduDiet", "KosherDiet",
-  "LowCalorieDiet", "LowFatDiet", "LowLactoseDiet", "LowSaltDiet",
-  "VeganDiet", "VegetarianDiet",
-]);
-
-const MenuSectionSchema = z.object({
-  "@type": z.string().describe("MenuSection"),
-  "name": z.string().describe("Section name"),
-  "description": z.string().optional().describe("Section description"),
-  "identifier": z.string().describe("Section identifier"),
-});
-
-const MenuSchema = z.object({
-  "@type": z.string().describe("Menu"),
-  "name": z.string().describe("Menu name"),
-  "description": z.string().optional().describe("Menu description"),
-  "identifier": z.string().describe("Menu identifier"),
-  "hasMenuSection": z.array(MenuSectionSchema).optional().describe("Array of menu sections"),
-});
-
-const PostalAddressSchema = z.object({
-  "@type": z.string(),
-  "streetAddress": z.string().optional(),
-  "addressLocality": z.string().optional(),
-  "addressRegion": z.string().optional(),
-  "postalCode": z.string().optional(),
-  "addressCountry": z.string().optional(),
-});
-
-const GeoCoordinatesSchema = z.object({
-  "@type": z.string(),
-  "latitude": z.number(),
-  "longitude": z.number(),
-});
-
-const FoodEstablishmentSchema = z.object({
-  "@context": z.string(),
-  "@type": z.string(),
-  "name": z.string(),
-  "description": z.string(),
-  "address": PostalAddressSchema.optional(),
-  "telephone": z.string().optional(),
-  "email": z.string().optional(),
-  "openingHours": z.array(z.string()).optional(),
-  "image": z.string().optional(),
-  "servesCuisine": z.array(z.string()).optional(),
-  "geo": GeoCoordinatesSchema.optional(),
-  "url": z.string().optional(),
-  "acceptsReservations": z.union([z.string(), z.boolean()]).optional(),
-  "keywords": z.string().optional(),
-  "@id": z.string().describe("Food establishment identifier"),
-  "hasMenu": z.array(MenuSchema).optional(),
-});
-
-const MenuItemSchema = z.object({
-  "@context": z.string(),
-  "@type": z.string(),
-  "name": z.string(),
-  "description": z.string(),
-  "identifier": z.string().optional(),
-  "image": z.string().url().optional(),
-  "suitableForDiet": z.array(DietEnum).optional(),
-  "offers": z.object({
-    "@type": z.string(),
-    "price": z.number(),
-    "priceCurrency": z.string(),
-  }).optional(),
-  "geo": GeoCoordinatesSchema.optional(),
-});
-
-// Response schemas
-const SearchFoodEstablishmentsOutput = z.object({
-  food_establishments: z.array(FoodEstablishmentSchema),
-});
-
-const GetMenuItemsOutput = z.object({
-  "@context": z.string(),
-  "@type": z.string(),
-  "name": z.string(),
-  "description": z.string().optional(),
-  "identifier": z.string(),
-  "hasMenuItem": z.array(MenuItemSchema),
-});
-
-const SearchMenuItemsOutput = z.object({
-  "@context": z.string(),
-  "@graph": z.array(z.object({
-    "@type": z.string(),
-    "name": z.string(),
-    "geo": GeoCoordinatesSchema.optional(),
-    "@id": z.string(),
-    "hasMenu": z.array(z.object({
-      "@type": z.string(),
-      "name": z.string(),
-      "description": z.string().optional(),
-      "identifier": z.string(),
-      "hasMenuItem": z.array(MenuItemSchema),
-    })),
-  })),
-});
-
-const MakeReservationOutput = z.object({
-  "@context": z.string(),
-  "@type": z.string(),
-  "reservationId": z.number().optional(),
-  "reservationStatus": z.string().optional(),
-  "actionStatus": z.string().optional(),
-  "underName": z.object({
-    "@type": z.string(),
-    "name": z.string(),
-    "email": z.string().optional(),
-    "telephone": z.string().optional(),
-  }).optional(),
-  "broker": z.object({
-    "@type": z.string(),
-    "name": z.string(),
-    "legalName": z.string(),
-  }).optional(),
-  "reservationFor": z.object({
-    "@type": z.string(),
-    "name": z.string(),
-    "address": PostalAddressSchema.optional(),
-  }).optional(),
-  "startTime": z.string().optional(),
-  "endTime": z.string().optional(),
-  "partySize": z.number().optional(),
-  "error": z.object({
-    "@type": z.string(),
-    "name": z.string(),
-    "description": z.string(),
-  }).optional(),
-});
 
 /**
  * Generate OpenAPI 3.1.0 schema from Zod schemas
@@ -209,7 +75,7 @@ export function generateOpenAPISchema(baseUrl: string) {
               description: "Successfully found food establishments",
               content: {
                 "application/json": {
-                  schema: zodToJsonSchema(SearchFoodEstablishmentsOutput as any, { $refStrategy: "none" })
+                  schema: zodToJsonSchema(SearchFoodEstablishmentsOutputSchema as any, { $refStrategy: "none" })
                 }
               }
             }
@@ -243,7 +109,7 @@ export function generateOpenAPISchema(baseUrl: string) {
               description: "Successfully retrieved menu items",
               content: {
                 "application/json": {
-                  schema: zodToJsonSchema(GetMenuItemsOutput as any, { $refStrategy: "none" })
+                  schema: zodToJsonSchema(GetMenuItemsOutputSchema as any, { $refStrategy: "none" })
                 }
               }
             }
@@ -284,7 +150,7 @@ export function generateOpenAPISchema(baseUrl: string) {
               description: "Successfully found menu items",
               content: {
                 "application/json": {
-                  schema: zodToJsonSchema(SearchMenuItemsOutput as any, { $refStrategy: "none" })
+                  schema: zodToJsonSchema(SearchMenuItemsOutputSchema as any, { $refStrategy: "none" })
                 }
               }
             }
@@ -325,7 +191,7 @@ export function generateOpenAPISchema(baseUrl: string) {
               description: "Reservation response (success or error)",
               content: {
                 "application/json": {
-                  schema: zodToJsonSchema(MakeReservationOutput as any, { $refStrategy: "none" })
+                  schema: zodToJsonSchema(MakeReservationOutputSchema as any, { $refStrategy: "none" })
                 }
               }
             }

@@ -4,39 +4,57 @@ This document explains how the OpenAPI schema is automatically generated from Zo
 
 ## Overview
 
-The DineDirect MCP Server maintains two schema definitions:
+The DineDirect MCP Server uses two schema formats:
 1. **MCP Schema** (`src/register-tools.ts`) - Used by MCP clients like MCP Explorer
 2. **OpenAPI Schema** (`/v1/schema` endpoint) - Used by Custom GPTs and other OpenAPI clients
 
-Previously, these were maintained separately, leading to sync issues. Now, the OpenAPI schema is **automatically generated** from Zod schemas.
+**SINGLE SOURCE OF TRUTH**: All schemas are now defined once in `src/schemas.ts` and imported by both MCP and OpenAPI modules.
 
 ## How It Works
 
-### 1. Single Source of Truth
+### 1. Shared Schema Definitions
 
-Zod schemas are defined in `src/generate-openapi.ts`. These schemas mirror the structure used in `src/register-tools.ts` for MCP tools.
+All Zod schemas are defined in **`src/schemas.ts`**:
+- Input/output schemas for all tools
+- Common schemas (Menu, MenuItem, FoodEstablishment, etc.)
+- Enums (FoodEstablishmentType, DietEnum, etc.)
 
-### 2. Automatic Conversion
+Both `register-tools.ts` (MCP) and `generate-openapi.ts` (OpenAPI) import from this single file.
 
-The `generateOpenAPISchema()` function uses `zod-to-json-schema` to convert Zod schemas into JSON Schema format compatible with OpenAPI 3.1.0.
+### 2. MCP Server Registration
+
+`src/register-tools.ts` imports and uses shared schemas:
+
+```typescript
+import {
+  SearchFoodEstablishmentsInputSchema,
+  SearchFoodEstablishmentsOutputSchema,
+} from './schemas.js';
+
+server.registerTool("search_food_establishments", {
+  inputSchema: SearchFoodEstablishmentsInputSchema,
+  outputSchema: SearchFoodEstablishmentsOutputSchema,
+  // ...
+});
+```
+
+### 3. OpenAPI Generation
+
+`src/generate-openapi.ts` imports the same schemas and converts them:
 
 ```typescript
 import { zodToJsonSchema } from "zod-to-json-schema";
+import { SearchFoodEstablishmentsOutputSchema } from './schemas.js';
 
-// Define schema once
-const MenuSchema = z.object({
-  "@type": z.string(),
-  "name": z.string(),
-  "hasMenuSection": z.array(MenuSectionSchema).optional(),
-});
-
-// Auto-convert to OpenAPI
-schema: zodToJsonSchema(MenuSchema as any, { $refStrategy: "none" })
+// Auto-convert to OpenAPI JSON Schema
+schema: zodToJsonSchema(SearchFoodEstablishmentsOutputSchema as any, { 
+  $refStrategy: "none" 
+})
 ```
 
-### 3. Endpoint Serves Generated Schema
+### 4. Endpoint Serves Generated Schema
 
-The `/api/schema-v1` endpoint (rewritten to `/v1/schema`) calls `generateOpenAPISchema()` to serve the auto-generated schema:
+The `/api/schema-v1` endpoint (accessible at `/v1/schema`) serves the auto-generated schema:
 
 ```typescript
 import { generateOpenAPISchema } from '../dist/generate-openapi.js';
@@ -67,9 +85,9 @@ The generated schema now includes the `hasMenuSection` property:
 }
 ```
 
-### ✅ No Manual Sync Required
+### ✅ True Single Source of Truth
 
-When you update the Zod schemas in `src/generate-openapi.ts`, the OpenAPI schema automatically reflects those changes. No need to manually update two separate files.
+When you update schemas in `src/schemas.ts`, **both** MCP and OpenAPI automatically reflect those changes. You only define each schema once.
 
 ### ✅ Type Safety
 
@@ -77,26 +95,67 @@ TypeScript ensures the Zod schemas are valid at compile time, preventing schema 
 
 ## Making Changes
 
-### To Update a Schema:
+### To Update an Existing Schema:
 
-1. **Edit the Zod schema** in `src/generate-openapi.ts`
+1. **Edit the schema** in `src/schemas.ts`
 2. **Build** the project: `npm run build`
-3. **Deploy**: Changes automatically deploy via Vercel
+3. **Test**: `npm test`
+4. **Deploy**: Changes automatically deploy via Vercel
 
-Example - Adding a new property to Menu:
+Example - Adding a new property to `MenuSchema`:
 
 ```typescript
-// In src/generate-openapi.ts
-const MenuSchema = z.object({
-  "@type": z.string(),
-  "name": z.string(),
-  "identifier": z.string(),
+// In src/schemas.ts
+export const MenuSchema = z.object({
+  "@type": z.string().describe("Menu"),
+  "name": z.string().describe("Menu name"),
+  "identifier": z.string().describe("Menu identifier"),
   "hasMenuSection": z.array(MenuSectionSchema).optional(),
-  "newProperty": z.string().optional(), // ← Add here
+  "priceRange": z.string().optional(), // ← Add here
 });
 ```
 
-That's it! The OpenAPI schema will automatically include `newProperty`.
+Both MCP and OpenAPI schemas will automatically include `priceRange`.
+
+### To Create a New Tool:
+
+1. **Define schemas** in `src/schemas.ts`:
+   ```typescript
+   export const NewToolInputSchema = z.object({...});
+   export const NewToolOutputSchema = z.object({...});
+   ```
+
+2. **Register in MCP** (`src/register-tools.ts`):
+   ```typescript
+   import { NewToolInputSchema, NewToolOutputSchema } from './schemas.js';
+   
+   server.registerTool("new_tool", {
+     inputSchema: NewToolInputSchema,
+     outputSchema: NewToolOutputSchema,
+     // ...
+   });
+   ```
+
+3. **Add to OpenAPI** (`src/generate-openapi.ts`):
+   ```typescript
+   import { NewToolOutputSchema } from './schemas.js';
+   
+   // Add to paths object in generateOpenAPISchema()
+   "/api/new_tool": {
+     get: {
+       operationId: "new_tool",
+       responses: {
+         "200": {
+           content: {
+             "application/json": {
+               schema: zodToJsonSchema(NewToolOutputSchema as any, { $refStrategy: "none" })
+             }
+           }
+         }
+       }
+     }
+   }
+   ```
 
 ## Technical Details
 
