@@ -1,10 +1,11 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { generateOpenAPISchema } from '../dist/generate-openapi.js';
 
 // Hardcoded base URL
 const BASE_URL = 'https://mcp.dinedirect.app';
 
-// OpenAPI 3.0 schema for Custom GPT Actions
-function getOpenAPISchema(baseUrl: string) {
+// Legacy hardcoded OpenAPI schema (kept for reference, not used)
+function getOpenAPISchemaLegacy(baseUrl: string) {
   return {
     openapi: "3.1.0",
     info: {
@@ -653,7 +654,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   if (format === 'openapi' || req.headers.accept?.includes('application/openapi+json')) {
     res.setHeader('Content-Type', 'application/openapi+json; charset=utf-8');
-    return res.status(200).json(getOpenAPISchema(BASE_URL));
+    // Use auto-generated OpenAPI schema from Zod definitions
+    return res.status(200).json(generateOpenAPISchema(BASE_URL));
   }
 
   if (format === 'mcp') {
@@ -664,8 +666,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
   }
 
-  // Default: return OpenAPI schema with proper Content-Type
+  // Default: return auto-generated OpenAPI schema with proper Content-Type
   res.setHeader('Content-Type', 'application/openapi+json; charset=utf-8');
-  return res.status(200).json(getOpenAPISchema(BASE_URL));
+  return res.status(200).json(generateOpenAPISchema(BASE_URL));
 }
 
