@@ -153,19 +153,28 @@ export function matchesDietaryTag(tag1: string, tag2: string): boolean {
 }
 
 // Find products linked to a collection via "a" tag
-// Products reference collections via: ["a", "30405", pubkey, collection_id]
+// Products reference collections via: ["a", "30405:pubkey:collection_id"] (NIP-99 compact format)
 export function findProductsInCollection(
   products: NostrEvent[],
   restaurantPubkey: string,
   collectionId: string
 ): NostrEvent[] {
   return products.filter(product => {
-    return product.tags.some(tag => 
-      tag[0] === 'a' &&
-      tag[1] === '30405' &&
-      tag[2] === restaurantPubkey &&
-      tag[3] === collectionId
-    );
+    return product.tags.some(tag => {
+      if (tag[0] !== 'a' || !tag[1] || typeof tag[1] !== 'string') return false;
+      
+      // Parse compact format: ["a", "30405:pubkey:collectionId"]
+      if (tag[1].includes(':')) {
+        const parts = tag[1].split(':');
+        if (parts.length >= 3 && parts[0] === '30405') {
+          const tagPubkey = parts[1];
+          const tagCollectionId = parts[2];
+          return tagPubkey === restaurantPubkey && tagCollectionId === collectionId;
+        }
+      }
+      
+      return false;
+    });
   });
 }
 
@@ -350,24 +359,90 @@ export function extractSchemaOrgData(profile: NostrEvent, collections?: NostrEve
 
   // Extract menus (collections kind:30405) for this establishment
   if (collections) {
-    const establishmentMenus = collections
-      .filter(collection => 
-        collection.kind === 30405 && 
-        collection.pubkey === profile.pubkey
-      )
-      .map(collection => {
-        const titleTag = collection.tags.find(t => t[0] === 'title');
-        const summaryTag = collection.tags.find(t => t[0] === 'summary');
-        const dTag = collection.tags.find(t => t[0] === 'd');
-        
-        return {
-          "@type": "Menu",
-          "name": titleTag?.[1] || '',
-          "description": summaryTag?.[1] || '',
-          "identifier": dTag?.[1] || '',
-        };
-      })
-      .filter(menu => menu.identifier); // Only include menus with identifier
+    const establishmentCollections = collections.filter(collection => 
+      collection.kind === 30405 && 
+      collection.pubkey === profile.pubkey
+    );
+    
+    // Separate menus from menu sections based on title
+    const menus: NostrEvent[] = [];
+    const sections: NostrEvent[] = [];
+    
+    establishmentCollections.forEach(collection => {
+      const titleTag = collection.tags.find(t => t[0] === 'title');
+      const title = titleTag?.[1] || '';
+      
+      // Check if this is a menu section (contains "Menu Section" in title)
+      if (title.toLowerCase().includes('menu section')) {
+        sections.push(collection);
+      } else {
+        menus.push(collection);
+      }
+    });
+    
+    // Build menu objects with their sections
+    const establishmentMenus = menus.map(menu => {
+      const titleTag = menu.tags.find(t => t[0] === 'title');
+      const summaryTag = menu.tags.find(t => t[0] === 'summary');
+      const dTag = menu.tags.find(t => t[0] === 'd');
+      const menuId = dTag?.[1] || '';
+      
+      const menuObject: Record<string, any> = {
+        "@type": "Menu",
+        "name": titleTag?.[1] || '',
+        "description": summaryTag?.[1] || '',
+        "identifier": menuId,
+      };
+      
+      // Find sections that belong to this menu by checking if they share products
+      // Get product IDs from menu's "a" tags (compact format: "30402:pubkey:productId")
+      const menuProductIds = new Set<string>();
+      menu.tags
+        .filter(tag => tag[0] === 'a' && tag[1] && typeof tag[1] === 'string' && tag[1].includes(':'))
+        .forEach(tag => {
+          const parts = tag[1].split(':');
+          if (parts.length >= 3 && parts[0] === '30402') {
+            menuProductIds.add(parts[2]);
+          }
+        });
+      
+      // Find sections that share products with this menu
+      const menuSections = sections
+        .filter(section => {
+          // Get product IDs from section's "a" tags
+          return section.tags.some(tag => {
+            if (tag[0] === 'a' && tag[1] && typeof tag[1] === 'string' && tag[1].includes(':')) {
+              const parts = tag[1].split(':');
+              if (parts.length >= 3 && parts[0] === '30402') {
+                return menuProductIds.has(parts[2]);
+              }
+            }
+            return false;
+          });
+        })
+        .map(section => {
+          const secTitleTag = section.tags.find(t => t[0] === 'title');
+          const secSummaryTag = section.tags.find(t => t[0] === 'summary');
+          const secDTag = section.tags.find(t => t[0] === 'd');
+          
+          // Clean up the section name by removing "Menu Section" suffix
+          let sectionName = secTitleTag?.[1] || '';
+          sectionName = sectionName.replace(/\s*Menu Section\s*$/i, '').trim();
+          
+          return {
+            "@type": "MenuSection",
+            "name": sectionName,
+            "description": secSummaryTag?.[1] || '',
+            "identifier": secDTag?.[1] || '',
+          };
+        });
+      
+      if (menuSections.length > 0) {
+        menuObject.hasMenuSection = menuSections;
+      }
+      
+      return menuObject;
+    }).filter(menu => menu.identifier); // Only include menus with identifier
     
     if (establishmentMenus.length > 0) {
       schemaData.hasMenu = establishmentMenus;
