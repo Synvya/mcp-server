@@ -169,6 +169,7 @@ export const GetMenuItemsOutputSchema = z.object({
   name: z.string().describe("Menu name"),
   description: z.string().optional().describe("Menu description"),
   identifier: z.string().describe("Menu identifier"),
+  hasMenuItem: z.array(MenuItemSchema).optional().describe("Array of menu items directly in the menu (not in sections)"),
   hasMenuSection: z.array(MenuSectionSchema).optional().describe("Array of menu sections, each containing menu items grouped by section"),
 });
 
@@ -184,7 +185,8 @@ export const SearchMenuItemsOutputSchema = z.object({
       name: z.string().describe("Menu name"),
       description: z.string().optional().describe("Menu description"),
       identifier: z.string().describe("Menu identifier"),
-      hasMenuItem: z.array(MenuItemSchema),
+      hasMenuItem: z.array(MenuItemSchema).optional().describe("Array of menu items directly in the menu (not in sections)"),
+      hasMenuSection: z.array(MenuSectionSchema).optional().describe("Array of menu sections, each containing grouped menu items"),
     })),
   })),
 });

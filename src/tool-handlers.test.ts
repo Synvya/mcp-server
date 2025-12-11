@@ -143,7 +143,9 @@ describe('Tool Handlers', () => {
       
       expect(result['@context']).toBe('https://schema.org');
       expect(result['@type']).toBe('Menu');
-      expect(result.hasMenuSection).toEqual([]);
+      // Empty menu should have no items or sections
+      expect(result.hasMenuItem).toBeUndefined();
+      expect(result.hasMenuSection).toBeUndefined();
     });
 
     it('should return empty menu for invalid menu_identifier', () => {
@@ -160,7 +162,9 @@ describe('Tool Handlers', () => {
       );
       
       expect(result['@type']).toBe('Menu');
-      expect(result.hasMenuSection).toEqual([]);
+      // Empty menu should have no items or sections
+      expect(result.hasMenuItem).toBeUndefined();
+      expect(result.hasMenuSection).toBeUndefined();
     });
 
     it('should return menu with items for valid restaurant and menu', () => {
@@ -191,7 +195,10 @@ describe('Tool Handlers', () => {
       expect(result['@type']).toBe('Menu');
       expect(result.name).toBeDefined();
       expect(result.identifier).toBe(menuIdentifier);
-      expect(Array.isArray(result.hasMenuSection)).toBe(true);
+      // Menu should have either direct items, sections, or both
+      const hasItems = result.hasMenuItem && Array.isArray(result.hasMenuItem) && result.hasMenuItem.length > 0;
+      const hasSections = result.hasMenuSection && Array.isArray(result.hasMenuSection) && result.hasMenuSection.length > 0;
+      expect(hasItems || hasSections).toBe(true);
     });
 
     it('should return menu items with correct JSON-LD structure', () => {
@@ -218,6 +225,7 @@ describe('Tool Handlers', () => {
         toolData
       );
       
+      // Check for sectioned items
       if (result.hasMenuSection && result.hasMenuSection.length > 0) {
         const section = result.hasMenuSection[0];
         expect(section['@type']).toBe('MenuSection');
@@ -232,6 +240,15 @@ describe('Tool Handlers', () => {
           expect(item.name).toBeDefined();
           expect(item.description).toBeDefined();
         }
+      }
+      
+      // Check for direct items
+      if (result.hasMenuItem && result.hasMenuItem.length > 0) {
+        const item = result.hasMenuItem[0];
+        expect(item['@context']).toBe('https://schema.org');
+        expect(item['@type']).toBe('MenuItem');
+        expect(item.name).toBeDefined();
+        expect(item.description).toBeDefined();
       }
     });
   });
