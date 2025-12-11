@@ -27,7 +27,12 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.22.0",
     "@scure/base": "^2.0.0",
-    "ngeohash": "^0.6.3"
+    "ngeohash": "^0.6.3",
+    "zod": "^4.0.0",
+    "zod-to-json-schema": "^3.25.0"
+  },
+  "overrides": {
+    "zod": "^4.0.0"
   },
   "devDependencies": {
     "@types/ngeohash": "^0.6.8",
