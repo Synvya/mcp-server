@@ -59,6 +59,12 @@ export function registerTools(server: McpServer, data: ToolData) {
             "name": z.string().describe("Menu name"),
             "description": z.string().optional().describe("Menu description"),
             "identifier": z.string().describe("Menu identifier - use this as menu_identifier for get_menu_items"),
+            "hasMenuSection": z.array(z.object({
+              "@type": z.string().describe("MenuSection"),
+              "name": z.string().describe("Section name (e.g., 'Appetizers', 'Entrees', 'Sides')"),
+              "description": z.string().optional().describe("Section description"),
+              "identifier": z.string().describe("Section identifier"),
+            })).optional().describe("Array of menu sections within this menu"),
           })).optional().describe("Array of menus available at this establishment"),
         })).describe("Array of JSON-LD formatted food establishment objects following schema.org FoodEstablishment specification. May contain mixed types (Restaurant, Bakery, etc.)"),
       }),
