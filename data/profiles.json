@@ -1,11 +1,11 @@
 [
   {
-    "content": "{\"name\":\"elcandado\",\"display_name\":\"Restaurante El Candado\",\"about\":\"El Candado: Authentic Spanish Flavors in Snoqualmie 🇪🇸🌲\\n\\nMore than a meal, a Mediterranean state of mind. Where the soul of Spain meets the heart of the Cascades.\\n\\nOur Story:\\nBorn from a family recipe book dating back to 1940s Málaga, we bring genuine Spanish sobremesa (the art of lingering at the table) to Snoqualmie. Chef Alejandro’s wood-fired paellas and Abuela’s secret gambas recipe will transport you to a sun-drenched plaza.\\n\\nWhat We Serve:\\n✅ Handcrafted tapas using local PNW ingredients\\n✅ Saffron-infused paellas cooked over almond wood\\n✅ Imported Spanish wines & craft sangrias\\n✅ Extensive gluten-free/vegan selection\\n\\nEnjoy your sobremesa at our rustic-chic dining room with fireplace or at our summer patio overlooking the Snoqualmie River.\\n\\nVisit us or make a reservation with your favorite AI assistant. \",\"website\":\"https://www.dinedirect.app/demo/elcandado\",\"picture\":\"https://i.nostr.build/uQ6Lq7jq0nCNSRTT.png\",\"banner\":\"https://i.nostr.build/uR9UxQhO9VKSIRMu.png\",\"nip05\":\"elcandado@dinedirect.app\"}",
-    "created_at": 1763621702,
-    "id": "d6fcf837edd671fcf5e48090c4eb932face9b25fb260aacd84ac4da3723ed3dc",
+    "content": "{\"name\":\"elcandado\",\"display_name\":\"Restaurante El Candado\",\"about\":\"El Candado: Authentic Spanish Flavors in Snoqualmie 🇪🇸🌲\\n\\nMore than a meal, a Mediterranean state of mind. Where the soul of Spain meets the heart of the Cascades.\\n\\nOur Story:\\nBorn from a family recipe book dating back to 1940s Málaga, we bring genuine Spanish sobremesa (the art of lingering at the table) to Snoqualmie. Chef Alejandro’s wood-fired paellas and Abuela’s secret gambas recipe will transport you to a sun-drenched plaza.\\n\\nWhat We Serve:\\n✅ Handcrafted tapas using local PNW ingredients\\n✅ Saffron-infused paellas cooked over almond wood\\n✅ Imported Spanish wines & craft sangrias\\n✅ Dedicated gluten-free/vegan menu\\n\\nEnjoy your sobremesa at our rustic-chic dining room with fireplace or at our summer patio overlooking the Snoqualmie River.\\n\\nVisit us or make a reservation with your favorite AI assistant. \",\"website\":\"https://www.dinedirect.app/demo/elcandado\",\"picture\":\"https://i.nostr.build/K9PYZZtXfb4k3NSw.png\",\"banner\":\"https://i.nostr.build/uR9UxQhO9VKSIRMu.png\",\"nip05\":\"elcandado@dinedirect.app\"}",
+    "created_at": 1765313640,
+    "id": "7de71da77287e09828aecb29a3c634e1ffc6aabe5b51a47616456181d1152c54",
     "kind": 0,
     "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
-    "sig": "2ea0ee93257538e82d9fa02f1ec0803106b4464b2cd4b16a281876743508d4dbfa96315f653c85f4f47603960f9d45e5f226be5923daa19b7c54cb7cba75c10e",
+    "sig": "f98b6ee469a7391de8895dbce3ddfd778c1dc9388a11b3c88f61205d9016a30d1faf5ce2f92eda64706f74bac219eec0031556c6f910d5cdbf3d35644f999f8a",
     "tags": [
       [
         "schema.org:FoodEstablishment",
@@ -33,18 +33,23 @@
         "paella"
       ],
       [
+        "schema.org:FoodEstablishment:servesCuisine",
+        "Spanish",
+        "https://schema.org/servesCuisine"
+      ],
+      [
         "schema.org:FoodEstablishment:telephone",
         "tel:+155512345678",
         "https://datatracker.ietf.org/doc/html/rfc3966"
       ],
       [
         "schema.org:FoodEstablishment:email",
-        "mailto:synvya@synvya.com",
+        "mailto:elcandado@dinedirect.app",
         "https://schema.org/email"
       ],
       [
         "schema.org:PostalAddress:streetAddress",
-        "123 Main Street",
+        "7970 Railroad Ave",
         "https://schema.org/streetAddress"
       ],
       [
@@ -69,17 +74,17 @@
       ],
       [
         "schema.org:GeoCoordinates:longitude",
-        "-121.827093",
+        "-121.8253714",
         "https://schema.org/longitude"
       ],
       [
         "schema.org:GeoCoordinates:latitude",
-        "47.5289527",
+        "47.5288415",
         "https://schema.org/latitude"
       ],
       [
         "i",
-        "geo:c23q7u2hn",
+        "geo:c23q7u37x",
         "https://geohash.org"
       ],
       [
@@ -99,6 +104,11 @@
       [
         "k",
         "nip"
+      ],
+      [
+        "schema.org:FoodEstablishment:openingHours",
+        "Tu-Th 11:00-21:00, Fr-Sa 11:00-00:00, Su 11:00-21:00",
+        "https://schema.org/openingHours"
       ]
     ]
   }

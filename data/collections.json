@@ -1,11 +1,71 @@
 [
   {
     "content": "",
-    "created_at": 1763449048,
-    "id": "680413258e74b46dd309688b10221abf1fb46ab6c12e16bd4ca4168648c36800",
+    "created_at": 1765322945,
+    "id": "b8a2eab69572f4a9c402917111fd9b4fb0209b80f7a118330ff8819d840f30a9",
     "kind": 30405,
     "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
-    "sig": "39c7a4fc94046f3f5a023f1fca9a111b9fc0d8509b5387520d55d283510f6910bd9d2833c6566d25c41782456a87ef931dd17afc3e338b3e671512b14f18bba7",
+    "sig": "1aecb96194059e3af359cf314fa43fe45b0b045161cbc51a9f3932bc9048fd166993cee7886a1c87dcab0f999fe6aa406ac94c477b4fa0df05f5632a07ede5ea",
+    "tags": [
+      [
+        "d",
+        "Sides"
+      ],
+      [
+        "title",
+        "Sides Menu Section"
+      ],
+      [
+        "summary",
+        "Sides Menu Section for Restaurante El Candado"
+      ],
+      [
+        "a",
+        "30402:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:sq-6a8f2ac3bca6e398"
+      ]
+    ]
+  },
+  {
+    "content": "",
+    "created_at": 1765322945,
+    "id": "e48aa7720edf08957bb5d5fb0437e86cb68e79ae39e243066af4e6afe5326d33",
+    "kind": 30405,
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "sig": "34784c42db8e4bf2469d1b836d50d67d44f2e0480ed077eb09af6868be9a395e2220f10fe1816698d330f4e289fa12a7eb0063cb2c464f5c1befaa124df40770",
+    "tags": [
+      [
+        "d",
+        "Entrees"
+      ],
+      [
+        "title",
+        "Entrees Menu Section"
+      ],
+      [
+        "summary",
+        "Entrees Menu Section for Restaurante El Candado"
+      ],
+      [
+        "a",
+        "30402:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:sq-c9ab1636203e078f"
+      ],
+      [
+        "a",
+        "30402:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:sq-b097ad0d3fc3fbb2"
+      ],
+      [
+        "a",
+        "30402:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:sq-ccacef23a2be8ca7"
+      ]
+    ]
+  },
+  {
+    "content": "",
+    "created_at": 1765322945,
+    "id": "cf63d687d5392537aa908e5c5815227d9ccee47643719fee4c9127d1d52a5ad7",
+    "kind": 30405,
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "sig": "2b2429df3199a67b06d0ce928676e0eae9bf3e8e01bea2aa3525f3b7467b2e5141af3cb72ffca3ff8338da8c79bac0ae7e83e2b7b32cddb461d653092a18dcab",
     "tags": [
       [
         "d",
@@ -17,49 +77,111 @@
       ],
       [
         "summary",
-        "Dinner Menu for Restaurant El Candado"
-      ],
-      [
-        "location",
-        "123 Main Street, Snoqualmie, WA, 98065, USA"
-      ],
-      [
-        "g",
-        "c23q7u2hn"
+        "Dinner Menu for Restaurante El Candado"
       ],
       [
         "a",
-        "30402",
-        "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
-        "0005"
+        "30402:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:sq-b097ad0d3fc3fbb2"
       ],
       [
         "a",
-        "30402",
-        "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
-        "0006"
+        "30402:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:sq-ccacef23a2be8ca7"
       ],
       [
         "a",
-        "30402",
-        "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
-        "0007"
-      ],
-      [
-        "a",
-        "30402",
-        "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
-        "0008"
+        "30402:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:sq-6a8f2ac3bca6e398"
       ]
     ]
   },
   {
     "content": "",
-    "created_at": 1763449048,
-    "id": "04d1302f57f79450f00604b8f1389e15449566c322cb8ae331dd0df14045f776",
+    "created_at": 1765322945,
+    "id": "6b7ffe39295c812a88d8d28e0caaa1e58e3026d704d74a3d4919a4ca5b250f18",
     "kind": 30405,
     "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
-    "sig": "43429fbc9d1710ad8080f2db723d3fdc2c339da60f66f88434980caf6046e2fd54425b938cc09ca84e4193f3c519470fa6619d61e5569f5fdfed1c6134c331b3",
+    "sig": "ccf425242c41894bcccbaa1c14e69e76512dbc6db4f8e842d78905cf53532bf1805f53c54656d18e3532f9029d5cc21197d49afc8f0e3048ab1226d03f4a9e56",
+    "tags": [
+      [
+        "d",
+        "Sandwiches"
+      ],
+      [
+        "title",
+        "Sandwiches Menu Section"
+      ],
+      [
+        "summary",
+        "Sandwiches Menu Section for Restaurante El Candado"
+      ],
+      [
+        "a",
+        "30402:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:sq-26b0b60687169e93"
+      ]
+    ]
+  },
+  {
+    "content": "",
+    "created_at": 1765322945,
+    "id": "b3e8ba8ada533d9ae91491f6cce59b1e50f3fdb381e7ed7444bca729dd7ba7bc",
+    "kind": 30405,
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "sig": "2cd3f2ac97d1d3561192d2391eef1efabde41785700aec2dfd743848475a97c18de8611b093e90b51b0bfafc0bb406f948bbae70c40b0f6ae4cc84ae1527d1a9",
+    "tags": [
+      [
+        "d",
+        "Salads"
+      ],
+      [
+        "title",
+        "Salads Menu Section"
+      ],
+      [
+        "summary",
+        "Salads Menu Section for Restaurante El Candado"
+      ],
+      [
+        "a",
+        "30402:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:sq-c3dd067564086ad4"
+      ]
+    ]
+  },
+  {
+    "content": "",
+    "created_at": 1765322945,
+    "id": "5d3440ec71d3553183c3c1292f6fd068abe9eef3a1ea1109dd3ca2a3c406b000",
+    "kind": 30405,
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "sig": "a9c1701f62cc07adbdd194b498ac7f0e2d41064f012fcafe640c215976a0970eb5c3018d290a3f1df1f49b0c058751438d2d77fbc6279d2bc4bcc09b0e257eaa",
+    "tags": [
+      [
+        "d",
+        "Appetizers"
+      ],
+      [
+        "title",
+        "Appetizers Menu Section"
+      ],
+      [
+        "summary",
+        "Appetizers Menu Section for Restaurante El Candado"
+      ],
+      [
+        "a",
+        "30402:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:sq-e6f12d538b37b4dc"
+      ],
+      [
+        "a",
+        "30402:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:sq-d73ae57107664684"
+      ]
+    ]
+  },
+  {
+    "content": "",
+    "created_at": 1765322945,
+    "id": "f8c9e5d543ed3a1454dfca31f42b2d800faa52cf5c070c765e4ceec749e090d3",
+    "kind": 30405,
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "sig": "1fdcc3daf28365a308d4b707377a39fd628f6a56753490c6b9ffbd8842ab8e4115496e892608480126bda3d81dac2e3cb7e68a4ef6d6061d6557c6883590b10a",
     "tags": [
       [
         "d",
@@ -71,39 +193,23 @@
       ],
       [
         "summary",
-        "Lunch Menu for Restaurant El Candado"
-      ],
-      [
-        "location",
-        "123 Main Street, Snoqualmie, WA, 98065, USA"
-      ],
-      [
-        "g",
-        "c23q7u2hn"
+        "Lunch Menu for Restaurante El Candado"
       ],
       [
         "a",
-        "30402",
-        "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
-        "0001"
+        "30402:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:sq-26b0b60687169e93"
       ],
       [
         "a",
-        "30402",
-        "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
-        "0002"
+        "30402:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:sq-c3dd067564086ad4"
       ],
       [
         "a",
-        "30402",
-        "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
-        "0003"
+        "30402:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:sq-e6f12d538b37b4dc"
       ],
       [
         "a",
-        "30402",
-        "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
-        "0004"
+        "30402:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:sq-d73ae57107664684"
       ]
     ]
   }
