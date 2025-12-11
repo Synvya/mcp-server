@@ -63,12 +63,13 @@ export const GeoCoordinatesSchema = z.object({
 // MENU SCHEMAS
 // ============================================================================
 
-export const MenuSectionSchema = z.object({
+export const MenuSectionSchema: z.ZodType<any> = z.lazy(() => z.object({
   "@type": z.string().describe("MenuSection"),
   name: z.string().describe("Section name (e.g., 'Appetizers', 'Entrees', 'Sides')"),
   description: z.string().optional().describe("Section description"),
   identifier: z.string().describe("Section identifier"),
-});
+  hasMenuItem: z.array(MenuItemSchema).optional().describe("Array of menu items in this section"),
+}));
 
 export const MenuSchema = z.object({
   "@type": z.string().describe("Menu"),
@@ -168,7 +169,7 @@ export const GetMenuItemsOutputSchema = z.object({
   name: z.string().describe("Menu name"),
   description: z.string().optional().describe("Menu description"),
   identifier: z.string().describe("Menu identifier"),
-  hasMenuItem: z.array(MenuItemSchema).describe("Array of JSON-LD formatted menu item objects following schema.org MenuItem specification"),
+  hasMenuSection: z.array(MenuSectionSchema).optional().describe("Array of menu sections, each containing menu items grouped by section"),
 });
 
 export const SearchMenuItemsOutputSchema = z.object({

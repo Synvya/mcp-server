@@ -142,7 +142,7 @@ export function getMenuItems(
       "@type": "Menu",
       "name": "",
       "identifier": "",
-      "hasMenuItem": [],
+      "hasMenuSection": [],
     };
   }
   
@@ -154,74 +154,97 @@ export function getMenuItems(
       "@type": "Menu",
       "name": "",
       "identifier": "",
-      "hasMenuItem": [],
+      "hasMenuSection": [],
     };
   }
   
-  // Collect all unique products using Set to avoid duplicates
-  const menuItemSet = new Set<NostrEvent>();
-  
-  // 1. Find products directly linked to this menu
-  const directMenuItems = findProductsInCollection(products, establishmentPubkey, menu_identifier);
-  directMenuItems.forEach(item => menuItemSet.add(item));
-  
-  // 2. Find products directly referenced by the menu's "a" tags (compact format: "30402:pubkey:productId")
+  // Get product IDs from menu's "a" tags (compact format: "30402:pubkey:productId")
+  const menuProductIds = new Set<string>();
   collection.tags
     .filter(tag => tag[0] === 'a' && tag[1] && typeof tag[1] === 'string' && tag[1].includes(':'))
     .forEach(tag => {
       const parts = tag[1].split(':');
-      if (parts.length >= 3 && parts[0] === '30402' && parts[1] === establishmentPubkey) {
-        const productId = parts[2];
-        const product = products.find(p => {
-          const dTag = p.tags.find(t => t[0] === 'd');
-          return dTag && dTag[1] === productId && p.pubkey === establishmentPubkey;
-        });
-        if (product) menuItemSet.add(product);
+      if (parts.length >= 3 && parts[0] === '30402') {
+        menuProductIds.add(parts[2]);
       }
     });
   
-  // 3. Find all menu sections (collections with same pubkey that are not the main menu)
-  const menuSections = collections.filter(c => 
+  // Find all menu sections (collections with same pubkey that are not the main menu)
+  const allSections = collections.filter(c => 
     c.kind === 30405 &&
     c.pubkey === establishmentPubkey &&
     c.tags.some(t => t[0] === 'd' && t[1] && t[1] !== menu_identifier)
   );
   
-  // 4. For each menu section, check if any of its products are also linked to the menu
-  // If so, include all products from that section
-  for (const section of menuSections) {
+  // Filter sections that share products with this menu and build MenuSection objects
+  const menuSectionsJsonLd: Record<string, any>[] = [];
+  
+  for (const section of allSections) {
     const sectionId = section.tags.find(t => t[0] === 'd')?.[1];
     if (!sectionId) continue;
     
+    // Get all products in this section
     const sectionProducts = findProductsInCollection(products, establishmentPubkey, sectionId);
     
-    // Check if any section product is also linked to the menu
-    const sectionHasMenuProducts = sectionProducts.some(product => {
-      // Check if product has an "a" tag linking to the menu (compact format)
-      return product.tags.some(tag => {
-        if (tag[0] !== 'a' || !tag[1] || typeof tag[1] !== 'string' || !tag[1].includes(':')) {
-          return false;
-        }
-        
+    // Also check section's "a" tags for product references
+    const sectionProductIds = new Set<string>();
+    section.tags
+      .filter(tag => tag[0] === 'a' && tag[1] && typeof tag[1] === 'string' && tag[1].includes(':'))
+      .forEach(tag => {
         const parts = tag[1].split(':');
-        if (parts.length >= 3 && parts[0] === '30405') {
-          return parts[1] === establishmentPubkey && parts[2] === menu_identifier;
+        if (parts.length >= 3 && parts[0] === '30402') {
+          sectionProductIds.add(parts[2]);
         }
-        
-        return false;
       });
-    });
     
-    // If section shares products with menu, include all its products
-    if (sectionHasMenuProducts) {
-      sectionProducts.forEach(product => menuItemSet.add(product));
+    // Check if this section has any products that are also in the menu
+    const hasSharedProducts = Array.from(sectionProductIds).some(productId => 
+      menuProductIds.has(productId)
+    );
+    
+    if (!hasSharedProducts) continue;
+    
+    // Get all products for this section
+    const sectionProductEvents = new Set<NostrEvent>();
+    
+    // Add products from collection lookup
+    sectionProducts.forEach(p => sectionProductEvents.add(p));
+    
+    // Add products from section's "a" tags
+    for (const productId of sectionProductIds) {
+      const product = products.find(p => {
+        const dTag = p.tags.find(t => t[0] === 'd');
+        return dTag && dTag[1] === productId && p.pubkey === establishmentPubkey;
+      });
+      if (product) sectionProductEvents.add(product);
     }
+    
+    // Convert products to MenuItem JSON-LD
+    const menuItems = Array.from(sectionProductEvents)
+      .map(item => extractMenuItemSchemaOrgData(item, false))
+      .filter((item): item is Record<string, any> => item !== null);
+    
+    if (menuItems.length === 0) continue;
+    
+    // Extract section properties
+    const secTitleTag = section.tags.find(t => t[0] === 'title');
+    const secSummaryTag = section.tags.find(t => t[0] === 'summary');
+    const secDTag = section.tags.find(t => t[0] === 'd');
+    
+    // Clean up the section name by removing "Menu Section" suffix
+    let sectionName = secTitleTag?.[1] || '';
+    sectionName = sectionName.replace(/\s*Menu Section\s*$/i, '').trim();
+    
+    const menuSection: Record<string, any> = {
+      "@type": "MenuSection",
+      "name": sectionName,
+      "description": secSummaryTag?.[1] || '',
+      "identifier": secDTag?.[1] || '',
+      "hasMenuItem": menuItems,
+    };
+    
+    menuSectionsJsonLd.push(menuSection);
   }
-  
-  // Convert to JSON-LD MenuItem format (without seller since restaurant_id is already specified)
-  const menuItemsJsonLd = Array.from(menuItemSet)
-    .map(item => extractMenuItemSchemaOrgData(item, false))
-    .filter((item): item is Record<string, any> => item !== null);
   
   // Extract menu properties from collection
   const titleTag = collection.tags.find(t => t[0] === 'title');
@@ -233,11 +256,14 @@ export function getMenuItems(
     "@type": "Menu",
     "name": titleTag?.[1] || '',
     "identifier": dTag?.[1] || '',
-    "hasMenuItem": menuItemsJsonLd,
   };
   
   if (summaryTag?.[1]) {
     menuObject.description = summaryTag[1];
+  }
+  
+  if (menuSectionsJsonLd.length > 0) {
+    menuObject.hasMenuSection = menuSectionsJsonLd;
   }
   
   return menuObject;

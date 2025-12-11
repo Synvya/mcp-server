@@ -66,7 +66,7 @@ Find food establishments (restaurants, bakeries, cafes, etc.) by type, cuisine, 
 
 ### get_menu_items
 
-Get all dishes from a specific food establishment menu. Returns a complete Menu object with all menu items.
+Get all dishes from a specific food establishment menu. Returns a complete Menu object with menu items organized by sections.
 
 **Parameters:**
 - `restaurant_id` (required): Food establishment identifier 
@@ -78,19 +78,24 @@ Get all dishes from a specific food establishment menu. Returns a complete Menu 
 A JSON-LD Menu object following schema.org Menu specification:
 - `@context`: "https://schema.org"
 - `@type`: "Menu"
-- `name` (string): Menu name from 
+- `name` (string): Menu name 
 - `description` (string, optional): Menu description 
 - `identifier` (string): Menu identifier 
-- `hasMenuItem` (array): Array of MenuItem objects, each containing:
-  - `@context`: "https://schema.org"
-  - `@type`: "MenuItem"
-  - `name` (string): name of the menu item
-  - `description` (string): Description of the menu item
-  - `identifier` (string, optional): Menu item identifier 
-  - `image` (string, optional): Image URL for the menu item
-  - `suitableForDiet` (array, optional): Array of schema.org suitableForDiet values (e.g., "VeganDiet", "GlutenFreeDiet")
-  - `offers` (object, optional): Price information with `@type: "Offer"`, `price` (number), `priceCurrency` (string)
-  - `geo` (object, optional): Geographic coordinates with `@type: "GeoCoordinates"`, `latitude`, and `longitude`
+- `hasMenuSection` (array): Array of MenuSection objects, each containing:
+  - `@type`: "MenuSection"
+  - `name` (string): Section name (e.g., "Appetizers", "Entrees", "Sides")
+  - `description` (string, optional): Section description
+  - `identifier` (string): Section identifier
+  - `hasMenuItem` (array): Array of MenuItem objects in this section, each containing:
+    - `@context`: "https://schema.org"
+    - `@type`: "MenuItem"
+    - `name` (string): name of the menu item
+    - `description` (string): Description of the menu item
+    - `identifier` (string, optional): Menu item identifier 
+    - `image` (string, optional): Image URL for the menu item
+    - `suitableForDiet` (array, optional): Array of schema.org suitableForDiet values (e.g., "VeganDiet", "GlutenFreeDiet")
+    - `offers` (object, optional): Price information with `@type: "Offer"`, `price` (number), `priceCurrency` (string)
+    - `geo` (object, optional): Geographic coordinates with `@type: "GeoCoordinates"`, `latitude`, and `longitude`
 
 **Example:**
 ```json
@@ -101,12 +106,13 @@ A JSON-LD Menu object following schema.org Menu specification:
 ```
 
 **Behavior Notes:**
-- Output format is JSON-LD (JSON for Linked Data) following schema.org Menu and MenuItem specifications
-- All objects include `@context` and `@type` for proper JSON-LD interpretation
+- Output format is JSON-LD (JSON for Linked Data) following schema.org Menu, MenuSection, and MenuItem specifications
+- Menu items are grouped by sections (e.g., Entrees, Sides, Appetizers)
+- All objects include `@context` and/or `@type` for proper JSON-LD interpretation
 - Dietary tags are mapped to schema.org suitableForDiet values
 - Unmapped dietary tags are appended to the description as text (e.g., "Nut free. Sulphites")
-- If menu not found, returns an error message
-- If food establishment not found, returns an error message
+- If menu not found, returns an error with empty hasMenuSection array
+- If food establishment not found, returns an error with empty hasMenuSection array
 
 ---
 

@@ -143,7 +143,7 @@ describe('Tool Handlers', () => {
       
       expect(result['@context']).toBe('https://schema.org');
       expect(result['@type']).toBe('Menu');
-      expect(result.hasMenuItem).toEqual([]);
+      expect(result.hasMenuSection).toEqual([]);
     });
 
     it('should return empty menu for invalid menu_identifier', () => {
@@ -160,7 +160,7 @@ describe('Tool Handlers', () => {
       );
       
       expect(result['@type']).toBe('Menu');
-      expect(result.hasMenuItem).toEqual([]);
+      expect(result.hasMenuSection).toEqual([]);
     });
 
     it('should return menu with items for valid restaurant and menu', () => {
@@ -191,7 +191,7 @@ describe('Tool Handlers', () => {
       expect(result['@type']).toBe('Menu');
       expect(result.name).toBeDefined();
       expect(result.identifier).toBe(menuIdentifier);
-      expect(Array.isArray(result.hasMenuItem)).toBe(true);
+      expect(Array.isArray(result.hasMenuSection)).toBe(true);
     });
 
     it('should return menu items with correct JSON-LD structure', () => {
@@ -218,12 +218,20 @@ describe('Tool Handlers', () => {
         toolData
       );
       
-      if (result.hasMenuItem.length > 0) {
-        const item = result.hasMenuItem[0];
-        expect(item['@context']).toBe('https://schema.org');
-        expect(item['@type']).toBe('MenuItem');
-        expect(item.name).toBeDefined();
-        expect(item.description).toBeDefined();
+      if (result.hasMenuSection && result.hasMenuSection.length > 0) {
+        const section = result.hasMenuSection[0];
+        expect(section['@type']).toBe('MenuSection');
+        expect(section.name).toBeDefined();
+        expect(section.identifier).toBeDefined();
+        expect(Array.isArray(section.hasMenuItem)).toBe(true);
+        
+        if (section.hasMenuItem.length > 0) {
+          const item = section.hasMenuItem[0];
+          expect(item['@context']).toBe('https://schema.org');
+          expect(item['@type']).toBe('MenuItem');
+          expect(item.name).toBeDefined();
+          expect(item.description).toBeDefined();
+        }
       }
     });
   });
