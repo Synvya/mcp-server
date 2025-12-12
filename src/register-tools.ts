@@ -101,7 +101,7 @@ export function registerTools(server: McpServer, data: ToolData) {
           "@type": "Menu",
           "name": "",
           "identifier": "",
-          "hasMenuItem": [],
+          "hasMenuSection": [],
         };
         return {
           content: [

@@ -140,7 +140,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         "@type": "Menu",
         "name": "",
         "identifier": "",
-        "hasMenuItem": [],
+        "hasMenuSection": [],
       });
     }
 
@@ -171,7 +171,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       "@type": "Menu",
       "name": "",
       "identifier": "",
-      "hasMenuItem": [],
+      "hasMenuSection": [],
     });
   }
 }
