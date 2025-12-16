@@ -166,14 +166,14 @@ export function generateOpenAPISchema(baseUrl: string) {
   return {
     openapi: "3.1.0",
     info: {
-      title: "DineDirect MCP Server",
+      title: "Synvya MCP Server",
       description: "Discover restaurants and menus, and make reservations directly from your AI assistant. Search food establishments, get menu items, and find dishes by dietary preferences.",
       version: "1.0.0"
     },
     servers: [
       {
         url: baseUrl,
-        description: "DineDirect MCP Server"
+        description: "Synvya MCP Server"
       }
     ],
     paths: {
@@ -362,3 +362,4 @@ export function generateOpenAPISchema(baseUrl: string) {
     }
   };
 }
+

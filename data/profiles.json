@@ -1,6 +1,6 @@
 [
   {
-    "content": "{\"name\":\"elcandado\",\"display_name\":\"Restaurante El Candado\",\"about\":\"El Candado: Authentic Spanish Flavors in Snoqualmie 🇪🇸🌲\\n\\nMore than a meal, a Mediterranean state of mind. Where the soul of Spain meets the heart of the Cascades.\\n\\nOur Story:\\nBorn from a family recipe book dating back to 1940s Málaga, we bring genuine Spanish sobremesa (the art of lingering at the table) to Snoqualmie. Chef Alejandro’s wood-fired paellas and Abuela’s secret gambas recipe will transport you to a sun-drenched plaza.\\n\\nWhat We Serve:\\n✅ Handcrafted tapas using local PNW ingredients\\n✅ Saffron-infused paellas cooked over almond wood\\n✅ Imported Spanish wines & craft sangrias\\n✅ Dedicated gluten-free/vegan menu\\n\\nEnjoy your sobremesa at our rustic-chic dining room with fireplace or at our summer patio overlooking the Snoqualmie River.\\n\\nVisit us or make a reservation with your favorite AI assistant. \",\"website\":\"https://www.dinedirect.app/demo/elcandado\",\"picture\":\"https://i.nostr.build/K9PYZZtXfb4k3NSw.png\",\"banner\":\"https://i.nostr.build/uR9UxQhO9VKSIRMu.png\",\"nip05\":\"elcandado@dinedirect.app\"}",
+    "content": "{\"name\":\"elcandado\",\"display_name\":\"Restaurante El Candado\",\"about\":\"El Candado: Authentic Spanish Flavors in Snoqualmie 🇪🇸🌲\\n\\nMore than a meal, a Mediterranean state of mind. Where the soul of Spain meets the heart of the Cascades.\\n\\nOur Story:\\nBorn from a family recipe book dating back to 1940s Málaga, we bring genuine Spanish sobremesa (the art of lingering at the table) to Snoqualmie. Chef Alejandro's wood-fired paellas and Abuela's secret gambas recipe will transport you to a sun-drenched plaza.\\n\\nWhat We Serve:\\n✅ Handcrafted tapas using local PNW ingredients\\n✅ Saffron-infused paellas cooked over almond wood\\n✅ Imported Spanish wines & craft sangrias\\n✅ Dedicated gluten-free/vegan menu\\n\\nEnjoy your sobremesa at our rustic-chic dining room with fireplace or at our summer patio overlooking the Snoqualmie River.\\n\\nVisit us or make a reservation with your favorite AI assistant. \",\"website\":\"https://www.synvya.com/demo/elcandado\",\"picture\":\"https://i.nostr.build/K9PYZZtXfb4k3NSw.png\",\"banner\":\"https://i.nostr.build/uR9UxQhO9VKSIRMu.png\",\"nip05\":\"elcandado@synvya.com\"}",
     "created_at": 1765313640,
     "id": "7de71da77287e09828aecb29a3c634e1ffc6aabe5b51a47616456181d1152c54",
     "kind": 0,
@@ -44,7 +44,7 @@
       ],
       [
         "schema.org:FoodEstablishment:email",
-        "mailto:elcandado@dinedirect.app",
+        "mailto:elcandado@synvya.com",
         "https://schema.org/email"
       ],
       [
@@ -93,7 +93,7 @@
       ],
       [
         "schema.org:FoodEstablishment:acceptsReservations",
-        "https://dinedirect.app",
+        "https://synvya.com",
         "https://schema.org/acceptsReservations"
       ],
       [

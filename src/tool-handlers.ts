@@ -799,11 +799,11 @@ export function makeReservation(
     "reservationId": reservationId,
     "reservationStatus": "ReservationConfirmed",
     "underName": underName,
-    "broker": {
-      "@type": "Organization",
-      "name": "DineDirect",
-      "legalName": "Synvya Inc. d/b/a DineDirect",
-    },
+      "broker": {
+        "@type": "Organization",
+        "name": "Synvya",
+        "legalName": "Synvya Inc.",
+      },
     "reservationFor": reservationFor,
     "startTime": startTimeStr,
     "endTime": endTimeStr,

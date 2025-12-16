@@ -2,7 +2,7 @@
   "name": "mcp-server",
   "version": "1.0.0",
   "type": "module",
-  "description": "DineDirect MCP Server. Discover and book Restaurants directly from your AI assistant.",
+  "description": "Synvya MCP Server. Discover and book Restaurants directly from your AI assistant.",
   "main": "index.js",
   "scripts": {
     "test": "vitest run",

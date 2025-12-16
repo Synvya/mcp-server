@@ -1,6 +1,6 @@
 # Nostr Event Schema Documentation
 
-> **Quick Reference**: This document describes the required format for Nostr events used by the DineDirect MCP Server. Events must follow these schemas to be properly discovered and processed.
+> **Quick Reference**: This document describes the required format for Nostr events used by the Synvya MCP Server. Events must follow these schemas to be properly discovered and processed.
 
 ## Table of Contents
 
@@ -120,7 +120,7 @@ or
 
 #### Reservations & Hours
 ```json
-["schema.org:FoodEstablishment:acceptsReservations", "https://dinedirect.app", "https://schema.org/acceptsReservations"],  // or "True" or "False"
+["schema.org:FoodEstablishment:acceptsReservations", "https://synvya.com", "https://schema.org/acceptsReservations"],  // or "True" or "False"
 ["schema.org:FoodEstablishment:openingHours", "Tu-Th 11:00-21:00, Fr-Sa 11:00-00:00, Su 11:00-21:00", "https://schema.org/openingHours"]
 ```
 
@@ -142,7 +142,7 @@ Note: Dietary tags in profiles use **lowercase** format (e.g., `"vegan"`, `"glut
   "kind": 0,
   "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
   "created_at": 1763510731,
-  "content": "{\"name\":\"elcandado\",\"display_name\":\"Restaurante El Candado\",\"about\":\"Authentic Spanish restaurant...\",\"website\":\"https://www.dinedirect.app/demo/elcandado\",\"banner\":\"https://example.com/banner.png\"}",
+  "content": "{\"name\":\"elcandado\",\"display_name\":\"Restaurante El Candado\",\"about\":\"Authentic Spanish restaurant...\",\"website\":\"https://www.synvya.com/demo/elcandado\",\"banner\":\"https://example.com/banner.png\"}",
   "tags": [
     ["schema.org:FoodEstablishment", "Restaurant", "https://schema.org/FoodEstablishment"],
     ["t", "vegan"],
@@ -150,7 +150,7 @@ Note: Dietary tags in profiles use **lowercase** format (e.g., `"vegan"`, `"glut
     ["schema.org:FoodEstablishment:servesCuisine", "Spanish", "https://schema.org/servesCuisine"],
     ["schema.org:PostalAddress:streetAddress", "123 Main Street", "https://schema.org/streetAddress"],
     ["schema.org:GeoCoordinates:latitude", "47.5289527", "https://schema.org/latitude"],
-    ["schema.org:FoodEstablishment:acceptsReservations", "https://dinedirect.app", "https://schema.org/acceptsReservations"],
+    ["schema.org:FoodEstablishment:acceptsReservations", "https://synvya.com", "https://schema.org/acceptsReservations"],
     ["schema.org:FoodEstablishment:openingHours", "Tu-Th 11:00-21:00, Fr-Sa 11:00-00:00, Su 11:00-21:00", "https://schema.org/openingHours"]
   ],
   "sig": "..."

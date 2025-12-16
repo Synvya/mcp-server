@@ -1,4 +1,4 @@
-# DineDirect MCP Server
+# Synvya MCP Server
 
 Discover and book restaurants and other food establishments directly from your AI assistant.
 
@@ -212,7 +212,7 @@ The server supports both HTTP (for testing) and stdio (for Claude Desktop) trans
    ```json
    {
      "mcpServers": {
-       "dinedirect": {
+       "synvya": {
          "command": "node",
          "args": ["/absolute/path/to/mcp-server/dist/server.js"]
        }
@@ -262,7 +262,7 @@ The MCP server can be deployed to Vercel as a serverless function, making it acc
 3. **Deploy**:
    - Click "Deploy"
    - Wait for the deployment to complete
-   - Note your deployment URL (e.g., `https://mcp-server.vercel.app`)
+   - Note your deployment URL (e.g., `https://mcp.synvya.com`)
 
 4. **Test the deployment**:
    ```bash
