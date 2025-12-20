@@ -232,18 +232,27 @@ const VALID_FOOD_ESTABLISHMENT_TYPES = [
 ] as const;
 
 // Extract schema.org data from Nostr profile tags and format as JSON-LD
-// Returns null if profile doesn't have a valid schema.org:FoodEstablishment tag
+// Returns null if profile doesn't have a valid FoodEstablishment type
 export function extractSchemaOrgData(profile: NostrEvent, collections?: NostrEvent[]): Record<string, any> | null {
-  // Extract FoodEstablishment type from schema.org:FoodEstablishment tag: ["schema.org:FoodEstablishment", "Restaurant", "https://schema.org/FoodEstablishment"]
-  const foodEstablishmentTag = profile.tags.find(t => t[0] === 'schema.org:FoodEstablishment');
-  if (!foodEstablishmentTag || !foodEstablishmentTag[1]) {
-    return null; // STRICT: Ignore profiles without valid schema.org:FoodEstablishment tag
+  // NEW FORMAT: Extract FoodEstablishment type from "t" tag with "foodEstablishment:" prefix
+  let foodEstablishmentTag = profile.tags.find(t => 
+    t[0] === 't' && t[1] && t[1].startsWith('foodEstablishment:')
+  );
+  let establishmentType: string | undefined;
+  
+  if (foodEstablishmentTag && foodEstablishmentTag[1]) {
+    establishmentType = foodEstablishmentTag[1].replace('foodEstablishment:', '');
+  } else {
+    // OLD FORMAT: Fallback to schema.org:FoodEstablishment tag for backward compatibility
+    const oldTag = profile.tags.find(t => t[0] === 'schema.org:FoodEstablishment');
+    if (!oldTag || !oldTag[1]) {
+      return null; // STRICT: Ignore profiles without valid FoodEstablishment type
+    }
+    establishmentType = oldTag[1];
   }
-
-  const establishmentType = foodEstablishmentTag[1];
   
   // STRICT: Only accept valid FoodEstablishment types
-  if (!VALID_FOOD_ESTABLISHMENT_TYPES.includes(establishmentType as any)) {
+  if (!establishmentType || !VALID_FOOD_ESTABLISHMENT_TYPES.includes(establishmentType as any)) {
     return null; // Ignore profiles with invalid FoodEstablishment type
   }
 
@@ -255,66 +264,119 @@ export function extractSchemaOrgData(profile: NostrEvent, collections?: NostrEve
     "description": content.about || '',
   };
 
-  // Extract servesCuisine (always as array)
-  const cuisineTags = profile.tags.filter(t => t[0] === 'schema.org:FoodEstablishment:servesCuisine');
+  // NEW FORMAT: Extract servesCuisine from "t" tags with "servesCuisine:" prefix
+  const cuisineTags = profile.tags.filter(t => 
+    t[0] === 't' && t[1] && t[1].startsWith('servesCuisine:')
+  );
   if (cuisineTags.length > 0) {
     schemaData.servesCuisine = cuisineTags
-      .map(t => t[1])
+      .map(t => t[1]!.replace('servesCuisine:', ''))
       .filter(Boolean);
+  } else {
+    // OLD FORMAT: Fallback to schema.org:FoodEstablishment:servesCuisine tags
+    const oldCuisineTags = profile.tags.filter(t => t[0] === 'schema.org:FoodEstablishment:servesCuisine');
+    if (oldCuisineTags.length > 0) {
+      schemaData.servesCuisine = oldCuisineTags
+        .map(t => t[1])
+        .filter(Boolean);
+    }
   }
 
-  // Extract address components
-  const address: Record<string, string> = {};
-  profile.tags.forEach(tag => {
-    if (tag[0]?.startsWith('schema.org:PostalAddress:')) {
-      const parts = tag[0].split(':');
-      if (parts.length >= 3) {
-        const prop = parts[2]; // e.g., "streetAddress", "addressLocality" (after "schema.org:PostalAddress:")
-        const value = tag[1]; // Value is in tag[1]
-        if (prop && value) {
-          address[prop] = value;
+  // NEW FORMAT: Extract address from single "location" tag
+  const locationTag = profile.tags.find(t => t[0] === 'location');
+  if (locationTag && locationTag[1]) {
+    // Parse full address string: "7970 Railroad Ave, Snoqualmie, WA, 98065, USA"
+    const addressParts = locationTag[1].split(',').map(s => s.trim());
+    if (addressParts.length >= 4) {
+      schemaData.address = {
+        "@type": "PostalAddress",
+        "streetAddress": addressParts[0] || '',
+        "addressLocality": addressParts[1] || '',
+        "addressRegion": addressParts[2] || '',
+        "postalCode": addressParts[3] || '',
+        "addressCountry": addressParts[4] || (addressParts[3]?.match(/\d+/) ? 'US' : addressParts[3] || ''),
+      };
+    }
+  } else {
+    // OLD FORMAT: Extract address components from schema.org:PostalAddress:* tags
+    const address: Record<string, string> = {};
+    profile.tags.forEach(tag => {
+      if (tag[0]?.startsWith('schema.org:PostalAddress:')) {
+        const parts = tag[0].split(':');
+        if (parts.length >= 3) {
+          const prop = parts[2]; // e.g., "streetAddress", "addressLocality" (after "schema.org:PostalAddress:")
+          const value = tag[1]; // Value is in tag[1]
+          if (prop && value) {
+            address[prop] = value;
+          }
         }
       }
+    });
+    if (Object.keys(address).length > 0) {
+      schemaData.address = {
+        "@type": "PostalAddress",
+        ...address,
+      };
     }
-  });
-  if (Object.keys(address).length > 0) {
-    schemaData.address = {
-      "@type": "PostalAddress",
-      ...address,
-    };
   }
 
-  // Extract geo coordinates
-  const geo: Record<string, number> = {};
-  profile.tags.forEach(tag => {
-    if (tag[0]?.startsWith('schema.org:GeoCoordinates:')) {
-      const parts = tag[0].split(':');
-      if (parts.length >= 3) {
-        const prop = parts[2]; // "latitude" or "longitude" (after "schema.org:GeoCoordinates:")
-        const value = parseFloat(tag[1]); // Value is in tag[1]
-        if (prop && !isNaN(value)) {
-          geo[prop] = value;
+  // NEW FORMAT: Extract geo coordinates from single "geoCoordinates" tag
+  const geoCoordinatesTag = profile.tags.find(t => t[0] === 'geoCoordinates');
+  if (geoCoordinatesTag && geoCoordinatesTag[1]) {
+    // Parse comma-separated coordinates: "47.5288415, -121.8253714"
+    const coords = geoCoordinatesTag[1].split(',').map(s => parseFloat(s.trim()));
+    if (coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1])) {
+      schemaData.geo = {
+        "@type": "GeoCoordinates",
+        "latitude": coords[0],
+        "longitude": coords[1],
+      };
+    }
+  } else {
+    // OLD FORMAT: Extract geo coordinates from schema.org:GeoCoordinates:* tags
+    const geo: Record<string, number> = {};
+    profile.tags.forEach(tag => {
+      if (tag[0]?.startsWith('schema.org:GeoCoordinates:')) {
+        const parts = tag[0].split(':');
+        if (parts.length >= 3) {
+          const prop = parts[2]; // "latitude" or "longitude" (after "schema.org:GeoCoordinates:")
+          const value = parseFloat(tag[1]); // Value is in tag[1]
+          if (prop && !isNaN(value)) {
+            geo[prop] = value;
+          }
         }
       }
+    });
+    if (Object.keys(geo).length > 0) {
+      schemaData.geo = {
+        "@type": "GeoCoordinates",
+        ...geo,
+      };
     }
-  });
-  if (Object.keys(geo).length > 0) {
-    schemaData.geo = {
-      "@type": "GeoCoordinates",
-      ...geo,
-    };
   }
 
-  // Extract telephone
-  const telephoneTag = profile.tags.find(t => t[0] === 'schema.org:FoodEstablishment:telephone');
+  // NEW FORMAT: Extract telephone from "telephone" tag
+  let telephoneTag = profile.tags.find(t => t[0] === 'telephone');
   if (telephoneTag && telephoneTag[1]) {
     schemaData.telephone = telephoneTag[1]; // Value is in tag[1]
+  } else {
+    // OLD FORMAT: Fallback to schema.org:FoodEstablishment:telephone
+    telephoneTag = profile.tags.find(t => t[0] === 'schema.org:FoodEstablishment:telephone');
+    if (telephoneTag && telephoneTag[1]) {
+      schemaData.telephone = telephoneTag[1]; // Value is in tag[1]
+    }
   }
 
-  // Extract email (keep mailto: format)
-  const emailTag = profile.tags.find(t => t[0] === 'schema.org:FoodEstablishment:email');
+  // NEW FORMAT: Extract email from "email" tag (keep mailto: format)
+  let emailTag = profile.tags.find(t => t[0] === 'email');
   if (emailTag && emailTag[1]) {
     schemaData.email = emailTag[1]; // Value is in tag[1]
+  } else {
+    // OLD FORMAT: Fallback to schema.org:FoodEstablishment:email
+    emailTag = profile.tags.find(t => t[0] === 'schema.org:FoodEstablishment:email');
+    if (emailTag && emailTag[1]) {
+      schemaData.email = emailTag[1]; // Value is in tag[1]
+    }
   }
 
   // Extract website
@@ -327,27 +389,47 @@ export function extractSchemaOrgData(profile: NostrEvent, collections?: NostrEve
     schemaData.image = content.banner;
   }
 
-  // Extract acceptsReservations
-  const acceptsReservationsTag = profile.tags.find(t => t[0] === 'schema.org:FoodEstablishment:acceptsReservations');
+  // NEW FORMAT: Extract acceptsReservations from "acceptsReservations" tag
+  let acceptsReservationsTag = profile.tags.find(t => t[0] === 'acceptsReservations');
   if (acceptsReservationsTag) {
-    // Use tag value if present, otherwise default to "False"
-    schemaData.acceptsReservations = acceptsReservationsTag[1] || "False";
+    // Use tag value if present, otherwise default to "True"
+    schemaData.acceptsReservations = acceptsReservationsTag[1] || "True";
   } else {
-    schemaData.acceptsReservations = "False";
+    // OLD FORMAT: Fallback to schema.org:FoodEstablishment:acceptsReservations
+    acceptsReservationsTag = profile.tags.find(t => t[0] === 'schema.org:FoodEstablishment:acceptsReservations');
+    if (acceptsReservationsTag) {
+      schemaData.acceptsReservations = acceptsReservationsTag[1] || "False";
+    } else {
+      schemaData.acceptsReservations = "False";
+    }
   }
 
-  // Extract opening hours - single tag with comma-separated values: "Tu-Th 11:00-21:00, Fr-Sa 11:00-00:00, Su 11:00-21:00"
-  const openingHoursTag = profile.tags.find(t => t[0] === 'schema.org:openingHours');
+  // NEW FORMAT: Extract opening hours from "openingHours" tag - single tag with comma-separated values
+  let openingHoursTag = profile.tags.find(t => t[0] === 'openingHours');
   if (openingHoursTag && openingHoursTag[1]) {
     schemaData.openingHours = openingHoursTag[1]
       .split(',')
       .map(hours => hours.trim())
       .filter(hours => hours.length > 0);
+  } else {
+    // OLD FORMAT: Fallback to schema.org:FoodEstablishment:openingHours or schema.org:openingHours
+    openingHoursTag = profile.tags.find(t => 
+      t[0] === 'schema.org:FoodEstablishment:openingHours' || t[0] === 'schema.org:openingHours'
+    );
+    if (openingHoursTag && openingHoursTag[1]) {
+      schemaData.openingHours = openingHoursTag[1]
+        .split(',')
+        .map(hours => hours.trim())
+        .filter(hours => hours.length > 0);
+    }
   }
 
-  // Extract keywords (all "t" tags, comma-separated)
+  // Extract keywords (all "t" tags except those with prefixes, comma-separated)
   const keywordTags = profile.tags
-    .filter(t => t[0] === 't')
+    .filter(t => t[0] === 't' && t[1] && 
+      !t[1].startsWith('foodEstablishment:') && 
+      !t[1].startsWith('servesCuisine:') &&
+      !t[1].endsWith('Diet')) // Exclude dietary tags like "GlutenFreeDiet"
     .map(t => t[1])
     .filter(Boolean);
   if (keywordTags.length > 0) {
@@ -529,11 +611,21 @@ export function extractMenuItemSchemaOrgData(product: NostrEvent, includeSeller:
       .trim();
   }
   
-  // Add allergen tag values if present (schema.org:Recipe:recipeIngredient)
-  const allergenTags = product.tags.filter(t => t[0] === 'schema.org:Recipe:recipeIngredient');
+  // Add allergen tag values if present
+  // NEW FORMAT: "t" tags with "ingredients:" prefix (e.g., "ingredients:crustaceans")
+  // OLD FORMAT: schema.org:Recipe:recipeIngredient tags
+  const allergenTags = product.tags.filter(t => 
+    (t[0] === 't' && t[1] && t[1].startsWith('ingredients:')) ||
+    t[0] === 'schema.org:Recipe:recipeIngredient'
+  );
   if (allergenTags.length > 0) {
     const allergenValues = allergenTags
-      .map(t => t[1])
+      .map(t => {
+        if (t[0] === 't' && t[1] && t[1].startsWith('ingredients:')) {
+          return t[1].replace('ingredients:', ''); // Remove prefix for new format
+        }
+        return t[1]; // Old format
+      })
       .filter(Boolean);
     if (allergenValues.length > 0) {
       description += `. Contains ${allergenValues.join(', ')}`;

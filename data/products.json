@@ -1,430 +1,11 @@
 [
   {
-    "content": "**Bocadillo de Jamón**\n\nraditional Spanish baguette with cured Iberian ham and tomato spread",
-    "created_at": 1765322945,
-    "id": "af4cd084fbea7b4e4262b62b448b81a45208de570d9d652d513bfc6eaf5804d4",
-    "kind": 30402,
-    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
-    "sig": "78ba8781a63670808199a457abb41bcdc26551d1c9c7a14be383153737f486efd926caca2dbe3ad46f6095f39217fd9ed59b5d7995c1128afad659c159a08420",
-    "tags": [
-      [
-        "d",
-        "sq-26b0b60687169e93"
-      ],
-      [
-        "title",
-        "Bocadillo de Jamón"
-      ],
-      [
-        "summary",
-        "raditional Spanish baguette with cured Iberian ham and tomato spread"
-      ],
-      [
-        "type",
-        "simple",
-        "physical"
-      ],
-      [
-        "image",
-        "https://items-images-production.s3.us-west-2.amazonaws.com/files/477ccaba02308b4e418785993a25185bce244296/original.png",
-        ""
-      ],
-      [
-        "schema.org:Recipe:recipeIngredient",
-        "GLUTEN",
-        "https://schema.org/recipeIngredient"
-      ],
-      [
-        "a",
-        "30405:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:Sandwiches"
-      ],
-      [
-        "a",
-        "30405:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:Lunch"
-      ],
-      [
-        "published_at",
-        "1765322945"
-      ]
-    ]
-  },
-  {
-    "content": "**Setas al Jerez**\n\nWild mushrooms sautéed with sherry and garlic",
-    "created_at": 1765322945,
-    "id": "21362c75fa7a5bc990c0b18a4dfd2a7bc4d947a9a5271af3f22906c0454e537a",
-    "kind": 30402,
-    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
-    "sig": "9da1216394a4c770092e54f803df29f4d17b7cb0fd391f52662e5bcc2a45f0ce712fc9183cac0df3143fc2d92db4333de0b97f14404a1ff7ea5a07f8eda07fc0",
-    "tags": [
-      [
-        "d",
-        "sq-6a8f2ac3bca6e398"
-      ],
-      [
-        "title",
-        "Setas al Jerez"
-      ],
-      [
-        "summary",
-        "Wild mushrooms sautéed with sherry and garlic"
-      ],
-      [
-        "type",
-        "simple",
-        "physical"
-      ],
-      [
-        "image",
-        "https://items-images-production.s3.us-west-2.amazonaws.com/files/bb7616d26b664ea997337df7e151041864bcdc06/original.png",
-        ""
-      ],
-      [
-        "t",
-        "DAIRY_FREE"
-      ],
-      [
-        "t",
-        "GLUTEN_FREE"
-      ],
-      [
-        "t",
-        "VEGAN"
-      ],
-      [
-        "t",
-        "VEGETARIAN"
-      ],
-      [
-        "a",
-        "30405:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:Dinner"
-      ],
-      [
-        "a",
-        "30405:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:Sides"
-      ],
-      [
-        "schema.org:MenuItem:suitableForDiet",
-        "DAIRY_FREE",
-        "https://schema.org/suitableForDiet"
-      ],
-      [
-        "schema.org:MenuItem:suitableForDiet",
-        "GLUTEN_FREE",
-        "https://schema.org/suitableForDiet"
-      ],
-      [
-        "schema.org:MenuItem:suitableForDiet",
-        "VEGAN",
-        "https://schema.org/suitableForDiet"
-      ],
-      [
-        "schema.org:MenuItem:suitableForDiet",
-        "VEGETARIAN",
-        "https://schema.org/suitableForDiet"
-      ],
-      [
-        "published_at",
-        "1765322945"
-      ]
-    ]
-  },
-  {
-    "content": "**Paella Valenciana**\n\nSaffron rice with chicken, rabbit, green beans, and lima beans.",
-    "created_at": 1765322945,
-    "id": "1394cac143934e2786f16c7a7409652050e0a089926b998e431d9f03a8a309b7",
-    "kind": 30402,
-    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
-    "sig": "0ff38a516c62ae5757de6f897180eeff46fdcc8b2c97885f7178cd1d4528136dcae453445d019f2ae021f2c7ed003973ceb27b3cc1181e3ebe4475547cedf9e2",
-    "tags": [
-      [
-        "d",
-        "sq-ccacef23a2be8ca7"
-      ],
-      [
-        "title",
-        "Paella Valenciana"
-      ],
-      [
-        "summary",
-        "Saffron rice with chicken, rabbit, green beans, and lima beans."
-      ],
-      [
-        "type",
-        "simple",
-        "physical"
-      ],
-      [
-        "image",
-        "https://items-images-production.s3.us-west-2.amazonaws.com/files/91f7a22d22d0d87b2f800215dfa0ce7c8c6f8b92/original.png",
-        ""
-      ],
-      [
-        "schema.org:Recipe:recipeIngredient",
-        "FISH",
-        "https://schema.org/recipeIngredient"
-      ],
-      [
-        "t",
-        "DAIRY_FREE"
-      ],
-      [
-        "t",
-        "GLUTEN_FREE"
-      ],
-      [
-        "t",
-        "NUT_FREE"
-      ],
-      [
-        "a",
-        "30405:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:Entrees"
-      ],
-      [
-        "a",
-        "30405:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:Dinner"
-      ],
-      [
-        "schema.org:MenuItem:suitableForDiet",
-        "DAIRY_FREE",
-        "https://schema.org/suitableForDiet"
-      ],
-      [
-        "schema.org:MenuItem:suitableForDiet",
-        "GLUTEN_FREE",
-        "https://schema.org/suitableForDiet"
-      ],
-      [
-        "schema.org:MenuItem:suitableForDiet",
-        "NUT_FREE",
-        "https://schema.org/suitableForDiet"
-      ],
-      [
-        "published_at",
-        "1765322945"
-      ]
-    ]
-  },
-  {
-    "content": "**Cordero Asado**\n\nRoasted rack of lamb with rosemary and Rioja reduction",
-    "created_at": 1765322945,
-    "id": "58171b0d571ace5acfd290fa3ce9eae3fc17609501b8ad312f890bdb374f9ab9",
-    "kind": 30402,
-    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
-    "sig": "3c2e4c84c665ff43f94faa7dbbb08c05333d099b88f49a1668d7d18c89caa8a89ff32c154700831adaaf3d2929e5951e418f4f6523da1e18f971a062591d98a5",
-    "tags": [
-      [
-        "d",
-        "sq-b097ad0d3fc3fbb2"
-      ],
-      [
-        "title",
-        "Cordero Asado"
-      ],
-      [
-        "summary",
-        "Roasted rack of lamb with rosemary and Rioja reduction"
-      ],
-      [
-        "type",
-        "simple",
-        "physical"
-      ],
-      [
-        "image",
-        "https://items-images-production.s3.us-west-2.amazonaws.com/files/329b71fa0c40a04a1abfa46e223e7adb207673d9/original.png",
-        ""
-      ],
-      [
-        "t",
-        "DAIRY_FREE"
-      ],
-      [
-        "t",
-        "GLUTEN_FREE"
-      ],
-      [
-        "a",
-        "30405:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:Dinner"
-      ],
-      [
-        "a",
-        "30405:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:Entrees"
-      ],
-      [
-        "schema.org:MenuItem:suitableForDiet",
-        "DAIRY_FREE",
-        "https://schema.org/suitableForDiet"
-      ],
-      [
-        "schema.org:MenuItem:suitableForDiet",
-        "GLUTEN_FREE",
-        "https://schema.org/suitableForDiet"
-      ],
-      [
-        "published_at",
-        "1765322945"
-      ]
-    ]
-  },
-  {
-    "content": "**Bacalao al Pil Pil**\n\nSalt cod in garlic-olive oil emulsion with guindilla peppers",
-    "created_at": 1765322945,
-    "id": "762f8c9712b1dc81623bebe4025b3feee1209bf6fddae6e142022d85ed276918",
-    "kind": 30402,
-    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
-    "sig": "50a8c30fa6fb2ec2f97d10ec01fd7c1b0b46f6452fca690a00631e03492e4870dbd858917d3d1695f7e50e5287efaafdcc88f8697e37c37c0dbf63a6d9e1a750",
-    "tags": [
-      [
-        "d",
-        "sq-c9ab1636203e078f"
-      ],
-      [
-        "title",
-        "Bacalao al Pil Pil"
-      ],
-      [
-        "summary",
-        "Salt cod in garlic-olive oil emulsion with guindilla peppers"
-      ],
-      [
-        "type",
-        "simple",
-        "physical"
-      ],
-      [
-        "image",
-        "https://items-images-production.s3.us-west-2.amazonaws.com/files/9218a370e2a0483bf4e3291a08f767615a3f86f5/original.png",
-        ""
-      ],
-      [
-        "schema.org:Recipe:recipeIngredient",
-        "FISH",
-        "https://schema.org/recipeIngredient"
-      ],
-      [
-        "schema.org:Recipe:recipeIngredient",
-        "SULPHITES",
-        "https://schema.org/recipeIngredient"
-      ],
-      [
-        "t",
-        "DAIRY_FREE"
-      ],
-      [
-        "t",
-        "GLUTEN_FREE"
-      ],
-      [
-        "a",
-        "30405:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:Entrees"
-      ],
-      [
-        "a",
-        "30405:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:Dinner"
-      ],
-      [
-        "schema.org:MenuItem:suitableForDiet",
-        "DAIRY_FREE",
-        "https://schema.org/suitableForDiet"
-      ],
-      [
-        "schema.org:MenuItem:suitableForDiet",
-        "GLUTEN_FREE",
-        "https://schema.org/suitableForDiet"
-      ],
-      [
-        "published_at",
-        "1765322945"
-      ]
-    ]
-  },
-  {
-    "content": "**Pisto Manchego**\n\nVegetable stew with tomatoes, peppers, zucchini, and onions",
-    "created_at": 1765322945,
-    "id": "44355abb74fe94a69432fa193933598e969128c8aa629f12c91513937dbc4cca",
-    "kind": 30402,
-    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
-    "sig": "72d843c540d07c0bbe28f87033c2318dc24d1002841f5a162fe68b4bcb2e0870cc1a2bf1b8c48c1252d2c53fdd7d20628984d4fab42a1ea04713627eb5fc443d",
-    "tags": [
-      [
-        "d",
-        "sq-d73ae57107664684"
-      ],
-      [
-        "title",
-        "Pisto Manchego"
-      ],
-      [
-        "summary",
-        "Vegetable stew with tomatoes, peppers, zucchini, and onions"
-      ],
-      [
-        "type",
-        "simple",
-        "physical"
-      ],
-      [
-        "image",
-        "https://items-images-production.s3.us-west-2.amazonaws.com/files/5921fc6463d1a327f91cacf813033a16f6f687c7/original.png",
-        ""
-      ],
-      [
-        "t",
-        "DAIRY_FREE"
-      ],
-      [
-        "t",
-        "GLUTEN_FREE"
-      ],
-      [
-        "t",
-        "VEGAN"
-      ],
-      [
-        "t",
-        "VEGETARIAN"
-      ],
-      [
-        "a",
-        "30405:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:Appetizers"
-      ],
-      [
-        "a",
-        "30405:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:Lunch"
-      ],
-      [
-        "schema.org:MenuItem:suitableForDiet",
-        "DAIRY_FREE",
-        "https://schema.org/suitableForDiet"
-      ],
-      [
-        "schema.org:MenuItem:suitableForDiet",
-        "GLUTEN_FREE",
-        "https://schema.org/suitableForDiet"
-      ],
-      [
-        "schema.org:MenuItem:suitableForDiet",
-        "VEGAN",
-        "https://schema.org/suitableForDiet"
-      ],
-      [
-        "schema.org:MenuItem:suitableForDiet",
-        "VEGETARIAN",
-        "https://schema.org/suitableForDiet"
-      ],
-      [
-        "published_at",
-        "1765322945"
-      ]
-    ]
-  },
-  {
     "content": "**Gambas a la Plancha**\n\nGrilled wild prawns with garlic and smoked sea salt",
-    "created_at": 1765322945,
-    "id": "2acfaed2f6a9ab6b8cfeb952394fa5c57c8c0459fac0438c4982de5115f3f9bf",
+    "created_at": 1766100061,
+    "id": "504c4e6ee8dfbb2f1daafabfdfb912951b5dcded96105397fbbd4e6121b15d95",
     "kind": 30402,
     "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
-    "sig": "d130a0e5a53a187a0f5d5a3f94a6a670ee17eb2eb9fe555295341aa0aad1ed14a9ebf26f2b6495d3431cb3f08e355055acfcadf2ca8720f0c1856e2e88aa0cf7",
+    "sig": "c54f001154538ea9c01f5c3e0350b54f41ff56df5d877d54b0749de36b395fd0b7174a2f2a8e038a58a4c6b7d2a3c4e2bfe70e84570d41e349cc2ae83d1cd71e",
     "tags": [
       [
         "d",
@@ -435,35 +16,37 @@
         "Gambas a la Plancha"
       ],
       [
-        "summary",
-        "Grilled wild prawns with garlic and smoked sea salt"
-      ],
-      [
-        "type",
-        "simple",
-        "physical"
-      ],
-      [
         "image",
-        "https://items-images-production.s3.us-west-2.amazonaws.com/files/30f77e31ea87f7770c459109bcda0ea26c3f9768/original.png",
-        ""
+        "https://items-images-production.s3.us-west-2.amazonaws.com/files/30f77e31ea87f7770c459109bcda0ea26c3f9768/original.png"
       ],
       [
-        "schema.org:Recipe:recipeIngredient",
-        "CRUSTACEANS",
-        "https://schema.org/recipeIngredient"
+        "location",
+        "7970 Railroad Ave, Snoqualmie, WA, 98065, USA"
+      ],
+      [
+        "g",
+        "c23q7u37x"
+      ],
+      [
+        "price",
+        "18.99",
+        "USD"
       ],
       [
         "t",
-        "DAIRY_FREE"
+        "ingredients:crustaceans"
       ],
       [
         "t",
-        "GLUTEN_FREE"
+        "DairyFreeDiet"
       ],
       [
         "t",
-        "NUT_FREE"
+        "GlutenFreeDiet"
+      ],
+      [
+        "t",
+        "NutFreeDiet"
       ],
       [
         "a",
@@ -472,35 +55,75 @@
       [
         "a",
         "30405:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:Lunch"
+      ]
+    ]
+  },
+  {
+    "content": "**Pisto Manchego**\n\nVegetable stew with tomatoes, peppers, zucchini, and onions",
+    "created_at": 1766100061,
+    "id": "34a8e347462a48132acda1decc3f30e0d9d5037bcd6a825cab68f17a8b6d02bf",
+    "kind": 30402,
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "sig": "e300034e718256aa8596c115e007ae21d5746976c39f3afc7f4e559fa0c90ba0e9c73bbffca0500b95d9b467f1f73342a819265e20d8e2bfcbafd2abe3a661ba",
+    "tags": [
+      [
+        "d",
+        "sq-d73ae57107664684"
       ],
       [
-        "schema.org:MenuItem:suitableForDiet",
-        "DAIRY_FREE",
-        "https://schema.org/suitableForDiet"
+        "title",
+        "Pisto Manchego"
       ],
       [
-        "schema.org:MenuItem:suitableForDiet",
-        "GLUTEN_FREE",
-        "https://schema.org/suitableForDiet"
+        "image",
+        "https://items-images-production.s3.us-west-2.amazonaws.com/files/5921fc6463d1a327f91cacf813033a16f6f687c7/original.png"
       ],
       [
-        "schema.org:MenuItem:suitableForDiet",
-        "NUT_FREE",
-        "https://schema.org/suitableForDiet"
+        "location",
+        "7970 Railroad Ave, Snoqualmie, WA, 98065, USA"
       ],
       [
-        "published_at",
-        "1765322945"
+        "g",
+        "c23q7u37x"
+      ],
+      [
+        "price",
+        "10.99",
+        "USD"
+      ],
+      [
+        "t",
+        "DairyFreeDiet"
+      ],
+      [
+        "t",
+        "GlutenFreeDiet"
+      ],
+      [
+        "t",
+        "VeganDiet"
+      ],
+      [
+        "t",
+        "VegetarianDiet"
+      ],
+      [
+        "a",
+        "30405:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:Appetizers"
+      ],
+      [
+        "a",
+        "30405:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:Lunch"
       ]
     ]
   },
   {
     "content": "**Ensalada de Pulpo**\n\nGrilled octopus salad with potatoes, paprika, and olive oil",
-    "created_at": 1765322945,
-    "id": "04089cd02385e95c229f34da9a25c7b1c1936e7d9bb43b22750056df4cc46043",
+    "created_at": 1766100061,
+    "id": "485d3ebfac75c67d1d332ea53181716bf0c7a434ff7bdfceaa01dc561b3bf8c7",
     "kind": 30402,
     "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
-    "sig": "58ccbdd75cc26f90762ee496e2d5ccc899a64dde313ef14ccca1f9f2ecbe9a836d6d6937d35bb8bae792552aaf7c40a2b66467305b4b6a0a8b6010d9ebb339d7",
+    "sig": "2582521da17a4e474c5963ff1dac28a14af1f06748a775f33a8e4188965928ce4078838096b41667d6713218263ad59747ecc6ab544b226afead2ee7891dc38f",
     "tags": [
       [
         "d",
@@ -511,31 +134,33 @@
         "Ensalada de Pulpo"
       ],
       [
-        "summary",
-        "Grilled octopus salad with potatoes, paprika, and olive oil"
-      ],
-      [
-        "type",
-        "simple",
-        "physical"
-      ],
-      [
         "image",
-        "https://items-images-production.s3.us-west-2.amazonaws.com/files/fa0eb9143dfcbabc036d58e3872835fafa29a014/original.png",
-        ""
+        "https://items-images-production.s3.us-west-2.amazonaws.com/files/fa0eb9143dfcbabc036d58e3872835fafa29a014/original.png"
       ],
       [
-        "schema.org:Recipe:recipeIngredient",
-        "MOLLUSCS",
-        "https://schema.org/recipeIngredient"
+        "location",
+        "7970 Railroad Ave, Snoqualmie, WA, 98065, USA"
+      ],
+      [
+        "g",
+        "c23q7u37x"
+      ],
+      [
+        "price",
+        "16.99",
+        "USD"
       ],
       [
         "t",
-        "DAIRY_FREE"
+        "ingredients:molluscs"
       ],
       [
         "t",
-        "GLUTEN_FREE"
+        "DairyFreeDiet"
+      ],
+      [
+        "t",
+        "GlutenFreeDiet"
       ],
       [
         "a",
@@ -544,20 +169,351 @@
       [
         "a",
         "30405:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:Lunch"
+      ]
+    ]
+  },
+  {
+    "content": "**Bocadillo de Jamón**\n\nraditional Spanish baguette with cured Iberian ham and tomato spread",
+    "created_at": 1766100061,
+    "id": "95419fbfae018d6292f8278e8243536373e825c1391715f2a87de4ab8f787ad3",
+    "kind": 30402,
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "sig": "90ad1f4784d67f495687201ec8bbe3ffdb6a0230e0454a808899e0bf165cca0cb1e8c67cb1e0a731572f7f85a4c4c86eb16f512e4642dcab670bb2443cbbcf63",
+    "tags": [
+      [
+        "d",
+        "sq-26b0b60687169e93"
       ],
       [
-        "schema.org:MenuItem:suitableForDiet",
-        "DAIRY_FREE",
-        "https://schema.org/suitableForDiet"
+        "title",
+        "Bocadillo de Jamón"
       ],
       [
-        "schema.org:MenuItem:suitableForDiet",
-        "GLUTEN_FREE",
-        "https://schema.org/suitableForDiet"
+        "image",
+        "https://items-images-production.s3.us-west-2.amazonaws.com/files/477ccaba02308b4e418785993a25185bce244296/original.png"
       ],
       [
-        "published_at",
-        "1765322945"
+        "location",
+        "7970 Railroad Ave, Snoqualmie, WA, 98065, USA"
+      ],
+      [
+        "g",
+        "c23q7u37x"
+      ],
+      [
+        "price",
+        "12.99",
+        "USD"
+      ],
+      [
+        "t",
+        "ingredients:gluten"
+      ],
+      [
+        "a",
+        "30405:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:Sandwiches"
+      ],
+      [
+        "a",
+        "30405:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:Lunch"
+      ]
+    ]
+  },
+  {
+    "content": "**Setas al Jerez**\n\nWild mushrooms sautéed with sherry and garlic",
+    "created_at": 1766100061,
+    "id": "a25cec5bc96f6a992e92977f8c331341b2a27a2acd3a9c8602c1e76ec6b91a39",
+    "kind": 30402,
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "sig": "2183588a65c6f1403451fc218ee91123c227b55d07b2b70f9dce0e7a0187e37cf0dba4729b8029dc6c6f6956e8e9b2481c355a02dd73127850ee3b3f19efc7bb",
+    "tags": [
+      [
+        "d",
+        "sq-6a8f2ac3bca6e398"
+      ],
+      [
+        "title",
+        "Setas al Jerez"
+      ],
+      [
+        "image",
+        "https://items-images-production.s3.us-west-2.amazonaws.com/files/bb7616d26b664ea997337df7e151041864bcdc06/original.png"
+      ],
+      [
+        "location",
+        "7970 Railroad Ave, Snoqualmie, WA, 98065, USA"
+      ],
+      [
+        "g",
+        "c23q7u37x"
+      ],
+      [
+        "price",
+        "14.99",
+        "USD"
+      ],
+      [
+        "t",
+        "DairyFreeDiet"
+      ],
+      [
+        "t",
+        "GlutenFreeDiet"
+      ],
+      [
+        "t",
+        "VeganDiet"
+      ],
+      [
+        "t",
+        "VegetarianDiet"
+      ],
+      [
+        "a",
+        "30405:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:Dinner"
+      ],
+      [
+        "a",
+        "30405:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:Sides"
+      ]
+    ]
+  },
+  {
+    "content": "**Paella Valenciana**\n\nSaffron rice with chicken, rabbit, green beans, and lima beans.",
+    "created_at": 1766100061,
+    "id": "726cf47478f184e7809e00ac6c7d7840f0d59b84eaec4ceef797bcfa2fb1ad9c",
+    "kind": 30402,
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "sig": "a0d0d2834f1e02aef5d020d7cab2f980e9a93a41b1ed5f5a5e25ff4060aa5579d7cd49bdc0fd74d2e36ea180b11e0b9088ead9792155bffa6b0c1fd9211ba6c5",
+    "tags": [
+      [
+        "d",
+        "sq-ccacef23a2be8ca7"
+      ],
+      [
+        "title",
+        "Paella Valenciana"
+      ],
+      [
+        "image",
+        "https://items-images-production.s3.us-west-2.amazonaws.com/files/91f7a22d22d0d87b2f800215dfa0ce7c8c6f8b92/original.png"
+      ],
+      [
+        "location",
+        "7970 Railroad Ave, Snoqualmie, WA, 98065, USA"
+      ],
+      [
+        "g",
+        "c23q7u37x"
+      ],
+      [
+        "price",
+        "24.99",
+        "USD"
+      ],
+      [
+        "t",
+        "ingredients:fish"
+      ],
+      [
+        "t",
+        "DairyFreeDiet"
+      ],
+      [
+        "t",
+        "GlutenFreeDiet"
+      ],
+      [
+        "t",
+        "NutFreeDiet"
+      ],
+      [
+        "a",
+        "30405:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:Entrees"
+      ],
+      [
+        "a",
+        "30405:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:Dinner"
+      ]
+    ]
+  },
+  {
+    "content": "**Cordero Asado**\n\nRoasted rack of lamb with rosemary and Rioja reduction",
+    "created_at": 1766100061,
+    "id": "600538079e48f3aa820f5a64c8ea576d14130122e8ad0a7179021fbe5151e3d6",
+    "kind": 30402,
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "sig": "db4ae8042c8014bddc4649cb2475419b9f8404aed1b10d5ea0eaa4f3d8a025ca49619878e41c7e274850b78c2bb93d458fe0f11855ee58be4269e7434395a3c3",
+    "tags": [
+      [
+        "d",
+        "sq-b097ad0d3fc3fbb2"
+      ],
+      [
+        "title",
+        "Cordero Asado"
+      ],
+      [
+        "image",
+        "https://items-images-production.s3.us-west-2.amazonaws.com/files/329b71fa0c40a04a1abfa46e223e7adb207673d9/original.png"
+      ],
+      [
+        "location",
+        "7970 Railroad Ave, Snoqualmie, WA, 98065, USA"
+      ],
+      [
+        "g",
+        "c23q7u37x"
+      ],
+      [
+        "price",
+        "28.99",
+        "USD"
+      ],
+      [
+        "t",
+        "DairyFreeDiet"
+      ],
+      [
+        "t",
+        "GlutenFreeDiet"
+      ],
+      [
+        "a",
+        "30405:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:Dinner"
+      ],
+      [
+        "a",
+        "30405:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:Entrees"
+      ]
+    ]
+  },
+  {
+    "content": "**Bacalao al Pil Pil**\n\nSalt cod in garlic-olive oil emulsion with guindilla peppers",
+    "created_at": 1766100061,
+    "id": "fd3f9460454a2b506baea99a8086a9edf992506ce2f575a7610dc8c56169a97c",
+    "kind": 30402,
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "sig": "1a35c703235481a6191a5af86a6cc08237c4eb552b9ed859c759fb4b2bdddf00ca62b9be45aa6fdf8814e39f17cfb6e326ed8a05b48242a23366b067387578d6",
+    "tags": [
+      [
+        "d",
+        "sq-c9ab1636203e078f"
+      ],
+      [
+        "title",
+        "Bacalao al Pil Pil"
+      ],
+      [
+        "image",
+        "https://items-images-production.s3.us-west-2.amazonaws.com/files/9218a370e2a0483bf4e3291a08f767615a3f86f5/original.png"
+      ],
+      [
+        "location",
+        "7970 Railroad Ave, Snoqualmie, WA, 98065, USA"
+      ],
+      [
+        "g",
+        "c23q7u37x"
+      ],
+      [
+        "price",
+        "25.99",
+        "USD"
+      ],
+      [
+        "t",
+        "ingredients:fish"
+      ],
+      [
+        "t",
+        "ingredients:sulphites"
+      ],
+      [
+        "t",
+        "DairyFreeDiet"
+      ],
+      [
+        "t",
+        "GlutenFreeDiet"
+      ],
+      [
+        "a",
+        "30405:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:Entrees"
+      ],
+      [
+        "a",
+        "30405:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:Dinner"
+      ]
+    ]
+  },
+  {
+    "content": "**House Red**\n\nHouse red wine",
+    "created_at": 1766098512,
+    "id": "7371d693a336b3ec61ace1049c691b4861d6048dd8cf2378e351fefe217e349d",
+    "kind": 30402,
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "sig": "065c3511b8c48690b76203252476c2a85f0500fcfca82853d721a87c22a4493527b2279aa2e5d70affb4cffdadb032f358207305e3876c18c1a81fbd8e943417",
+    "tags": [
+      [
+        "d",
+        "house-red"
+      ],
+      [
+        "title",
+        "House Red"
+      ],
+      [
+        "price",
+        "12",
+        "USD"
+      ],
+      [
+        "image",
+        "https://i.nostr.build/uht86OURK7KLUoGW.png"
+      ],
+      [
+        "a",
+        "30405:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:Red Wines"
+      ],
+      [
+        "a",
+        "30405:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:Drinks"
+      ]
+    ]
+  },
+  {
+    "content": "**Sangria**\n\nReal sangria",
+    "created_at": 1766098512,
+    "id": "d9354ebe45cf871d60b224427b964273f387b278f4761e0bd7221b1912cde40d",
+    "kind": 30402,
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "sig": "38df54f46c9c3f99cbf091d5c81859092375744bd001e27cbc450446342ba5a9ab223e5a862e7c9605aa62244183bb62383cee0ef527d417d2b09f904f59a430",
+    "tags": [
+      [
+        "d",
+        "sangria"
+      ],
+      [
+        "title",
+        "Sangria"
+      ],
+      [
+        "price",
+        "7",
+        "USD"
+      ],
+      [
+        "image",
+        "https://i.nostr.build/QDFSr3gGByFze1K4.png"
+      ],
+      [
+        "a",
+        "30405:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:Cocktails"
+      ],
+      [
+        "a",
+        "30405:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:Drinks"
       ]
     ]
   }

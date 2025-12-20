@@ -1,28 +1,27 @@
 [
   {
-    "content": "{\"name\":\"elcandado\",\"display_name\":\"Restaurante El Candado\",\"about\":\"El Candado: Authentic Spanish Flavors in Snoqualmie 🇪🇸🌲\\n\\nMore than a meal, a Mediterranean state of mind. Where the soul of Spain meets the heart of the Cascades.\\n\\nOur Story:\\nBorn from a family recipe book dating back to 1940s Málaga, we bring genuine Spanish sobremesa (the art of lingering at the table) to Snoqualmie. Chef Alejandro's wood-fired paellas and Abuela's secret gambas recipe will transport you to a sun-drenched plaza.\\n\\nWhat We Serve:\\n✅ Handcrafted tapas using local PNW ingredients\\n✅ Saffron-infused paellas cooked over almond wood\\n✅ Imported Spanish wines & craft sangrias\\n✅ Dedicated gluten-free/vegan menu\\n\\nEnjoy your sobremesa at our rustic-chic dining room with fireplace or at our summer patio overlooking the Snoqualmie River.\\n\\nVisit us or make a reservation with your favorite AI assistant. \",\"website\":\"https://www.synvya.com/demo/elcandado\",\"picture\":\"https://i.nostr.build/K9PYZZtXfb4k3NSw.png\",\"banner\":\"https://i.nostr.build/uR9UxQhO9VKSIRMu.png\",\"nip05\":\"elcandado@synvya.com\"}",
-    "created_at": 1765313640,
-    "id": "7de71da77287e09828aecb29a3c634e1ffc6aabe5b51a47616456181d1152c54",
+    "content": "{\"name\":\"elcandado\",\"display_name\":\"Restaurante El Candado\",\"about\":\"El Candado: Authentic Spanish Flavors in Snoqualmie 🇪🇸🌲\\n\\nMore than a meal, a Mediterranean state of mind. Where the soul of Spain meets the heart of the Cascades.\\n\\nOur Story:\\nBorn from a family recipe book dating back to 1940s Málaga, we bring genuine Spanish sobremesa (the art of lingering at the table) to Snoqualmie. Chef Alejandro’s wood-fired paellas and Abuela’s secret gambas recipe will transport you to a sun-drenched plaza.\\n\\nWhat We Serve:\\n✅ Handcrafted tapas using local PNW ingredients\\n✅ Saffron-infused paellas cooked over almond wood\\n✅ Imported Spanish wines & craft sangrias\\n✅ Dedicated gluten-free/vegan menu\\n\\nEnjoy your sobremesa at our rustic-chic dining room with fireplace or at our summer patio overlooking the Snoqualmie River.\\n\\nVisit us or make a reservation with your favorite AI assistant. \",\"website\":\"https://www.synvya.com/demo/elcandado\",\"picture\":\"https://i.nostr.build/K9PYZZtXfb4k3NSw.png\",\"banner\":\"https://i.nostr.build/uR9UxQhO9VKSIRMu.png\",\"nip05\":\"elcandado@synvya.com\"}",
+    "created_at": 1766194418,
+    "id": "6f610c41a2c23a424bfbd3f506f123d705859460fbdc9a373ad9fc5498ace4ca",
     "kind": 0,
     "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
-    "sig": "f98b6ee469a7391de8895dbce3ddfd778c1dc9388a11b3c88f61205d9016a30d1faf5ce2f92eda64706f74bac219eec0031556c6f910d5cdbf3d35644f999f8a",
+    "sig": "19a4c1d3192b602923ef7e92f6ad5fd904c09211105d1f3be099a945eb12922f5562f62dfd0c4765c1e7727f9af957d38ed0a79886581576665e43359b4398c7",
     "tags": [
       [
-        "schema.org:FoodEstablishment",
-        "Restaurant",
-        "https://schema.org/FoodEstablishment"
+        "t",
+        "foodEstablishment:Restaurant"
       ],
       [
         "t",
-        "gluten free"
+        "GlutenFreeDiet"
       ],
       [
         "t",
-        "vegan"
+        "VeganDiet"
       ],
       [
         "t",
-        "vegetarian"
+        "VegetarianDiet"
       ],
       [
         "t",
@@ -33,68 +32,32 @@
         "paella"
       ],
       [
-        "schema.org:FoodEstablishment:servesCuisine",
-        "Spanish",
-        "https://schema.org/servesCuisine"
+        "t",
+        "servesCuisine:Spanish"
       ],
       [
-        "schema.org:FoodEstablishment:telephone",
-        "tel:+155512345678",
-        "https://datatracker.ietf.org/doc/html/rfc3966"
+        "telephone",
+        "tel:+155512345678"
       ],
       [
-        "schema.org:FoodEstablishment:email",
-        "mailto:elcandado@synvya.com",
-        "https://schema.org/email"
+        "email",
+        "mailto:elcandado@synvya.com"
       ],
       [
-        "schema.org:PostalAddress:streetAddress",
-        "7970 Railroad Ave",
-        "https://schema.org/streetAddress"
+        "location",
+        "7970 Railroad Ave, Snoqualmie, WA, 98065, USA"
       ],
       [
-        "schema.org:PostalAddress:addressLocality",
-        "Snoqualmie",
-        "https://schema.org/addressLocality"
+        "geoCoordinates",
+        "47.5288415, -121.8253714"
       ],
       [
-        "schema.org:PostalAddress:addressRegion",
-        "WA",
-        "https://schema.org/addressRegion"
+        "g",
+        "c23q7u37x"
       ],
       [
-        "schema.org:PostalAddress:postalCode",
-        "98065",
-        "https://schema.org/postalCode"
-      ],
-      [
-        "schema.org:PostalAddress:addressCountry",
-        "US",
-        "https://schema.org/addressCountry"
-      ],
-      [
-        "schema.org:GeoCoordinates:longitude",
-        "-121.8253714",
-        "https://schema.org/longitude"
-      ],
-      [
-        "schema.org:GeoCoordinates:latitude",
-        "47.5288415",
-        "https://schema.org/latitude"
-      ],
-      [
-        "i",
-        "geo:c23q7u37x",
-        "https://geohash.org"
-      ],
-      [
-        "k",
-        "geo"
-      ],
-      [
-        "schema.org:FoodEstablishment:acceptsReservations",
-        "https://synvya.com",
-        "https://schema.org/acceptsReservations"
+        "acceptsReservations",
+        "https://synvya.com"
       ],
       [
         "i",
@@ -106,9 +69,8 @@
         "nip"
       ],
       [
-        "schema.org:FoodEstablishment:openingHours",
-        "Tu-Th 11:00-21:00, Fr-Sa 11:00-00:00, Su 11:00-21:00",
-        "https://schema.org/openingHours"
+        "openingHours",
+        "Tu-Th 11:00-21:00, Fr-Sa 11:00-00:00, Su 11:00-21:00"
       ]
     ]
   }
