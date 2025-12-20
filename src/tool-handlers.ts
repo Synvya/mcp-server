@@ -59,13 +59,23 @@ export function searchFoodEstablishments(
   const { profiles, collections } = data;
   
   const results = profiles.filter((profile) => {
-    // STRICT: First check if profile has valid schema.org:FoodEstablishment tag
-    const foodEstablishmentTag = profile.tags.find(t => t[0] === 'schema.org:FoodEstablishment');
-    if (!foodEstablishmentTag || !foodEstablishmentTag[1]) {
-      return false; // Ignore profiles without valid schema.org:FoodEstablishment tag
+    // STRICT: First check if profile has valid FoodEstablishment type
+    // NEW FORMAT: "t" tag with "foodEstablishment:" prefix
+    let foodEstablishmentTag = profile.tags.find(t => 
+      t[0] === 't' && t[1] && t[1].startsWith('foodEstablishment:')
+    );
+    let establishmentType: string | undefined;
+    
+    if (foodEstablishmentTag && foodEstablishmentTag[1]) {
+      establishmentType = foodEstablishmentTag[1].replace('foodEstablishment:', '');
+    } else {
+      // OLD FORMAT: Fallback to schema.org:FoodEstablishment tag
+      const oldTag = profile.tags.find(t => t[0] === 'schema.org:FoodEstablishment');
+      if (!oldTag || !oldTag[1]) {
+        return false; // Ignore profiles without valid FoodEstablishment type
+      }
+      establishmentType = oldTag[1];
     }
-
-    const establishmentType = foodEstablishmentTag[1];
 
     // Filter by foodEstablishmentType if provided
     if (foodEstablishmentType && establishmentType !== foodEstablishmentType) {
@@ -79,7 +89,12 @@ export function searchFoodEstablishments(
     // Match cuisine - check tags and content
     const matchesCuisine = cuisine
       ? profile.tags.some(tag => {
-          // Check schema.org:FoodEstablishment:servesCuisine tag
+          // NEW FORMAT: Check "t" tag with "servesCuisine:" prefix
+          if (tag[0] === 't' && tag[1] && tag[1].startsWith('servesCuisine:')) {
+            const cuisineValue = tag[1].replace('servesCuisine:', '');
+            return cuisineValue.toLowerCase().includes(cuisine.toLowerCase());
+          }
+          // OLD FORMAT: Check schema.org:FoodEstablishment:servesCuisine tag
           if (tag[0] === 'schema.org:FoodEstablishment:servesCuisine' && tag[1]) {
             return tag[1].toLowerCase().includes(cuisine.toLowerCase());
           }
@@ -92,7 +107,11 @@ export function searchFoodEstablishments(
       ? profileName.toLowerCase().includes(query.toLowerCase()) ||
         about.toLowerCase().includes(query.toLowerCase()) ||
         profile.tags.some(tag => {
-          // Check location tags
+          // NEW FORMAT: Check "location" tag
+          if (tag[0] === 'location' && tag[1]) {
+            return tag[1].toLowerCase().includes(query.toLowerCase());
+          }
+          // OLD FORMAT: Check schema.org:PostalAddress:* tags
           if (tag[0]?.startsWith('schema.org:PostalAddress:') && tag[1]) {
             return tag[1].toLowerCase().includes(query.toLowerCase());
           }
@@ -341,14 +360,24 @@ export function searchMenuItems(
   
   for (const product of productsToSearch) {
     const dishName = extractDishName(product);
-    const summaryTag = product.tags.find(t => t[0] === 'summary');
-    const description = summaryTag?.[1] || '';
+    // Extract description from content (no summary tag in new format)
     const contentText = typeof product.content === 'string' ? product.content : '';
+    const description = contentText; // Use content as description
     
-    // Extract ingredient tags (schema.org:Recipe:recipeIngredient)
+    // Extract ingredient tags from both formats:
+    // NEW FORMAT: "t" tags with "ingredients:" prefix
+    // OLD FORMAT: schema.org:Recipe:recipeIngredient tags
     const ingredientTags = product.tags
-      .filter(t => t[0] === 'schema.org:Recipe:recipeIngredient')
-      .map(t => t[1])
+      .filter(t => 
+        (t[0] === 't' && t[1] && t[1].startsWith('ingredients:')) ||
+        t[0] === 'schema.org:Recipe:recipeIngredient'
+      )
+      .map(t => {
+        if (t[0] === 't' && t[1] && t[1].startsWith('ingredients:')) {
+          return t[1].replace('ingredients:', ''); // Remove prefix for new format
+        }
+        return t[1]; // Old format
+      })
       .filter(Boolean)
       .join(' ');
     

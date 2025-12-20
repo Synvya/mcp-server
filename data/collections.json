@@ -1,6 +1,88 @@
 [
   {
     "content": "",
+    "created_at": 1766098512,
+    "id": "8d4be628a6a26feef388e138f540f7d2f72e311816b9ecb40fa86e73fd702d01",
+    "kind": 30405,
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "sig": "b91930132aa5f824d282e60c640b26f3158e10dd8c0bf72ec4b0dcdb835ca560b7d2e8c26b6605f6fd7b528a7b1df996689b24fbecac33a7a3426aa42e95573f",
+    "tags": [
+      [
+        "d",
+        "Cocktails"
+      ],
+      [
+        "title",
+        "Cocktails Menu Section"
+      ],
+      [
+        "summary",
+        "Spanish inspired cocktails"
+      ],
+      [
+        "a",
+        "30402:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:sangria"
+      ]
+    ]
+  },
+  {
+    "content": "",
+    "created_at": 1766098512,
+    "id": "aa3bfcc8e695c652e00f67e50a00b9497f35436084694f219abe8d74b69ec60a",
+    "kind": 30405,
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "sig": "2528a48241eea4455f94d82b5f365367d981f300fe6fa78c5d83c8ff4c1d2475988e9274920435b333df02f0e10bdcb227204c83218ca04d5a2b1a56d0ac64a8",
+    "tags": [
+      [
+        "d",
+        "Red Wines"
+      ],
+      [
+        "title",
+        "Red Wines Menu Section"
+      ],
+      [
+        "summary",
+        "Selection of Spanish reds"
+      ],
+      [
+        "a",
+        "30402:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:house-red"
+      ]
+    ]
+  },
+  {
+    "content": "",
+    "created_at": 1766098512,
+    "id": "5af3971a59dcd57d96524dd5b2f1fb9c763e14fc6d4f972cf7f4064c75efd118",
+    "kind": 30405,
+    "pubkey": "e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f",
+    "sig": "963100abf7003651b6892363db56525e452c50a80d572bda629264ea8766d01b3b1a618ca05d6da160a5d87ce8f97d87f6fcac326bddf59da56b578dad7a16d1",
+    "tags": [
+      [
+        "d",
+        "Drinks"
+      ],
+      [
+        "title",
+        "Drinks Menu"
+      ],
+      [
+        "summary",
+        "Alcoholic and non-alcoholic drinks"
+      ],
+      [
+        "a",
+        "30402:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:sangria"
+      ],
+      [
+        "a",
+        "30402:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:house-red"
+      ]
+    ]
+  },
+  {
+    "content": "",
     "created_at": 1765322945,
     "id": "b8a2eab69572f4a9c402917111fd9b4fb0209b80f7a118330ff8819d840f30a9",
     "kind": 30405,
@@ -86,10 +168,6 @@
       [
         "a",
         "30402:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:sq-ccacef23a2be8ca7"
-      ],
-      [
-        "a",
-        "30402:e01e4b0b3677204161b8d13d0a7b88e5d2e7dac2f7d2cc5530a3bc1dca3fbd2f:sq-c9ab1636203e078f"
       ],
       [
         "a",
