@@ -157,12 +157,25 @@ jobs:
           UPDATE_ENVIRONMENT: ${{ secrets.UPDATE_LAMBDA_ENVIRONMENT }}
         run: |
           echo "⚙️ Updating Lambda environment variables"
-          
+
+          # Create JSON for environment variables
+          cat > env-vars.json <<EOF
+          {
+            "Variables": {
+              "DYNAMODB_TABLE_NAME": "$DYNAMODB_TABLE_NAME",
+              "REGION": "$AWS_REGION",
+              "NOSTR_RELAYS": "$NOSTR_RELAYS",
+              "MAX_EVENTS_PER_RELAY": "$MAX_EVENTS_PER_RELAY",
+              "QUERY_TIMEOUT_MS": "$QUERY_TIMEOUT_MS"
+            }
+          }
+          EOF
+
           aws lambda update-function-configuration \
             --region "$AWS_REGION" \
             --function-name "$LAMBDA_FUNCTION_NAME" \
-            --environment "Variables={DYNAMODB_TABLE_NAME=$DYNAMODB_TABLE_NAME,REGION=$AWS_REGION,NOSTR_RELAYS=$NOSTR_RELAYS,MAX_EVENTS_PER_RELAY=$MAX_EVENTS_PER_RELAY,QUERY_TIMEOUT_MS=$QUERY_TIMEOUT_MS}"
-          
+            --environment file://env-vars.json
+
           echo "✅ Environment variables updated"
 
       - name: Deployment summary
