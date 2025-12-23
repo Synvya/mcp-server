@@ -158,6 +158,13 @@ jobs:
         run: |
           echo "⚙️ Updating Lambda environment variables"
 
+          # Wait for previous function update to complete
+          echo "Waiting for Lambda function to finish updating..."
+          aws lambda wait function-updated \
+            --region "$AWS_REGION" \
+            --function-name "$LAMBDA_FUNCTION_NAME"
+          echo "✅ Function update complete"
+
           # Create JSON for environment variables
           cat > env-vars.json <<EOF
           {
