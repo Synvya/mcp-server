@@ -1,8 +1,6 @@
 /**
  * AWS Lambda function to query Nostr relays for food establishment profiles
  * and store them in DynamoDB
- * 
- * Updated: Testing IAM policy propagation
  */
 
 import { Handler } from 'aws-lambda';
