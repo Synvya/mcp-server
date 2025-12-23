@@ -81,6 +81,34 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
           role-session-name: GitHubActionsLambdaDeploy
 
+      - name: Debug Lambda deployment
+        if: steps.lambda-changes.outputs.changed == 'true'
+        working-directory: lambda/nostr-querier
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          LAMBDA_FUNCTION_NAME: ${{ secrets.LAMBDA_FUNCTION_NAME }}
+        run: |
+          echo "=== Debug Information ==="
+          echo "AWS Region: $AWS_REGION"
+          echo "Lambda Function Name: $LAMBDA_FUNCTION_NAME"
+          echo ""
+          echo "Current AWS Identity:"
+          aws sts get-caller-identity
+          echo ""
+          echo "Testing lambda:GetFunction permission:"
+          aws lambda get-function \
+            --function-name "$LAMBDA_FUNCTION_NAME" \
+            --region "$AWS_REGION" \
+            --query 'Configuration.FunctionName' \
+            --output text
+          echo "✅ GetFunction succeeded"
+          echo ""
+          echo "Zip file details:"
+          ls -lh synvya-nostr-querier.zip
+          echo ""
+          echo "Full AWS Lambda command that will be executed:"
+          echo "aws lambda update-function-code --region \"$AWS_REGION\" --function-name \"$LAMBDA_FUNCTION_NAME\" --zip-file fileb://synvya-nostr-querier.zip"
+
       - name: Deploy Lambda function
         if: steps.lambda-changes.outputs.changed == 'true'
         working-directory: lambda/nostr-querier
