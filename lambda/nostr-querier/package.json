@@ -1,0 +1,23 @@
+{
+  "name": "synvya-nostr-querier",
+  "version": "1.0.0",
+  "description": "Lambda function to query Nostr relays for food establishment profiles",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "package": "npm run build && cd dist && zip -r ../lambda.zip . && cd ..",
+    "deploy": "aws lambda update-function-code --function-name synvya-nostr-querier --zip-file fileb://lambda.zip"
+  },
+  "dependencies": {
+    "nostr-tools": "^2.10.2",
+    "@aws-sdk/client-dynamodb": "^3.700.0",
+    "@aws-sdk/lib-dynamodb": "^3.700.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/aws-lambda": "^8.10.145",
+    "typescript": "^5.9.3"
+  }
+}
+

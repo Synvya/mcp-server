@@ -23,8 +23,10 @@
 
 ### Lambda Function
 - DYNAMODB_TABLE_NAME=synvya-nostr-events
-- AWS_REGION=us-east-1
+- REGION=us-east-1
 - NOSTR_RELAYS=wss://relay.damus.io,wss://relay.nostr.band,wss://nos.lol
+- MAX_EVENTS_PER_RELAY=1000
+- QUERY_TIMEOUT_MS=25000
 
 ### Vercel (MCP Server)
 - DYNAMODB_TABLE_NAME=synvya-nostr-events

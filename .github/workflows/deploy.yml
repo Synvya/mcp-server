@@ -1,0 +1,136 @@
+name: Deploy Lambda Function
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    name: Build and Deploy Lambda
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # Needed so git log can see the before commit when detecting Lambda changes
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: lambda/nostr-querier/package-lock.json
+
+      - name: Check for Lambda changes
+        id: lambda-changes
+        run: |
+          # Check if the before commit exists
+          if git cat-file -e ${{ github.event.before }} 2>/dev/null; then
+            if git log --name-only --diff-filter=AM ${{ github.event.before }}..${{ github.sha }} -- "lambda/nostr-querier/" | grep -q "^lambda/nostr-querier/"; then
+              echo "changed=true" >> $GITHUB_OUTPUT
+            else
+              echo "changed=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            # First commit or force push - check if lambda directory has files
+            if git diff-tree --no-commit-id --name-only -r ${{ github.sha }} | grep -q "^lambda/nostr-querier/"; then
+              echo "changed=true" >> $GITHUB_OUTPUT
+            else
+              echo "changed=false" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+      - name: Install dependencies
+        if: steps.lambda-changes.outputs.changed == 'true'
+        working-directory: lambda/nostr-querier
+        run: npm ci
+
+      - name: Build Lambda function
+        if: steps.lambda-changes.outputs.changed == 'true'
+        working-directory: lambda/nostr-querier
+        run: npm run build
+
+      - name: Package Lambda function
+        if: steps.lambda-changes.outputs.changed == 'true'
+        working-directory: lambda/nostr-querier
+        run: |
+          # Install production dependencies in dist/ for packaging
+          cd dist
+          cp ../package*.json .
+          npm ci --production --omit=dev
+          
+          # Create deployment package with compiled code and node_modules
+          zip -qr ../synvya-nostr-querier.zip .
+          
+          cd ..
+          echo "✅ Lambda package created: synvya-nostr-querier.zip"
+          ls -lh synvya-nostr-querier.zip
+
+      - name: Configure AWS credentials
+        if: steps.lambda-changes.outputs.changed == 'true'
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-session-name: GitHubActionsLambdaDeploy
+
+      - name: Deploy Lambda function
+        if: steps.lambda-changes.outputs.changed == 'true'
+        working-directory: lambda/nostr-querier
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          LAMBDA_FUNCTION_NAME: ${{ secrets.LAMBDA_FUNCTION_NAME }}
+        run: |
+          echo "🚀 Deploying Lambda function: $LAMBDA_FUNCTION_NAME"
+          
+          aws lambda update-function-code \
+            --region "$AWS_REGION" \
+            --function-name "$LAMBDA_FUNCTION_NAME" \
+            --zip-file fileb://synvya-nostr-querier.zip
+          
+          echo "✅ Lambda function deployed successfully"
+
+      - name: Update Lambda environment variables
+        if: steps.lambda-changes.outputs.changed == 'true' && env.UPDATE_ENVIRONMENT == 'true'
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          LAMBDA_FUNCTION_NAME: ${{ secrets.LAMBDA_FUNCTION_NAME }}
+          DYNAMODB_TABLE_NAME: ${{ secrets.DYNAMODB_TABLE_NAME }}
+          NOSTR_RELAYS: ${{ secrets.NOSTR_RELAYS }}
+          MAX_EVENTS_PER_RELAY: ${{ secrets.MAX_EVENTS_PER_RELAY }}
+          QUERY_TIMEOUT_MS: ${{ secrets.QUERY_TIMEOUT_MS }}
+          UPDATE_ENVIRONMENT: ${{ secrets.UPDATE_LAMBDA_ENVIRONMENT }}
+        run: |
+          echo "⚙️ Updating Lambda environment variables"
+          
+          aws lambda update-function-configuration \
+            --region "$AWS_REGION" \
+            --function-name "$LAMBDA_FUNCTION_NAME" \
+            --environment "Variables={DYNAMODB_TABLE_NAME=$DYNAMODB_TABLE_NAME,REGION=$AWS_REGION,NOSTR_RELAYS=$NOSTR_RELAYS,MAX_EVENTS_PER_RELAY=$MAX_EVENTS_PER_RELAY,QUERY_TIMEOUT_MS=$QUERY_TIMEOUT_MS}"
+          
+          echo "✅ Environment variables updated"
+
+      - name: Deployment summary
+        if: steps.lambda-changes.outputs.changed == 'true'
+        run: |
+          echo "## 🎉 Deployment Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Function**: ${{ secrets.LAMBDA_FUNCTION_NAME }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Region**: ${{ secrets.AWS_REGION }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Trigger**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Skip deployment
+        if: steps.lambda-changes.outputs.changed == 'false'
+        run: |
+          echo "ℹ️ No changes detected in lambda/nostr-querier/ - skipping deployment"
+          echo "## ⏭️ Deployment Skipped" >> $GITHUB_STEP_SUMMARY
+          echo "No changes detected in Lambda function code." >> $GITHUB_STEP_SUMMARY
+
