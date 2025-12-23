@@ -89,8 +89,31 @@ jobs:
           LAMBDA_FUNCTION_NAME: ${{ secrets.LAMBDA_FUNCTION_NAME }}
         run: |
           echo "=== Debug Information ==="
-          echo "AWS Region: $AWS_REGION"
-          echo "Lambda Function Name: $LAMBDA_FUNCTION_NAME"
+          echo "Checking IAM policy resource pattern match..."
+          echo ""
+          echo "Expected IAM policy resource pattern:"
+          echo "  arn:aws:lambda:us-east-1:122610503853:function/synvya-*"
+          echo ""
+          echo "Actual function ARN being accessed:"
+          echo "  arn:aws:lambda:$AWS_REGION:122610503853:function:$LAMBDA_FUNCTION_NAME"
+          echo ""
+
+          # Check if region matches
+          if [ "$AWS_REGION" != "us-east-1" ]; then
+            echo "❌ MISMATCH: Region is '$AWS_REGION' but policy only allows 'us-east-1'"
+            echo "   Fix: Update IAM policy resource to use 'arn:aws:lambda:*:122610503853:function/synvya-*'"
+          else
+            echo "✅ Region matches"
+          fi
+
+          # Check if function name starts with synvya-
+          if [[ ! "$LAMBDA_FUNCTION_NAME" =~ ^synvya- ]]; then
+            echo "❌ MISMATCH: Function name '$LAMBDA_FUNCTION_NAME' doesn't start with 'synvya-'"
+            echo "   Fix: Update IAM policy resource pattern to match your function name"
+          else
+            echo "✅ Function name matches pattern"
+          fi
+
           echo ""
           echo "Current AWS Identity:"
           aws sts get-caller-identity
@@ -105,9 +128,6 @@ jobs:
           echo ""
           echo "Zip file details:"
           ls -lh synvya-nostr-querier.zip
-          echo ""
-          echo "Full AWS Lambda command that will be executed:"
-          echo "aws lambda update-function-code --region \"$AWS_REGION\" --function-name \"$LAMBDA_FUNCTION_NAME\" --zip-file fileb://synvya-nostr-querier.zip"
 
       - name: Deploy Lambda function
         if: steps.lambda-changes.outputs.changed == 'true'
