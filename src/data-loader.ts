@@ -95,7 +95,7 @@ async function loadProfileDataFromDynamoDB(): Promise<NostrEvent[]> {
   const client = getDynamoDBClient();
   
   try {
-    console.error('Loading profiles from DynamoDB...');
+    console.log('Loading profiles from DynamoDB...');
     
     // Query DynamoDB for all kind:0 events
     const command = new ScanCommand({
@@ -124,7 +124,7 @@ async function loadProfileDataFromDynamoDB(): Promise<NostrEvent[]> {
       });
     });
     
-    console.error(`✅ Loaded ${foodEstablishmentProfiles.length} food establishment profiles from DynamoDB`);
+    console.log(`✅ Loaded ${foodEstablishmentProfiles.length} food establishment profiles from DynamoDB`);
     return foodEstablishmentProfiles;
   } catch (error) {
     console.error('Error loading profiles from DynamoDB:', error);
@@ -137,10 +137,10 @@ async function loadProfileDataFromDynamoDB(): Promise<NostrEvent[]> {
  */
 async function loadProfileDataFromFile(): Promise<NostrEvent[]> {
   try {
-    console.error('Loading profiles from static file...');
+    console.log('Loading profiles from static file...');
     const data = await fs.readFile(join(projectRoot, 'data', 'profiles.json'), 'utf-8');
     const profiles = JSON.parse(data);
-    console.error(`✅ Loaded ${profiles.length} profiles from file`);
+    console.log(`✅ Loaded ${profiles.length} profiles from file`);
     return profiles;
   } catch (error) {
     console.error('Error loading profile data from file:', error);
@@ -155,7 +155,7 @@ export async function loadProfileData(): Promise<NostrEvent[]> {
   // Check cache first
   const now = Date.now();
   if (profileCache.data && (now - profileCache.timestamp) < profileCache.ttl) {
-    console.error('✅ Using cached profiles');
+    console.log('✅ Using cached profiles');
     return profileCache.data;
   }
   
@@ -166,7 +166,7 @@ export async function loadProfileData(): Promise<NostrEvent[]> {
       // Try loading from DynamoDB
       profiles = await loadProfileDataFromDynamoDB();
     } catch (error) {
-      console.error('⚠️ DynamoDB load failed, falling back to file');
+      console.warn('⚠️ DynamoDB load failed, falling back to file');
       // Fallback to file on error
       profiles = await loadProfileDataFromFile();
     }
