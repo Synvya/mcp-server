@@ -25,6 +25,8 @@
   },
   "homepage": "https://github.com/synvya/mcp-server#readme",
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.700.0",
+    "@aws-sdk/lib-dynamodb": "^3.700.0",
     "@modelcontextprotocol/sdk": "^1.22.0",
     "@scure/base": "^2.0.0",
     "ngeohash": "^0.6.3",

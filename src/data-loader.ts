@@ -3,6 +3,8 @@ import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { createRequire } from 'module';
 import { bech32 } from '@scure/base';
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocumentClient, ScanCommand } from '@aws-sdk/lib-dynamodb';
 
 const require = createRequire(import.meta.url);
 const ngeohash = require('ngeohash');
@@ -13,6 +15,34 @@ const __dirname = dirname(__filename);
 
 // Get the project root (go up from dist/ to project root)
 const projectRoot = join(__dirname, '..');
+
+// DynamoDB configuration
+const USE_DYNAMODB = process.env.USE_DYNAMODB === 'true';
+const DYNAMODB_TABLE_NAME = process.env.DYNAMODB_TABLE_NAME || 'synvya-nostr-events';
+const AWS_REGION = process.env.AWS_REGION || process.env.REGION || 'us-east-1';
+const PROFILE_CACHE_TTL_SECONDS = parseInt(process.env.PROFILE_CACHE_TTL_SECONDS || '300', 10);
+
+// Initialize DynamoDB client (lazy initialization)
+let dynamoClient: DynamoDBDocumentClient | null = null;
+
+function getDynamoDBClient(): DynamoDBDocumentClient {
+  if (!dynamoClient) {
+    const client = new DynamoDBClient({ region: AWS_REGION });
+    dynamoClient = DynamoDBDocumentClient.from(client);
+  }
+  return dynamoClient;
+}
+
+// In-memory cache for profiles
+const profileCache: {
+  data: NostrEvent[] | null;
+  timestamp: number;
+  ttl: number;
+} = {
+  data: null,
+  timestamp: 0,
+  ttl: PROFILE_CACHE_TTL_SECONDS * 1000,
+};
 
 // Convert hex pubkey to bech32 npub format
 export function pubkeyToNpub(hexPubkey: string): string {
@@ -58,14 +88,98 @@ export type NostrEvent = {
   sig?: string;
 };
 
-export async function loadProfileData(): Promise<NostrEvent[]> {
+/**
+ * Load profile data from DynamoDB
+ */
+async function loadProfileDataFromDynamoDB(): Promise<NostrEvent[]> {
+  const client = getDynamoDBClient();
+  
   try {
-    const data = await fs.readFile(join(projectRoot, 'data', 'profiles.json'), 'utf-8');
-    return JSON.parse(data);
+    console.error('Loading profiles from DynamoDB...');
+    
+    // Query DynamoDB for all kind:0 events
+    const command = new ScanCommand({
+      TableName: DYNAMODB_TABLE_NAME,
+      FilterExpression: '#kind = :kind',
+      ExpressionAttributeNames: {
+        '#kind': 'kind',
+      },
+      ExpressionAttributeValues: {
+        ':kind': 0,
+      },
+    });
+    
+    const result = await client.send(command);
+    const events = (result.Items || []) as NostrEvent[];
+    
+    // Filter for food establishment profiles
+    const foodEstablishmentProfiles = events.filter(event => {
+      return event.tags?.some(tag => {
+        if (tag[0] === 't' && tag[1]) {
+          return VALID_FOOD_ESTABLISHMENT_TYPES.some(type => 
+            tag[1] === `foodEstablishment:${type}`
+          );
+        }
+        return false;
+      });
+    });
+    
+    console.error(`✅ Loaded ${foodEstablishmentProfiles.length} food establishment profiles from DynamoDB`);
+    return foodEstablishmentProfiles;
   } catch (error) {
-    console.error('Error loading profile data:', error);
-    throw new Error('Failed to load profile data');
+    console.error('Error loading profiles from DynamoDB:', error);
+    throw error;
   }
+}
+
+/**
+ * Load profile data from static JSON file (fallback)
+ */
+async function loadProfileDataFromFile(): Promise<NostrEvent[]> {
+  try {
+    console.error('Loading profiles from static file...');
+    const data = await fs.readFile(join(projectRoot, 'data', 'profiles.json'), 'utf-8');
+    const profiles = JSON.parse(data);
+    console.error(`✅ Loaded ${profiles.length} profiles from file`);
+    return profiles;
+  } catch (error) {
+    console.error('Error loading profile data from file:', error);
+    throw new Error('Failed to load profile data from file');
+  }
+}
+
+/**
+ * Load profile data with caching and fallback
+ */
+export async function loadProfileData(): Promise<NostrEvent[]> {
+  // Check cache first
+  const now = Date.now();
+  if (profileCache.data && (now - profileCache.timestamp) < profileCache.ttl) {
+    console.error('✅ Using cached profiles');
+    return profileCache.data;
+  }
+  
+  let profiles: NostrEvent[];
+  
+  if (USE_DYNAMODB) {
+    try {
+      // Try loading from DynamoDB
+      profiles = await loadProfileDataFromDynamoDB();
+    } catch (error) {
+      console.error('⚠️ DynamoDB load failed, falling back to file');
+      // Fallback to file on error
+      profiles = await loadProfileDataFromFile();
+    }
+  } else {
+    // Use file-based loading when DynamoDB is disabled
+    profiles = await loadProfileDataFromFile();
+  }
+  
+  // Update cache
+  profileCache.data = profiles;
+  profileCache.timestamp = now;
+  
+  return profiles;
 }
 
 export async function loadCollectionsData(): Promise<NostrEvent[]> {

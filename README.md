@@ -291,10 +291,22 @@ The MCP server can be deployed to Vercel as a serverless function, making it acc
 
 #### Environment Variables
 
-If you need to configure environment variables:
-- Go to your Vercel project settings
-- Navigate to "Environment Variables"
-- Add any required variables (currently none needed)
+Configure these in your Vercel project settings (Settings → Environment Variables):
+
+**DynamoDB Integration** (optional - profiles can be loaded from live Nostr data):
+- `USE_DYNAMODB` - Enable DynamoDB integration (default: `false`)
+  - Set to `true` to load profiles from DynamoDB instead of static files
+- `DYNAMODB_TABLE_NAME` - DynamoDB table name (default: `synvya-nostr-events`)
+- `AWS_REGION` - AWS region (default: `us-east-1`)
+- `AWS_ACCESS_KEY_ID` - IAM user access key (required if `USE_DYNAMODB=true`)
+- `AWS_SECRET_ACCESS_KEY` - IAM user secret key (required if `USE_DYNAMODB=true`)
+- `PROFILE_CACHE_TTL_SECONDS` - Cache duration in seconds (default: `300` = 5 minutes)
+
+**Notes:**
+- When `USE_DYNAMODB=false` (default), profiles are loaded from `data/profiles.json`
+- When `USE_DYNAMODB=true`, profiles are loaded from DynamoDB with automatic caching
+- If DynamoDB query fails, the system automatically falls back to static files
+- Cache reduces DynamoDB costs and improves response times
 
 #### Troubleshooting
 
@@ -303,9 +315,30 @@ If you need to configure environment variables:
 - **Cold starts**: First request may be slower due to serverless cold starts
 - **CORS issues**: The server includes CORS headers for browser-based testing
 
-## Data Files
+## Data Sources
 
-The server reads from JSON files in the `data/` directory:
+### Static Files (Default)
+
+By default, the server reads from JSON files in the `data/` directory:
 - `profiles.json` - Restaurant profiles (kind:0 events)
 - `collections.json` - Menu collections (kind:30405 events)
 - `products.json` - Individual dishes (kind:30402 events)
+
+### DynamoDB Integration (Optional)
+
+When `USE_DYNAMODB=true`, the server loads profiles from AWS DynamoDB:
+- **Table**: `synvya-nostr-events` (configurable)
+- **Source**: Live Nostr relay data (updated every 30 minutes via Lambda)
+- **Caching**: 5-minute in-memory cache (configurable)
+- **Fallback**: Automatically uses static files if DynamoDB fails
+
+**Benefits of DynamoDB:**
+- ✅ Real-time profile updates from Nostr relays
+- ✅ Automatic synchronization every 30 minutes
+- ✅ Scalable to thousands of restaurants
+- ✅ No manual data file updates needed
+
+**Setup:**
+1. Complete Issues #30-32 (DynamoDB table, Lambda function, EventBridge schedule)
+2. Configure Vercel environment variables (see above)
+3. Set `USE_DYNAMODB=true` in production
