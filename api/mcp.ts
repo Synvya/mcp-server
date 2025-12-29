@@ -89,39 +89,43 @@ function formatResponse(result: {
 // Global server instance (reused across invocations to minimize cold starts)
 let serverInstance: McpServer | null = null;
 let transportInstance: StreamableHTTPServerTransport | null = null;
-let profiles: NostrEvent[] = [];
-let collections: NostrEvent[] = [];
-let products: NostrEvent[] = [];
-let calendar: NostrEvent[] = [];
-let tables: NostrEvent[] = [];
 // Store protocol version per session (for stateless mode, we'll use a fallback)
 const sessionProtocolVersions = new Map<string, string>();
 
-async function initializeServer() {
-  if (serverInstance && transportInstance) {
-    return { server: serverInstance, transport: transportInstance };
-  }
-
-  // Load data
+// Helper to load all data (uses TTL cache from data-loader.ts)
+async function loadAllData() {
   try {
-    profiles = await loadProfileData();
-    collections = await loadCollectionsData();
-    products = await loadProductsData();
-    calendar = await loadCalendarData();
-    tables = await loadTablesData();
-    console.error("✅ Data loaded:", {
+    const profiles = await loadProfileData();
+    const collections = await loadCollectionsData();
+    const products = await loadProductsData();
+    const calendar = await loadCalendarData();
+    const tables = await loadTablesData();
+    
+    console.log("✅ Data loaded:", {
       profiles: profiles.length,
       collections: collections.length,
       products: products.length,
       calendar: calendar.length,
       tables: tables.length,
     });
+    
+    return { profiles, collections, products, calendar, tables };
   } catch (error) {
     console.error("❌ Failed to load data:", error);
     throw error;
   }
+}
 
-  // Create server
+async function initializeServer() {
+  // Always load fresh data (respects TTL cache in data-loader.ts)
+  const data = await loadAllData();
+  
+  if (serverInstance && transportInstance) {
+    // Server exists, just return it with fresh data
+    return { server: serverInstance, transport: transportInstance, data };
+  }
+
+  // Create server (first time only)
   serverInstance = new McpServer({
     name: "synvya-mcp",
     version: "1.0.0",
@@ -145,7 +149,7 @@ async function initializeServer() {
     const sessionId = extra.sessionId || (typeof sessionIdHeader === 'string' ? sessionIdHeader : Array.isArray(sessionIdHeader) ? sessionIdHeader[0] : 'default');
     sessionProtocolVersions.set(sessionId, protocolVersion);
     
-    console.error("🔌 Client initialize:", {
+    console.log("🔌 Client initialize:", {
       requestedVersion,
       negotiatedVersion: protocolVersion,
       sessionId,
@@ -166,13 +170,7 @@ async function initializeServer() {
   });
 
   // Register all tools with the server (after data is loaded)
-  registerTools(serverInstance, {
-    profiles,
-    collections,
-    products,
-    calendar,
-    tables,
-  });
+  registerTools(serverInstance, data);
 
   // OLD TOOL REGISTRATION CODE REMOVED - NOW IN register-tools.ts
   /*
@@ -1139,7 +1137,7 @@ async function initializeServer() {
 
   await serverInstance.connect(transportInstance);
 
-  return { server: serverInstance, transport: transportInstance };
+  return { server: serverInstance, transport: transportInstance, data };
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {

@@ -62,33 +62,24 @@ function checkRateLimit(identifier: string): { allowed: boolean; remaining: numb
   };
 }
 
-// Global data cache
-let profiles: NostrEvent[] = [];
-let collections: NostrEvent[] = [];
-let products: NostrEvent[] = [];
-let calendar: NostrEvent[] = [];
-let tables: NostrEvent[] = [];
-let dataLoaded = false;
-
+// Load data with TTL caching (handled by data-loader.ts)
 async function loadData() {
-  if (dataLoaded) {
-    return;
-  }
-
   try {
-    profiles = await loadProfileData();
-    collections = await loadCollectionsData();
-    products = await loadProductsData();
-    calendar = await loadCalendarData();
-    tables = await loadTablesData();
-    dataLoaded = true;
-    console.error("✅ Data loaded for get_menu_items:", {
+    const profiles = await loadProfileData();
+    const collections = await loadCollectionsData();
+    const products = await loadProductsData();
+    const calendar = await loadCalendarData();
+    const tables = await loadTablesData();
+    
+    console.log("✅ Data loaded for get_menu_items:", {
       profiles: profiles.length,
       collections: collections.length,
       products: products.length,
       calendar: calendar.length,
       tables: tables.length,
     });
+    
+    return { profiles, collections, products, calendar, tables };
   } catch (error) {
     console.error("❌ Failed to load data:", error);
     throw error;
@@ -126,9 +117,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    // Load data
-    await loadData();
-
+    // Load data (uses TTL cache from data-loader.ts)
+    const data = await loadData();
+    
     // Parse parameters from query string (GET) or body (POST)
     const params = req.method === 'GET' ? req.query : (req.body || {});
     
@@ -150,15 +141,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     };
 
     // Call handler
-    const toolData: ToolData = {
-      profiles,
-      collections,
-      products,
-      calendar,
-      tables,
-    };
-
-    const result = getMenuItems(args, toolData);
+    const result = getMenuItems(args, data);
 
     // Return JSON response
     return res.status(200).json(result);
