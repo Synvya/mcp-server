@@ -171,7 +171,7 @@ export function registerTools(server: McpServer, data: ToolData) {
     },
     async (args) => {
       try {
-        const structuredContent = makeReservation(args, {
+        const structuredContent = await makeReservation(args, {
           profiles,
           collections,
           products,
