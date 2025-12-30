@@ -15,6 +15,7 @@ const NOSTR_RELAYS = (process.env.NOSTR_RELAYS || 'wss://relay.damus.io,wss://re
 const MAX_EVENTS_PER_RELAY = parseInt(process.env.MAX_EVENTS_PER_RELAY || '1000', 10);
 const QUERY_TIMEOUT_MS = parseInt(process.env.QUERY_TIMEOUT_MS || '25000', 10);
 const QUERY_COLLECTIONS = (process.env.QUERY_COLLECTIONS || 'true') === 'true';
+const QUERY_PRODUCTS = (process.env.QUERY_PRODUCTS || 'true') === 'true';
 
 // Initialize DynamoDB client
 const dynamoClient = new DynamoDBClient({ region: REGION });
@@ -376,14 +377,40 @@ export const handler: Handler = async (event: LambdaEvent) => {
       console.log('\n=== STEP 2: Skipping collections (no profiles retrieved) ===');
     }
 
+    // Step 3: Query products (kind:30402) for known food establishments
+    let productStats: QueryStats | null = null;
+    
+    if (QUERY_PRODUCTS && profileStats.eventsRetrieved > 0) {
+      console.log('\n=== STEP 3: Querying products for food establishments ===');
+      
+      // Get all food establishment pubkeys from DynamoDB
+      const pubkeys = await getFoodEstablishmentPubkeys();
+      
+      if (pubkeys.length > 0) {
+        const productFilter: Filter = {
+          kinds: [30402],
+          authors: pubkeys,
+          limit: MAX_EVENTS_PER_RELAY,
+        };
+        
+        productStats = await queryNostrRelays(productFilter, 'products', dryRun);
+      } else {
+        console.log('No food establishment pubkeys found, skipping products query');
+      }
+    } else if (!QUERY_PRODUCTS) {
+      console.log('\n=== STEP 3: Products query disabled (QUERY_PRODUCTS=false) ===');
+    } else {
+      console.log('\n=== STEP 3: Skipping products (no profiles retrieved) ===');
+    }
+
     // Combine statistics
     const combinedStats: QueryStats = {
-      eventsRetrieved: profileStats.eventsRetrieved + (collectionStats?.eventsRetrieved || 0),
-      eventsStored: profileStats.eventsStored + (collectionStats?.eventsStored || 0),
-      eventsUpdated: profileStats.eventsUpdated + (collectionStats?.eventsUpdated || 0),
-      eventsSkipped: profileStats.eventsSkipped + (collectionStats?.eventsSkipped || 0),
-      relayErrors: [...profileStats.relayErrors, ...(collectionStats?.relayErrors || [])],
-      duration: profileStats.duration + (collectionStats?.duration || 0),
+      eventsRetrieved: profileStats.eventsRetrieved + (collectionStats?.eventsRetrieved || 0) + (productStats?.eventsRetrieved || 0),
+      eventsStored: profileStats.eventsStored + (collectionStats?.eventsStored || 0) + (productStats?.eventsStored || 0),
+      eventsUpdated: profileStats.eventsUpdated + (collectionStats?.eventsUpdated || 0) + (productStats?.eventsUpdated || 0),
+      eventsSkipped: profileStats.eventsSkipped + (collectionStats?.eventsSkipped || 0) + (productStats?.eventsSkipped || 0),
+      relayErrors: [...profileStats.relayErrors, ...(collectionStats?.relayErrors || []), ...(productStats?.relayErrors || [])],
+      duration: profileStats.duration + (collectionStats?.duration || 0) + (productStats?.duration || 0),
     };
 
     // Log summary
@@ -400,6 +427,14 @@ export const handler: Handler = async (event: LambdaEvent) => {
       console.log(`  - Stored (new): ${collectionStats.eventsStored}`);
       console.log(`  - Updated: ${collectionStats.eventsUpdated}`);
       console.log(`  - Duration: ${collectionStats.duration}ms`);
+    }
+    
+    if (productStats) {
+      console.log('Products:');
+      console.log(`  - Retrieved: ${productStats.eventsRetrieved}`);
+      console.log(`  - Stored (new): ${productStats.eventsStored}`);
+      console.log(`  - Updated: ${productStats.eventsUpdated}`);
+      console.log(`  - Duration: ${productStats.duration}ms`);
     }
     
     console.log('Total:');
@@ -427,6 +462,7 @@ export const handler: Handler = async (event: LambdaEvent) => {
           combined: combinedStats,
           profiles: profileStats,
           collections: collectionStats,
+          products: productStats,
         },
         message: isSuccess 
           ? 'Successfully queried Nostr relays and stored events'

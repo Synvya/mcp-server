@@ -1,6 +1,6 @@
 # Synvya Nostr Relay Querier Lambda
 
-AWS Lambda function that queries multiple Nostr relays for food establishment profiles (kind:0) and collections (kind:30405), then stores them in DynamoDB.
+AWS Lambda function that queries multiple Nostr relays for food establishment profiles (kind:0), collections (kind:30405), and products (kind:30402), then stores them in DynamoDB.
 
 ## Overview
 
@@ -8,7 +8,8 @@ This Lambda function:
 - Connects to multiple Nostr relays via WebSocket
 - **Step 1**: Queries for kind:0 events with `foodEstablishment:*` tags (profiles)
 - **Step 2**: Queries for kind:30405 events from known food establishment pubkeys (collections/menus)
-- Deduplicates events by ID
+- **Step 3**: Queries for kind:30402 events from known food establishment pubkeys (products/menu items)
+- Deduplicates events by [kind, pubkey, d-tag] triplet for replaceable events
 - Stores/updates events in DynamoDB
 - Handles relay failures gracefully
 - Logs detailed execution statistics
@@ -102,6 +103,7 @@ Configure these in the Lambda console under **Configuration → Environment vari
 | `MAX_EVENTS_PER_RELAY` | No | `1000` | Max events to retrieve per filter |
 | `QUERY_TIMEOUT_MS` | No | `25000` | Query timeout in milliseconds |
 | `QUERY_COLLECTIONS` | No | `true` | Enable/disable collections (kind:30405) querying |
+| `QUERY_PRODUCTS` | No | `true` | Enable/disable products (kind:30402) querying |
 
 **Default Nostr Relays:**
 ```
@@ -171,7 +173,7 @@ The Lambda no longer accepts parameters via the event. It automatically:
 2. Queries collections (kind:30405) for those establishments
 
 **Legacy Parameters** (ignored in current version):
-- ~~`kinds`~~ - Now fixed to [0] for profiles, then [30405] for collections
+- ~~`kinds`~~ - Now fixed to [0] for profiles, then [30405] for collections, then [30402] for products
 - ~~`tags`~~ - Now queries all food establishment types automatically
 - **`dryRun`** (boolean): If true, retrieves events but doesn't store them (default: `false`)
 
@@ -181,6 +183,12 @@ The Lambda no longer accepts parameters via the event. It automatically:
   "dryRun": false
 }
 ```
+
+**Expected Output Summary**:
+- Step 1: Profiles (kind:0) retrieved and stored
+- Step 2: Collections (kind:30405) retrieved and stored
+- Step 3: Products (kind:30402) retrieved and stored
+- Total statistics: retrieved, stored, updated, skipped, errors, duration
 
 ## Response Format
 
