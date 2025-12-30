@@ -7,6 +7,43 @@ Discover and book restaurants and other food establishments directly from your A
 - **[Reservation System Architecture](internal/reservation.md)** - Complete guide to the reservation system including NIP-46 remote signing with Keycast, restaurant discovery, table management, and event schemas
 - **[Nostr Event Schema](nostr-schema.md)** - Documentation for profiles (kind:0), menus (kind:30405), and menu items (kind:30402)
 
+## Configuration
+
+### Nostr Integration
+
+The MCP server requires Nostr configuration for reservation protocol (NIP-RP) support:
+
+1. **Generate a Nostr key pair**:
+   - Visit [nostrkeygen.com](https://nostrkeygen.com/) to generate a new key pair
+   - Save both the public key (npub) and private key (nsec) securely
+   - **Important**: The private key (nsec) must be kept secret!
+
+2. **Configure environment variables**:
+   
+   Copy `.env.example` to `.env` and update:
+   
+   ```bash
+   # Your MCP server's Nostr private key (nsec format)
+   MCP_SERVER_NSEC=nsec1...
+   
+   # Comma-separated list of Nostr relay URLs (optional)
+   NOSTR_RELAYS=wss://relay.damus.io,wss://nos.lol
+   
+   # Timeout for reservation responses in milliseconds (optional)
+   RESERVATION_TIMEOUT_MS=30000
+   ```
+
+3. **Required variables**:
+   - `MCP_SERVER_NSEC`: Your Nostr private key in nsec format (starts with "nsec1")
+   
+4. **Optional variables**:
+   - `NOSTR_RELAYS`: Comma-separated relay URLs (default: `wss://relay.damus.io,wss://nos.lol`)
+   - `RESERVATION_TIMEOUT_MS`: Timeout for waiting for responses (default: 30000ms, range: 1000-120000)
+
+### Validation
+
+The configuration is validated on server startup. If required values are missing or invalid, you'll see a helpful error message explaining what needs to be fixed.
+
 ## Available Tools
 
 ### search_food_establishments
