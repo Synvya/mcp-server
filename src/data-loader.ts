@@ -22,6 +22,7 @@ const DYNAMODB_TABLE_NAME = process.env.DYNAMODB_TABLE_NAME || 'synvya-nostr-eve
 const AWS_REGION = process.env.AWS_REGION || process.env.REGION || 'us-east-1';
 const PROFILE_CACHE_TTL_SECONDS = parseInt(process.env.PROFILE_CACHE_TTL_SECONDS || '300', 10);
 const COLLECTION_CACHE_TTL_SECONDS = parseInt(process.env.COLLECTION_CACHE_TTL_SECONDS || '300', 10);
+const PRODUCT_CACHE_TTL_SECONDS = parseInt(process.env.PRODUCT_CACHE_TTL_SECONDS || '300', 10);
 
 // Initialize DynamoDB client (lazy initialization)
 let dynamoClient: DynamoDBDocumentClient | null = null;
@@ -54,6 +55,17 @@ const collectionCache: {
   data: null,
   timestamp: 0,
   ttl: COLLECTION_CACHE_TTL_SECONDS * 1000,
+};
+
+// In-memory cache for products
+const productCache: {
+  data: NostrEvent[] | null;
+  timestamp: number;
+  ttl: number;
+} = {
+  data: null,
+  timestamp: 0,
+  ttl: PRODUCT_CACHE_TTL_SECONDS * 1000,
 };
 
 // Convert hex pubkey to bech32 npub format
@@ -276,14 +288,86 @@ export async function loadCollectionsData(): Promise<NostrEvent[]> {
   return collections;
 }
 
-export async function loadProductsData(): Promise<NostrEvent[]> {
+/**
+ * Load product data from DynamoDB
+ */
+async function loadProductsDataFromDynamoDB(): Promise<NostrEvent[]> {
+  const client = getDynamoDBClient();
+  
   try {
-    const data = await fs.readFile(join(projectRoot, 'data', 'products.json'), 'utf-8');
-    return JSON.parse(data);
+    console.log('Loading products from DynamoDB...');
+    
+    // Query DynamoDB for all kind:30402 events (products)
+    const command = new ScanCommand({
+      TableName: DYNAMODB_TABLE_NAME,
+      FilterExpression: '#kind = :kind',
+      ExpressionAttributeNames: {
+        '#kind': 'kind',
+      },
+      ExpressionAttributeValues: {
+        ':kind': 30402,
+      },
+    });
+    
+    const result = await client.send(command);
+    const events = (result.Items || []) as NostrEvent[];
+    
+    console.log(`✅ Loaded ${events.length} products from DynamoDB`);
+    return events;
   } catch (error) {
-    console.error('Error loading products data:', error);
-    throw new Error('Failed to load products data');
+    console.error('Error loading products from DynamoDB:', error);
+    throw new Error('Failed to load products from DynamoDB');
   }
+}
+
+/**
+ * Load product data from static file
+ */
+async function loadProductsDataFromFile(): Promise<NostrEvent[]> {
+  try {
+    console.log('Loading products from static file...');
+    const data = await fs.readFile(join(projectRoot, 'data', 'products.json'), 'utf-8');
+    const products = JSON.parse(data);
+    console.log(`✅ Loaded ${products.length} products from file`);
+    return products;
+  } catch (error) {
+    console.error('Error loading product data from file:', error);
+    throw new Error('Failed to load product data from file');
+  }
+}
+
+/**
+ * Load product data with caching and fallback
+ */
+export async function loadProductsData(): Promise<NostrEvent[]> {
+  // Check cache first
+  const now = Date.now();
+  if (productCache.data && (now - productCache.timestamp) < productCache.ttl) {
+    console.log('✅ Using cached products');
+    return productCache.data;
+  }
+  
+  let products: NostrEvent[];
+  
+  if (USE_DYNAMODB) {
+    try {
+      // Try loading from DynamoDB
+      products = await loadProductsDataFromDynamoDB();
+    } catch (error) {
+      console.warn('⚠️ DynamoDB load failed, falling back to file');
+      // Fallback to file on error
+      products = await loadProductsDataFromFile();
+    }
+  } else {
+    // Use file-based loading when DynamoDB is disabled
+    products = await loadProductsDataFromFile();
+  }
+  
+  // Update cache
+  productCache.data = products;
+  productCache.timestamp = now;
+  
+  return products;
 }
 
 export async function loadCalendarData(): Promise<NostrEvent[]> {
