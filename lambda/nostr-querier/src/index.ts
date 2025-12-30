@@ -134,7 +134,8 @@ async function storeEvent(event: NostrEvent): Promise<void> {
  */
 async function queryNostrRelays(
   filter: Filter,
-  description: string
+  description: string,
+  dryRun: boolean = false
 ): Promise<QueryStats> {
   const startTime = Date.now();
   const stats: QueryStats = {
@@ -149,6 +150,9 @@ async function queryNostrRelays(
   console.log(`Starting Nostr relay query for ${description}...`);
   console.log(`Relays: ${NOSTR_RELAYS.join(', ')}`);
   console.log(`Filter:`, JSON.stringify(filter, null, 2));
+  if (dryRun) {
+    console.log('⚠️ DRY RUN MODE - Events will NOT be stored in DynamoDB');
+  }
 
   const pool = new SimplePool();
 
@@ -190,34 +194,39 @@ async function queryNostrRelays(
 
     console.log(`Processing ${eventMap.size} unique events...`);
 
-    // Store events in DynamoDB
-    for (const [eventId, event] of eventMap.entries()) {
-      try {
-        const shouldStore = await shouldStoreEvent(event);
-        
-        if (shouldStore) {
-          await storeEvent(event);
+    // Store events in DynamoDB (skip if dryRun)
+    if (dryRun) {
+      console.log(`⚠️ DRY RUN: Would process ${eventMap.size} events (not storing)`);
+      stats.eventsRetrieved = eventMap.size;
+    } else {
+      for (const [eventId, event] of eventMap.entries()) {
+        try {
+          const shouldStore = await shouldStoreEvent(event);
           
-          // Check if it was an update or new insert
-          const wasUpdate = await docClient.send(new GetCommand({
-            TableName: DYNAMODB_TABLE_NAME,
-            Key: { id: eventId },
-          })).then(result => result.Item?.updatedAt !== event.created_at);
-          
-          if (wasUpdate) {
-            stats.eventsUpdated++;
+          if (shouldStore) {
+            await storeEvent(event);
+            
+            // Check if it was an update or new insert
+            const wasUpdate = await docClient.send(new GetCommand({
+              TableName: DYNAMODB_TABLE_NAME,
+              Key: { id: eventId },
+            })).then(result => result.Item?.updatedAt !== event.created_at);
+            
+            if (wasUpdate) {
+              stats.eventsUpdated++;
+            } else {
+              stats.eventsStored++;
+            }
+            
+            console.log(`Stored event ${eventId.substring(0, 8)}... (kind:${event.kind})`);
           } else {
-            stats.eventsStored++;
+            stats.eventsSkipped++;
+            console.log(`Skipped event ${eventId.substring(0, 8)}... (older version)`);
           }
-          
-          console.log(`Stored event ${eventId.substring(0, 8)}... (kind:${event.kind})`);
-        } else {
-          stats.eventsSkipped++;
-          console.log(`Skipped event ${eventId.substring(0, 8)}... (older version)`);
+        } catch (error) {
+          console.error(`Error storing event ${eventId}:`, error);
+          stats.relayErrors.push(`Failed to store event ${eventId}: ${error}`);
         }
-      } catch (error) {
-        console.error(`Error storing event ${eventId}:`, error);
-        stats.relayErrors.push(`Failed to store event ${eventId}: ${error}`);
       }
     }
   } catch (error) {
@@ -254,7 +263,7 @@ export const handler: Handler = async (event: LambdaEvent) => {
       limit: MAX_EVENTS_PER_RELAY,
     };
     
-    const profileStats = await queryNostrRelays(profileFilter, 'food establishment profiles');
+    const profileStats = await queryNostrRelays(profileFilter, 'food establishment profiles', dryRun);
 
     // Step 2: Query collections (kind:30405) for known food establishments
     let collectionStats: QueryStats | null = null;
@@ -273,7 +282,7 @@ export const handler: Handler = async (event: LambdaEvent) => {
           limit: MAX_EVENTS_PER_RELAY,
         };
         
-        collectionStats = await queryNostrRelays(collectionFilter, 'collections');
+        collectionStats = await queryNostrRelays(collectionFilter, 'collections', dryRun);
       } else {
         console.log('No food establishment pubkeys found, skipping collections query');
       }
