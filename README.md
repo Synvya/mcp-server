@@ -289,6 +289,29 @@ The MCP server can be deployed to Vercel as a serverless function, making it acc
    - ChatGPT should now be able to use your MCP tools
    - Try asking: "Find me a vegan Spanish restaurant"
 
+#### Connect to CustomGPT / OpenAI Actions
+
+For CustomGPT or OpenAI Actions integration, use the auto-generated OpenAPI schema:
+
+1. **In CustomGPT/GPT Builder**:
+   - Go to "Configure" → "Actions"
+   - Click "Import from URL"
+   - Enter: `https://mcp.synvya.com/api/schema-v1`
+   - Click "Import"
+
+2. **Configure Authentication**:
+   - Authentication: None (API is public)
+   - Privacy Policy: Optional (add your privacy policy URL if needed)
+
+3. **Test the Actions**:
+   - Use the "Test" button in the Actions editor to verify each endpoint
+   - Try asking your GPT: "Find me a vegan Spanish restaurant in Snoqualmie"
+
+**Notes:**
+- The schema is auto-generated from the same Zod schemas used by the MCP interface
+- Schema updates automatically when you redeploy to Vercel
+- All endpoints support CORS for browser-based testing
+
 #### Environment Variables
 
 Configure these in your Vercel project settings (Settings → Environment Variables):
