@@ -1,12 +1,13 @@
 # Synvya Nostr Relay Querier Lambda
 
-AWS Lambda function that queries multiple Nostr relays for food establishment profiles (kind:0 events) and stores them in DynamoDB.
+AWS Lambda function that queries multiple Nostr relays for food establishment profiles (kind:0) and collections (kind:30405), then stores them in DynamoDB.
 
 ## Overview
 
 This Lambda function:
 - Connects to multiple Nostr relays via WebSocket
-- Queries for kind:0 events with `foodEstablishment:*` tags
+- **Step 1**: Queries for kind:0 events with `foodEstablishment:*` tags (profiles)
+- **Step 2**: Queries for kind:30405 events from known food establishment pubkeys (collections/menus)
 - Deduplicates events by ID
 - Stores/updates events in DynamoDB
 - Handles relay failures gracefully
@@ -100,6 +101,7 @@ Configure these in the Lambda console under **Configuration → Environment vari
 | `NOSTR_RELAYS` | No | See below | Comma-separated list of relay URLs |
 | `MAX_EVENTS_PER_RELAY` | No | `1000` | Max events to retrieve per filter |
 | `QUERY_TIMEOUT_MS` | No | `25000` | Query timeout in milliseconds |
+| `QUERY_COLLECTIONS` | No | `true` | Enable/disable collections (kind:30405) querying |
 
 **Default Nostr Relays:**
 ```
@@ -142,6 +144,7 @@ cat response.json
 
 After successful execution, verify events in DynamoDB:
 
+**Check profiles (kind:0)**:
 ```bash
 aws dynamodb scan \
   --table-name synvya-nostr-events \
@@ -151,19 +154,31 @@ aws dynamodb scan \
   --limit 10
 ```
 
+**Check collections (kind:30405)**:
+```bash
+aws dynamodb scan \
+  --table-name synvya-nostr-events \
+  --filter-expression "#k = :kind" \
+  --expression-attribute-names '{"#k":"kind"}' \
+  --expression-attribute-values '{":kind":{"N":"30405"}}' \
+  --limit 10
+```
+
 ## Event Parameters
 
-The Lambda accepts the following optional parameters:
+The Lambda no longer accepts parameters via the event. It automatically:
+1. Queries all food establishment profiles (kind:0)
+2. Queries collections (kind:30405) for those establishments
 
-- **`kinds`** (number[]): Nostr event kinds to query (default: `[0]` for profiles)
-- **`tags`** (string[]): Food establishment types to filter (default: all types)
+**Legacy Parameters** (ignored in current version):
+- ~~`kinds`~~ - Now fixed to [0] for profiles, then [30405] for collections
+- ~~`tags`~~ - Now queries all food establishment types automatically
 - **`dryRun`** (boolean): If true, retrieves events but doesn't store them (default: `false`)
 
-**Example**: Query only restaurants and bakeries:
+**Example Test Event**:
 ```json
 {
-  "kinds": [0],
-  "tags": ["Restaurant", "Bakery"]
+  "dryRun": false
 }
 ```
 
@@ -175,12 +190,30 @@ The Lambda accepts the following optional parameters:
   "body": {
     "success": true,
     "stats": {
-      "eventsRetrieved": 42,
-      "eventsStored": 15,
-      "eventsUpdated": 10,
-      "eventsSkipped": 17,
-      "relayErrors": [],
-      "duration": 12453
+      "combined": {
+        "eventsRetrieved": 52,
+        "eventsStored": 20,
+        "eventsUpdated": 15,
+        "eventsSkipped": 17,
+        "relayErrors": [],
+        "duration": 15234
+      },
+      "profiles": {
+        "eventsRetrieved": 42,
+        "eventsStored": 15,
+        "eventsUpdated": 10,
+        "eventsSkipped": 17,
+        "relayErrors": [],
+        "duration": 12453
+      },
+      "collections": {
+        "eventsRetrieved": 10,
+        "eventsStored": 5,
+        "eventsUpdated": 5,
+        "eventsSkipped": 0,
+        "relayErrors": [],
+        "duration": 2781
+      }
     },
     "message": "Successfully queried Nostr relays and stored events"
   }
