@@ -293,18 +293,19 @@ The MCP server can be deployed to Vercel as a serverless function, making it acc
 
 Configure these in your Vercel project settings (Settings → Environment Variables):
 
-**DynamoDB Integration** (optional - profiles can be loaded from live Nostr data):
+**DynamoDB Integration** (optional - profiles and collections can be loaded from live Nostr data):
 - `USE_DYNAMODB` - Enable DynamoDB integration (default: `false`)
-  - Set to `true` to load profiles from DynamoDB instead of static files
+  - Set to `true` to load profiles and collections from DynamoDB instead of static files
 - `DYNAMODB_TABLE_NAME` - DynamoDB table name (default: `synvya-nostr-events`)
 - `AWS_REGION` - AWS region (default: `us-east-1`)
 - `AWS_ACCESS_KEY_ID` - IAM user access key (required if `USE_DYNAMODB=true`)
 - `AWS_SECRET_ACCESS_KEY` - IAM user secret key (required if `USE_DYNAMODB=true`)
-- `PROFILE_CACHE_TTL_SECONDS` - Cache duration in seconds (default: `300` = 5 minutes)
+- `PROFILE_CACHE_TTL_SECONDS` - Profile cache duration in seconds (default: `300` = 5 minutes)
+- `COLLECTION_CACHE_TTL_SECONDS` - Collection cache duration in seconds (default: `300` = 5 minutes)
 
 **Notes:**
-- When `USE_DYNAMODB=false` (default), profiles are loaded from `data/profiles.json`
-- When `USE_DYNAMODB=true`, profiles are loaded from DynamoDB with automatic caching
+- When `USE_DYNAMODB=false` (default), profiles and collections are loaded from `data/*.json` files
+- When `USE_DYNAMODB=true`, profiles (kind:0) and collections (kind:30405) are loaded from DynamoDB with automatic caching
 - If DynamoDB query fails, the system automatically falls back to static files
 - Cache reduces DynamoDB costs and improves response times
 

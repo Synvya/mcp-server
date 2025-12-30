@@ -21,6 +21,7 @@ const USE_DYNAMODB = process.env.USE_DYNAMODB === 'true';
 const DYNAMODB_TABLE_NAME = process.env.DYNAMODB_TABLE_NAME || 'synvya-nostr-events';
 const AWS_REGION = process.env.AWS_REGION || process.env.REGION || 'us-east-1';
 const PROFILE_CACHE_TTL_SECONDS = parseInt(process.env.PROFILE_CACHE_TTL_SECONDS || '300', 10);
+const COLLECTION_CACHE_TTL_SECONDS = parseInt(process.env.COLLECTION_CACHE_TTL_SECONDS || '300', 10);
 
 // Initialize DynamoDB client (lazy initialization)
 let dynamoClient: DynamoDBDocumentClient | null = null;
@@ -42,6 +43,17 @@ const profileCache: {
   data: null,
   timestamp: 0,
   ttl: PROFILE_CACHE_TTL_SECONDS * 1000,
+};
+
+// In-memory cache for collections
+const collectionCache: {
+  data: NostrEvent[] | null;
+  timestamp: number;
+  ttl: number;
+} = {
+  data: null,
+  timestamp: 0,
+  ttl: COLLECTION_CACHE_TTL_SECONDS * 1000,
 };
 
 // Convert hex pubkey to bech32 npub format
@@ -182,14 +194,86 @@ export async function loadProfileData(): Promise<NostrEvent[]> {
   return profiles;
 }
 
-export async function loadCollectionsData(): Promise<NostrEvent[]> {
+/**
+ * Load collection data from DynamoDB
+ */
+async function loadCollectionsDataFromDynamoDB(): Promise<NostrEvent[]> {
+  const client = getDynamoDBClient();
+  
   try {
-    const data = await fs.readFile(join(projectRoot, 'data', 'collections.json'), 'utf-8');
-    return JSON.parse(data);
+    console.log('Loading collections from DynamoDB...');
+    
+    // Query DynamoDB for all kind:30405 events (collections)
+    const command = new ScanCommand({
+      TableName: DYNAMODB_TABLE_NAME,
+      FilterExpression: '#kind = :kind',
+      ExpressionAttributeNames: {
+        '#kind': 'kind',
+      },
+      ExpressionAttributeValues: {
+        ':kind': 30405,
+      },
+    });
+    
+    const result = await client.send(command);
+    const events = (result.Items || []) as NostrEvent[];
+    
+    console.log(`✅ Loaded ${events.length} collections from DynamoDB`);
+    return events;
   } catch (error) {
-    console.error('Error loading collections data:', error);
-    throw new Error('Failed to load collections data');
+    console.error('Error loading collections from DynamoDB:', error);
+    throw new Error('Failed to load collections from DynamoDB');
   }
+}
+
+/**
+ * Load collection data from static file
+ */
+async function loadCollectionsDataFromFile(): Promise<NostrEvent[]> {
+  try {
+    console.log('Loading collections from static file...');
+    const data = await fs.readFile(join(projectRoot, 'data', 'collections.json'), 'utf-8');
+    const collections = JSON.parse(data);
+    console.log(`✅ Loaded ${collections.length} collections from file`);
+    return collections;
+  } catch (error) {
+    console.error('Error loading collection data from file:', error);
+    throw new Error('Failed to load collection data from file');
+  }
+}
+
+/**
+ * Load collection data with caching and fallback
+ */
+export async function loadCollectionsData(): Promise<NostrEvent[]> {
+  // Check cache first
+  const now = Date.now();
+  if (collectionCache.data && (now - collectionCache.timestamp) < collectionCache.ttl) {
+    console.log('✅ Using cached collections');
+    return collectionCache.data;
+  }
+  
+  let collections: NostrEvent[];
+  
+  if (USE_DYNAMODB) {
+    try {
+      // Try loading from DynamoDB
+      collections = await loadCollectionsDataFromDynamoDB();
+    } catch (error) {
+      console.warn('⚠️ DynamoDB load failed, falling back to file');
+      // Fallback to file on error
+      collections = await loadCollectionsDataFromFile();
+    }
+  } else {
+    // Use file-based loading when DynamoDB is disabled
+    collections = await loadCollectionsDataFromFile();
+  }
+  
+  // Update cache
+  collectionCache.data = collections;
+  collectionCache.timestamp = now;
+  
+  return collections;
 }
 
 export async function loadProductsData(): Promise<NostrEvent[]> {
