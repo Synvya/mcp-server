@@ -2,6 +2,11 @@
 
 Discover and book restaurants and other food establishments directly from your AI assistant.
 
+## Documentation
+
+- **[Reservation System Architecture](internal/reservation.md)** - Complete guide to the reservation system including NIP-46 remote signing with Keycast, restaurant discovery, table management, and event schemas
+- **[Nostr Event Schema](nostr-schema.md)** - Documentation for profiles (kind:0), menus (kind:30405), and menu items (kind:30402)
+
 ## Available Tools
 
 ### search_food_establishments
