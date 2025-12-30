@@ -5,7 +5,7 @@
 
 import { Handler } from 'aws-lambda';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, PutCommand, GetCommand, ScanCommand } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, PutCommand, GetCommand, ScanCommand, DeleteCommand } from '@aws-sdk/lib-dynamodb';
 import { SimplePool, Filter, Event as NostrEvent } from 'nostr-tools';
 
 // Environment variables
@@ -86,25 +86,92 @@ async function getFoodEstablishmentPubkeys(): Promise<string[]> {
 }
 
 /**
+ * Get the d-tag value from an event's tags
+ */
+function getDTag(event: NostrEvent): string | null {
+  const dTag = event.tags.find(tag => tag[0] === 'd');
+  return dTag ? dTag[1] : null;
+}
+
+/**
+ * Find existing replaceable event in DynamoDB by [kind, pubkey, d-tag]
+ */
+async function findExistingReplaceableEvent(event: NostrEvent): Promise<any | null> {
+  try {
+    // Only for replaceable events (kind 30000-39999)
+    if (event.kind < 30000 || event.kind >= 40000) {
+      return null;
+    }
+
+    const dTag = getDTag(event);
+    if (!dTag) {
+      console.warn(`Replaceable event ${event.id} missing d-tag`);
+      return null;
+    }
+
+    // Scan DynamoDB to find events with same [kind, pubkey, d-tag]
+    const result = await docClient.send(new ScanCommand({
+      TableName: DYNAMODB_TABLE_NAME,
+      FilterExpression: '#kind = :kind AND pubkey = :pubkey',
+      ExpressionAttributeNames: {
+        '#kind': 'kind',
+      },
+      ExpressionAttributeValues: {
+        ':kind': event.kind,
+        ':pubkey': event.pubkey,
+      },
+    }));
+
+    // Find event with matching d-tag
+    const existingEvent = (result.Items || []).find(item => {
+      const existingDTag = (item.tags as string[][]).find(tag => tag[0] === 'd');
+      return existingDTag && existingDTag[1] === dTag;
+    });
+
+    return existingEvent || null;
+  } catch (error) {
+    console.error(`Error finding existing replaceable event:`, error);
+    return null;
+  }
+}
+
+/**
  * Check if an event already exists in DynamoDB and if it's newer
  */
-async function shouldStoreEvent(event: NostrEvent): Promise<boolean> {
+async function shouldStoreEvent(event: NostrEvent): Promise<{ shouldStore: boolean; oldEventId?: string }> {
   try {
+    // For replaceable events (kind 30000-39999), check by [kind, pubkey, d-tag]
+    if (event.kind >= 30000 && event.kind < 40000) {
+      const existingEvent = await findExistingReplaceableEvent(event);
+      
+      if (!existingEvent) {
+        return { shouldStore: true };
+      }
+
+      // Only store if new event is newer
+      if (event.created_at > existingEvent.created_at) {
+        return { shouldStore: true, oldEventId: existingEvent.id };
+      } else {
+        return { shouldStore: false };
+      }
+    }
+
+    // For non-replaceable events, check by event ID
     const result = await docClient.send(new GetCommand({
       TableName: DYNAMODB_TABLE_NAME,
       Key: { id: event.id },
     }));
 
     if (!result.Item) {
-      return true; // Event doesn't exist, store it
+      return { shouldStore: true };
     }
 
     // Check if new event is newer than existing one
     const existingCreatedAt = result.Item.created_at as number;
-    return event.created_at > existingCreatedAt;
+    return { shouldStore: event.created_at > existingCreatedAt };
   } catch (error) {
     console.error(`Error checking event ${event.id}:`, error);
-    return true; // On error, try to store anyway
+    return { shouldStore: true }; // On error, try to store anyway
   }
 }
 
@@ -184,11 +251,26 @@ async function queryNostrRelays(
     // Process events
     const eventMap = new Map<string, NostrEvent>();
     
-    // Deduplicate by event ID (keep the one with latest created_at)
+    // Deduplicate events
     for (const event of events) {
-      const existing = eventMap.get(event.id);
-      if (!existing || event.created_at > existing.created_at) {
-        eventMap.set(event.id, event);
+      // For replaceable events (kind 30000-39999), deduplicate by [kind, pubkey, d-tag]
+      if (event.kind >= 30000 && event.kind < 40000) {
+        const dTag = getDTag(event);
+        if (dTag) {
+          const replaceableKey = `${event.kind}:${event.pubkey}:${dTag}`;
+          const existing = eventMap.get(replaceableKey);
+          if (!existing || event.created_at > existing.created_at) {
+            eventMap.set(replaceableKey, event);
+          }
+        } else {
+          console.warn(`Replaceable event ${event.id} missing d-tag, skipping`);
+        }
+      } else {
+        // For non-replaceable events, deduplicate by event ID
+        const existing = eventMap.get(event.id);
+        if (!existing || event.created_at > existing.created_at) {
+          eventMap.set(event.id, event);
+        }
       }
     }
 
@@ -199,33 +281,36 @@ async function queryNostrRelays(
       console.log(`⚠️ DRY RUN: Would process ${eventMap.size} events (not storing)`);
       stats.eventsRetrieved = eventMap.size;
     } else {
-      for (const [eventId, event] of eventMap.entries()) {
+      for (const [key, event] of eventMap.entries()) {
         try {
-          const shouldStore = await shouldStoreEvent(event);
+          const { shouldStore, oldEventId } = await shouldStoreEvent(event);
           
           if (shouldStore) {
-            await storeEvent(event);
-            
-            // Check if it was an update or new insert
-            const wasUpdate = await docClient.send(new GetCommand({
-              TableName: DYNAMODB_TABLE_NAME,
-              Key: { id: eventId },
-            })).then(result => result.Item?.updatedAt !== event.created_at);
-            
-            if (wasUpdate) {
+            // Delete old replaceable event if it exists
+            if (oldEventId && oldEventId !== event.id) {
+              await docClient.send(new DeleteCommand({
+                TableName: DYNAMODB_TABLE_NAME,
+                Key: { id: oldEventId },
+              }));
+              console.log(`Deleted old event ${oldEventId.substring(0, 8)}... (replaced by ${event.id.substring(0, 8)}...)`);
+              stats.eventsUpdated++;
+            } else if (oldEventId) {
+              // Same event ID, just updating
               stats.eventsUpdated++;
             } else {
+              // New event
               stats.eventsStored++;
             }
             
-            console.log(`Stored event ${eventId.substring(0, 8)}... (kind:${event.kind})`);
+            await storeEvent(event);
+            console.log(`Stored event ${event.id.substring(0, 8)}... (kind:${event.kind})`);
           } else {
             stats.eventsSkipped++;
-            console.log(`Skipped event ${eventId.substring(0, 8)}... (older version)`);
+            console.log(`Skipped event ${event.id.substring(0, 8)}... (older version)`);
           }
         } catch (error) {
-          console.error(`Error storing event ${eventId}:`, error);
-          stats.relayErrors.push(`Failed to store event ${eventId}: ${error}`);
+          console.error(`Error storing event ${event.id}:`, error);
+          stats.relayErrors.push(`Failed to store event ${event.id}: ${error}`);
         }
       }
     }
@@ -278,7 +363,6 @@ export const handler: Handler = async (event: LambdaEvent) => {
         const collectionFilter: Filter = {
           kinds: [30405],
           authors: pubkeys,
-          since: Math.floor(Date.now() / 1000) - (24 * 60 * 60), // Last 24 hours
           limit: MAX_EVENTS_PER_RELAY,
         };
         
