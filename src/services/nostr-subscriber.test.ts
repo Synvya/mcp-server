@@ -4,9 +4,9 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { generateSecretKey, getPublicKey } from 'nostr-tools';
-import { NostrSubscriber } from './nostr-subscriber';
-import { createAndWrapRumor } from '../lib/nip59';
-import type { Rumor } from '../lib/nip59';
+import { NostrSubscriber } from './nostr-subscriber.js';
+import { createAndWrapRumor } from '../lib/nip59.js';
+import type { Rumor } from '../lib/nip59.js';
 import type { Event } from 'nostr-tools';
 
 // Mock WebSocket (reuse from publisher tests)

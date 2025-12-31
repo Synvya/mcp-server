@@ -3,7 +3,7 @@
  * Tracks pending reservation requests and matches incoming responses with timeouts
  */
 
-import type { Rumor } from '../lib/nip59';
+import type { Rumor } from '../lib/nip59.js';
 
 /**
  * Pending request tracking entry

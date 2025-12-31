@@ -7,7 +7,7 @@
  */
 
 import type { UnsignedEvent } from 'nostr-tools';
-import type { Rumor } from './nip59';
+import type { Rumor } from './nip59.js';
 
 /**
  * Status values for reservation responses

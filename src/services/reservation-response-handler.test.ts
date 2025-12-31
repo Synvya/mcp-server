@@ -3,8 +3,8 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach, beforeAll, afterAll } from 'vitest';
-import { ReservationResponseHandler } from './reservation-response-handler';
-import type { Rumor } from '../lib/nip59';
+import { ReservationResponseHandler } from './reservation-response-handler.js';
+import type { Rumor } from '../lib/nip59.js';
 
 // Store original handler
 let originalUnhandledRejection: any;

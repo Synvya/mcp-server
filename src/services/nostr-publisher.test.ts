@@ -4,7 +4,7 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { generateSecretKey, finalizeEvent } from 'nostr-tools';
-import { NostrPublisher } from './nostr-publisher';
+import { NostrPublisher } from './nostr-publisher.js';
 import type { Event } from 'nostr-tools';
 
 // Mock WebSocket

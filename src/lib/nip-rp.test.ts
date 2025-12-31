@@ -4,7 +4,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { generateSecretKey, getPublicKey } from 'nostr-tools';
-import { createRumor } from './nip59';
+import { createRumor } from './nip59.js';
 import {
   buildReservationRequest,
   buildReservationResponse,
@@ -12,7 +12,7 @@ import {
   validateReservationResponseRumor,
   type ReservationRequestParams,
   type ReservationResponseParams,
-} from './nip-rp';
+} from './nip-rp.js';
 
 describe('NIP-RP Event Builders', () => {
   // Generate test keys

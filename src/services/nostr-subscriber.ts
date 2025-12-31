@@ -5,7 +5,7 @@
 
 import type { Event } from 'nostr-tools';
 import { getPublicKey } from 'nostr-tools';
-import { unwrapAndUnseal, type Rumor } from '../lib/nip59';
+import { unwrapAndUnseal, type Rumor } from '../lib/nip59.js';
 
 /**
  * Callback function type for handling unwrapped rumors

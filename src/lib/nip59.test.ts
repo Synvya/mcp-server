@@ -13,7 +13,7 @@ import {
   createAndWrapRumor,
   unwrapAndUnseal,
   type Rumor,
-} from './nip59';
+} from './nip59.js';
 
 describe('NIP-59 Gift Wrap Protocol', () => {
   // Generate test keys
