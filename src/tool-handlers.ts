@@ -12,6 +12,78 @@ import {
   checkTableAvailability,
   type NostrEvent,
 } from './data-loader.js';
+import { NostrPublisher } from './services/nostr-publisher.js';
+import { NostrSubscriber } from './services/nostr-subscriber.js';
+import { ReservationResponseHandler } from './services/reservation-response-handler.js';
+import { buildReservationRequest } from './lib/nip-rp.js';
+import { createAndWrapRumor } from './lib/nip59.js';
+import { nip19, getPublicKey } from 'nostr-tools';
+import { NOSTR_RELAYS, RESERVATION_TIMEOUT_MS, MCP_SERVER_NSEC } from './config.js';
+
+// Initialize Nostr services for reservation handling
+let nostrPublisher: NostrPublisher | null = null;
+let nostrSubscriber: NostrSubscriber | null = null;
+let responseHandler: ReservationResponseHandler | null = null;
+let serverPrivateKey: Uint8Array | null = null;
+let serverPublicKey: string | null = null;
+
+/**
+ * Initialize Nostr services for handling reservations
+ * Called lazily on first reservation request
+ */
+function initializeNostrServices(): void {
+  if (nostrPublisher && nostrSubscriber && responseHandler) {
+    return; // Already initialized
+  }
+
+  if (!MCP_SERVER_NSEC) {
+    throw new Error('MCP_SERVER_NSEC environment variable is required for making reservations');
+  }
+
+  // Decode private key from nsec format
+  try {
+    const decoded = nip19.decode(MCP_SERVER_NSEC);
+    if (decoded.type !== 'nsec') {
+      throw new Error('MCP_SERVER_NSEC must be in nsec format');
+    }
+    serverPrivateKey = decoded.data;
+    serverPublicKey = getPublicKey(serverPrivateKey);
+  } catch (error) {
+    throw new Error(`Failed to decode MCP_SERVER_NSEC: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+
+  // Initialize publisher
+  nostrPublisher = new NostrPublisher({ relays: NOSTR_RELAYS });
+
+  // Initialize response handler
+  responseHandler = new ReservationResponseHandler({
+    defaultTimeoutMs: RESERVATION_TIMEOUT_MS,
+  });
+
+  // Initialize subscriber with response handler integration
+  nostrSubscriber = new NostrSubscriber({
+    relays: NOSTR_RELAYS,
+    privateKey: serverPrivateKey,
+    onRumor: (rumor, giftWrap) => {
+      // Try to match with pending reservation request
+      const matched = responseHandler?.handleRumor(rumor);
+      
+      if (!matched) {
+        // Log unmatched rumors for debugging
+        console.log(`Received unmatched kind:${rumor.kind} rumor from ${rumor.pubkey.substring(0, 8)}...`);
+      }
+    },
+    onError: (error, relay) => {
+      console.error(`Subscription error on ${relay}:`, error);
+    },
+  });
+
+  // Start subscribing
+  nostrSubscriber.start();
+
+  console.log(`Initialized Nostr services for reservations (server pubkey: ${serverPublicKey.substring(0, 8)}...)`);
+}
+
 
 export interface ToolData {
   profiles: NostrEvent[];
@@ -626,88 +698,13 @@ export function searchMenuItems(
 /**
  * Make a reservation at a food establishment
  */
-export function makeReservation(
+export async function makeReservation(
   args: MakeReservationArgs,
   data: ToolData
-): Record<string, any> {
-  const { restaurant_id, time, party_size, name, telephone, email } = args;
-  const { profiles, tables, calendar } = data;
-
-  // Validate ISO 8601 time format and extract components
-  let startTimeStr: string;
-  let endTimeStr: string;
-  let timezoneOffset: string = "";
-  
+): Promise<Record<string, any>> {
+  // Initialize Nostr services if not already done
   try {
-    // Parse ISO 8601 string: YYYY-MM-DDTHH:mm:ss[+-]HH:mm or YYYY-MM-DDTHH:mm:ssZ
-    const iso8601Regex = /^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2}):(\d{2})([+-]\d{2}:\d{2}|Z)?$/;
-    const match = time.match(iso8601Regex);
-    if (!match) {
-      throw new Error("Invalid ISO 8601 format");
-    }
-    
-    const datePart = match[1]; // YYYY-MM-DD
-    const hours = parseInt(match[2], 10);
-    const minutes = parseInt(match[3], 10);
-    const seconds = parseInt(match[4], 10);
-    const tzPart = match[5]; // timezone part or undefined
-    
-    // Validate date components
-    const [year, month, day] = datePart.split('-').map(Number);
-    if (month < 1 || month > 12 || day < 1 || day > 31 || hours > 23 || minutes > 59 || seconds > 59) {
-      throw new Error("Invalid date or time values");
-    }
-    
-    // Extract timezone from input (preserve for output)
-    if (tzPart) {
-      timezoneOffset = tzPart === "Z" ? "+00:00" : tzPart;
-    } else {
-      // If no timezone specified, use local timezone offset
-      const testDate = new Date(time);
-      const offset = -testDate.getTimezoneOffset();
-      const offsetHours = Math.floor(Math.abs(offset) / 60);
-      const offsetMinutes = Math.abs(offset) % 60;
-      const sign = offset >= 0 ? "+" : "-";
-      timezoneOffset = `${sign}${offsetHours.toString().padStart(2, "0")}:${offsetMinutes.toString().padStart(2, "0")}`;
-    }
-
-    // Calculate end time by adding 90 minutes
-    let endHours = hours;
-    let endMinutes = minutes + 90;
-    let endDay = day;
-    let endMonth = month;
-    let endYear = year;
-    
-    // Handle minute overflow
-    while (endMinutes >= 60) {
-      endMinutes -= 60;
-      endHours += 1;
-    }
-    
-    // Handle hour overflow
-    while (endHours >= 24) {
-      endHours -= 24;
-      endDay += 1;
-    }
-    
-    // Handle day overflow (simplified - doesn't account for month lengths)
-    const daysInMonth = new Date(year, month, 0).getDate();
-    if (endDay > daysInMonth) {
-      endDay = 1;
-      endMonth += 1;
-      if (endMonth > 12) {
-        endMonth = 1;
-        endYear += 1;
-      }
-    }
-    
-    // Format times preserving original timezone
-    const formatTime = (y: number, m: number, d: number, h: number, min: number, s: number): string => {
-      return `${y}-${m.toString().padStart(2, "0")}-${d.toString().padStart(2, "0")}T${h.toString().padStart(2, "0")}:${min.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}${timezoneOffset}`;
-    };
-    
-    startTimeStr = formatTime(year, month, day, hours, minutes, seconds);
-    endTimeStr = formatTime(endYear, endMonth, endDay, endHours, endMinutes, seconds);
+    initializeNostrServices();
   } catch (error) {
     return {
       "@context": "https://schema.org",
@@ -715,11 +712,14 @@ export function makeReservation(
       "actionStatus": "FailedActionStatus",
       "error": {
         "@type": "Thing",
-        "name": "InvalidReservationRequest",
-        "description": "Invalid time format. Time must be in ISO 8601 format (e.g., '2025-10-22T08:00:00-07:00').",
+        "name": "ConfigurationError",
+        "description": error instanceof Error ? error.message : "Failed to initialize Nostr services",
       },
     };
   }
+
+  const { restaurant_id, time, party_size, name, telephone, email } = args;
+  const { profiles } = data;
 
   // Convert restaurant_id from npub to pubkey
   let establishmentPubkey: string;
@@ -768,75 +768,215 @@ export function makeReservation(
     };
   }
 
-  // Convert ISO 8601 time strings to Unix timestamps for availability check
-  const requestStartTimestamp = Math.floor(new Date(startTimeStr).getTime() / 1000);
-  const requestEndTimestamp = Math.floor(new Date(endTimeStr).getTime() / 1000);
-
-  // Check table availability
-  const availability = checkTableAvailability(
-    establishmentPubkey,
-    requestStartTimestamp,
-    requestEndTimestamp,
-    party_size,
-    tables,
-    calendar
-  );
-
-  if (!availability.available) {
+  // Parse time to get timestamp and timezone
+  let timeTimestamp: number;
+  let tzid: string;
+  
+  try {
+    const timeDate = new Date(time);
+    timeTimestamp = Math.floor(timeDate.getTime() / 1000);
+    
+    // Extract timezone from ISO string if present
+    // Format: YYYY-MM-DDTHH:mm:ss[+-]HH:mm or YYYY-MM-DDTHH:mm:ssZ
+    const tzMatch = time.match(/([+-]\d{2}:\d{2}|Z)$/);
+    if (tzMatch) {
+      // Convert timezone offset to IANA identifier (simplified)
+      const offset = tzMatch[1];
+      if (offset === 'Z' || offset === '+00:00') {
+        tzid = 'UTC';
+      } else {
+        // For now, use a generic timezone format
+        // In production, this should map to proper IANA identifiers
+        tzid = `Etc/GMT${offset.replace(':', '')}`;
+      }
+    } else {
+      // Use system timezone
+      tzid = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    }
+  } catch (error) {
     return {
       "@context": "https://schema.org",
       "@type": "ReserveAction",
       "actionStatus": "FailedActionStatus",
-      "startTime": startTimeStr,
-      "endTime": endTimeStr,
       "error": {
         "@type": "Thing",
-        "name": "ReservationDenied",
-        "description": availability.reason || "The restaurant is fully booked at the requested time.",
+        "name": "InvalidReservationRequest",
+        "description": "Invalid time format. Time must be in ISO 8601 format (e.g., '2025-10-22T08:00:00-07:00').",
       },
     };
   }
 
-  // Generate random reservation ID (number for now)
-  const reservationId = Math.floor(Math.random() * 1000000000);
+  // Build NIP-RP reservation request (kind:9901)
+  const request = buildReservationRequest({
+    restaurantPubkey: establishmentPubkey,
+    partySize: party_size,
+    time: timeTimestamp,
+    tzid,
+    name,
+    email: email ? (email.startsWith('mailto:') ? email : `mailto:${email}`) : undefined,
+    telephone: telephone ? (telephone.startsWith('tel:') ? telephone : `tel:${telephone}`) : undefined,
+    duration: 90 * 60, // 90 minutes in seconds
+    content: `Reservation request for ${party_size} people at ${restaurantData.name}`,
+  });
 
-  // Build underName object
-  const underName: any = {
-    "@type": "Person",
-    "name": name,
-  };
-  if (email) {
-    underName.email = email.startsWith("mailto:") ? email : `mailto:${email}`;
-  }
-  if (telephone) {
-    underName.telephone = telephone.startsWith("tel:") ? telephone : `tel:${telephone}`;
+  // Generate ID for the rumor (needed for tracking the response)
+  const requestId = crypto.randomUUID();
+
+  console.log(`Making reservation request ${requestId.substring(0, 8)}... to ${restaurantData.name}`);
+
+  // Start waiting for response
+  const responsePromise = responseHandler!.waitForResponse(requestId, RESERVATION_TIMEOUT_MS);
+
+  // Gift wrap the request for the restaurant and self
+  try {
+    const giftWrapForRestaurant = createAndWrapRumor(
+      request,
+      serverPrivateKey!,
+      establishmentPubkey
+    );
+
+    const giftWrapForSelf = createAndWrapRumor(
+      request,
+      serverPrivateKey!,
+      serverPublicKey!
+    );
+
+    // Publish to relays
+    await Promise.all([
+      nostrPublisher!.publish(giftWrapForRestaurant),
+      nostrPublisher!.publish(giftWrapForSelf),
+    ]);
+
+    console.log(`Published reservation request ${requestId.substring(0, 8)}... to ${NOSTR_RELAYS.length} relays`);
+  } catch (error) {
+    // Cancel waiting for response
+    responseHandler!.cancel(requestId);
+
+    return {
+      "@context": "https://schema.org",
+      "@type": "ReserveAction",
+      "actionStatus": "FailedActionStatus",
+      "error": {
+        "@type": "Thing",
+        "name": "PublishError",
+        "description": `Failed to publish reservation request: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      },
+    };
   }
 
-  // Build reservationFor object
-  const reservationFor: any = {
-    "@type": "FoodEstablishment",
-    "name": restaurantData.name,
-  };
-  if (restaurantData.address) {
-    reservationFor.address = restaurantData.address;
-  }
+  // Wait for response
+  try {
+    const response = await responsePromise;
 
-  // Build success response
-  return {
-    "@context": "https://schema.org",
-    "@type": "FoodEstablishmentReservation",
-    "reservationId": reservationId,
-    "reservationStatus": "ReservationConfirmed",
-    "underName": underName,
+    console.log(`Received response for request ${requestId.substring(0, 8)}...`);
+
+    // Extract status from response
+    const statusTag = response.tags.find(t => t[0] === 'status');
+    const status = statusTag?.[1];
+
+    // Extract optional message
+    const messageTag = response.tags.find(t => t[0] === 'message');
+    const message = messageTag?.[1];
+
+    // Extract time tags (confirmed start/end times from restaurant)
+    const timeTag = response.tags.find(t => t[0] === 'time');
+    const confirmedStartTime = timeTag?.[1] || time;
+
+    // Calculate end time (90 minutes after start)
+    const startDate = new Date(confirmedStartTime);
+    const endDate = new Date(startDate.getTime() + 90 * 60 * 1000);
+    const confirmedEndTime = endDate.toISOString();
+
+    // Build underName object
+    const underName: any = {
+      "@type": "Person",
+      "name": name,
+    };
+    if (email) {
+      underName.email = email.startsWith("mailto:") ? email : `mailto:${email}`;
+    }
+    if (telephone) {
+      underName.telephone = telephone.startsWith("tel:") ? telephone : `tel:${telephone}`;
+    }
+
+    // Build reservationFor object
+    const reservationFor: any = {
+      "@type": "FoodEstablishment",
+      "name": restaurantData.name,
+    };
+    if (restaurantData.address) {
+      reservationFor.address = restaurantData.address;
+    }
+
+    // Map NIP-RP status to schema.org status
+    let reservationStatus: string;
+    let actionStatus: string;
+
+    switch (status) {
+      case 'confirmed':
+        reservationStatus = 'ReservationConfirmed';
+        actionStatus = 'CompletedActionStatus';
+        break;
+      case 'declined':
+        reservationStatus = 'ReservationCancelled';
+        actionStatus = 'FailedActionStatus';
+        return {
+          "@context": "https://schema.org",
+          "@type": "ReserveAction",
+          "actionStatus": actionStatus,
+          "error": {
+            "@type": "Thing",
+            "name": "ReservationDenied",
+            "description": message || "The restaurant declined the reservation request.",
+          },
+        };
+      case 'pending':
+        reservationStatus = 'ReservationPending';
+        actionStatus = 'PotentialActionStatus';
+        break;
+      default:
+        reservationStatus = 'ReservationPending';
+        actionStatus = 'PotentialActionStatus';
+    }
+
+    // Build success response
+    const result: any = {
+      "@context": "https://schema.org",
+      "@type": "FoodEstablishmentReservation",
+      "reservationStatus": reservationStatus,
+      "underName": underName,
       "broker": {
         "@type": "Organization",
         "name": "Synvya",
         "legalName": "Synvya Inc.",
       },
-    "reservationFor": reservationFor,
-    "startTime": startTimeStr,
-    "endTime": endTimeStr,
-    "partySize": party_size,
-  };
+      "reservationFor": reservationFor,
+      "startTime": confirmedStartTime,
+      "endTime": confirmedEndTime,
+      "partySize": party_size,
+    };
+
+    // Add optional fields
+    if (message) {
+      result.description = message;
+    }
+
+    return result;
+
+  } catch (error) {
+    // Timeout or other error
+    console.error(`Reservation request ${requestId.substring(0, 8)}... failed:`, error);
+
+    return {
+      "@context": "https://schema.org",
+      "@type": "ReserveAction",
+      "actionStatus": "FailedActionStatus",
+      "error": {
+        "@type": "Thing",
+        "name": "ReservationTimeout",
+        "description": error instanceof Error ? error.message : "The restaurant did not respond to the reservation request in time.",
+      },
+    };
+  }
 }
 

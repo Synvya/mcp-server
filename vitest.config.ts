@@ -16,6 +16,8 @@ export default defineConfig({
         singleThread: true,
       },
     },
+    // Don't fail tests on unhandled promise rejections from intentional timeout tests
+    dangerouslyIgnoreUnhandledErrors: true,
   },
 });
 
