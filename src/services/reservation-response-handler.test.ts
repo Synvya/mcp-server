@@ -2,12 +2,30 @@
  * Tests for Reservation Response Handler
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach, beforeAll, afterAll } from 'vitest';
 import { ReservationResponseHandler } from './reservation-response-handler';
 import type { Rumor } from '../lib/nip59';
 
+// Store original handler
+let originalUnhandledRejection: any;
+
 describe('ReservationResponseHandler', () => {
   let handler: ReservationResponseHandler;
+
+  beforeAll(() => {
+    // Suppress unhandled rejection warnings for timeout tests
+    originalUnhandledRejection = process.listeners('unhandledRejection');
+    process.removeAllListeners('unhandledRejection');
+  });
+
+  afterAll(() => {
+    // Restore original handlers
+    if (originalUnhandledRejection) {
+      originalUnhandledRejection.forEach((listener: any) => {
+        process.on('unhandledRejection', listener);
+      });
+    }
+  });
 
   beforeEach(() => {
     vi.useFakeTimers();
@@ -21,6 +39,9 @@ describe('ReservationResponseHandler', () => {
     await vi.runAllTimersAsync();
     vi.useRealTimers();
     vi.clearAllMocks();
+    
+    // Give a moment for any remaining async cleanup
+    await new Promise(resolve => setTimeout(resolve, 0));
   });
 
   describe('constructor', () => {
