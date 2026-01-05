@@ -238,29 +238,41 @@ export class NostrSubscriber {
    * Handle a gift wrap event
    */
   private handleEvent(giftWrap: Event, relayUrl: string): void {
+    console.log(`📨 Received event from ${relayUrl}: kind:${giftWrap.kind}, id: ${giftWrap.id.substring(0, 8)}...`);
+    
     // Verify it's a kind:1059 gift wrap
     if (giftWrap.kind !== 1059) {
-      console.warn(`Received non-gift-wrap event (kind ${giftWrap.kind}) from ${relayUrl}`);
+      console.warn(`   ⚠️  Not a gift wrap (kind ${giftWrap.kind})`);
       return;
     }
 
     // Verify it's addressed to this server
     const pTag = giftWrap.tags.find(t => t[0] === 'p');
-    if (!pTag || pTag[1] !== this.publicKey) {
-      console.warn(`Received gift wrap not addressed to this server from ${relayUrl}`);
+    if (!pTag) {
+      console.warn(`   ⚠️  Gift wrap has no p-tag`);
       return;
     }
+    
+    console.log(`   Addressed to: ${pTag[1].substring(0, 8)}...`);
+    console.log(`   Server pubkey: ${this.publicKey.substring(0, 8)}...`);
+    
+    if (pTag[1] !== this.publicKey) {
+      console.warn(`   ⚠️  Gift wrap not addressed to this server`);
+      return;
+    }
+
+    console.log(`   ✅ Gift wrap is for this server, attempting to decrypt...`);
 
     try {
       // Unwrap and unseal the gift wrap
       const rumor = unwrapAndUnseal(giftWrap, this.privateKey);
       
-      console.log(`Unwrapped kind:${rumor.kind} rumor from ${rumor.pubkey.substring(0, 8)}... (relay: ${relayUrl})`);
+      console.log(`   ✅ Decrypted successfully: kind:${rumor.kind} rumor from ${rumor.pubkey.substring(0, 8)}...`);
       
       // Call the callback with the unwrapped rumor
       this.onRumor(rumor, giftWrap);
     } catch (error) {
-      console.error(`Failed to unwrap gift wrap from ${relayUrl}:`, error);
+      console.error(`   ❌ Failed to unwrap gift wrap:`, error);
       if (this.onError) {
         this.onError(
           error instanceof Error ? error : new Error('Failed to unwrap'),

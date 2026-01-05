@@ -20,10 +20,10 @@ export const NOSTR_RELAYS = (
 
 /**
  * Timeout for waiting for reservation responses (milliseconds)
- * Default: 30000 (30 seconds)
+ * Default: 90000 (90 seconds)
  */
 export const RESERVATION_TIMEOUT_MS = 
-  parseInt(process.env.RESERVATION_TIMEOUT_MS || '30000', 10);
+  parseInt(process.env.RESERVATION_TIMEOUT_MS || '90000', 10);
 
 /**
  * Validate that required configuration is present

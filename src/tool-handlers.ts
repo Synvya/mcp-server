@@ -65,12 +65,28 @@ function initializeNostrServices(): void {
     relays: NOSTR_RELAYS,
     privateKey: serverPrivateKey,
     onRumor: (rumor, giftWrap) => {
+      console.log(`📬 Received kind:${rumor.kind} rumor from ${rumor.pubkey.substring(0, 8)}... (gift wrap: ${giftWrap.id.substring(0, 8)}...)`);
+      
+      // Log e-tag if present (for matching)
+      const eTag = rumor.tags.find(t => t[0] === 'e');
+      if (eTag) {
+        console.log(`   e-tag references: ${eTag[1].substring(0, 8)}...`);
+      }
+      
       // Try to match with pending reservation request
       const matched = responseHandler?.handleRumor(rumor);
       
       if (!matched) {
         // Log unmatched rumors for debugging
-        console.log(`Received unmatched kind:${rumor.kind} rumor from ${rumor.pubkey.substring(0, 8)}...`);
+        console.log(`   ⚠️  No matching pending request found`);
+        const pendingIds = responseHandler?.getPendingRequestIds() || [];
+        if (pendingIds.length > 0) {
+          console.log(`   Pending requests: ${pendingIds.map(id => id.substring(0, 8)).join(', ')}`);
+        } else {
+          console.log(`   No pending requests at all`);
+        }
+      } else {
+        console.log(`   ✅ Matched to pending request`);
       }
     },
     onError: (error, relay) => {

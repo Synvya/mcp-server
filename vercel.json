@@ -2,7 +2,7 @@
   "version": 2,
   "functions": {
     "api/mcp.ts": {
-      "maxDuration": 30
+      "maxDuration": 90
     },
     "api/schema-v1.ts": {
       "maxDuration": 10
@@ -17,7 +17,7 @@
       "maxDuration": 30
     },
     "api/make_reservation.ts": {
-      "maxDuration": 30
+      "maxDuration": 90
     }
   },
   "rewrites": [
