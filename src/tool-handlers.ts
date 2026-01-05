@@ -16,7 +16,7 @@ import { NostrPublisher } from './services/nostr-publisher.js';
 import { NostrSubscriber } from './services/nostr-subscriber.js';
 import { ReservationResponseHandler } from './services/reservation-response-handler.js';
 import { buildReservationRequest } from './lib/nip-rp.js';
-import { createAndWrapRumor } from './lib/nip59.js';
+import { createAndWrapRumor, createRumor, sealRumor, wrapSeal } from './lib/nip59.js';
 import { nip19, getPublicKey } from 'nostr-tools';
 import { NOSTR_RELAYS, RESERVATION_TIMEOUT_MS, MCP_SERVER_NSEC } from './config.js';
 
@@ -836,27 +836,25 @@ export async function makeReservation(
     content: `Reservation request for ${party_size} people at ${restaurantData.name}`,
   });
 
-  // Generate ID for the rumor (needed for tracking the response)
-  const requestId = crypto.randomUUID();
+  // Create the rumor to get the actual thread ID (per NIP-RP spec)
+  // The rumor.id is the "thread id to be used by all other messages for this reservation"
+  const rumor = createRumor(request, serverPrivateKey!);
+  const requestId = rumor.id;
 
   console.log(`Making reservation request ${requestId.substring(0, 8)}... to ${restaurantData.name}`);
 
-  // Start waiting for response
+  // Start waiting for response using the actual rumor ID
   const responsePromise = responseHandler!.waitForResponse(requestId, RESERVATION_TIMEOUT_MS);
 
   // Gift wrap the request for the restaurant and self
   try {
-    const giftWrapForRestaurant = createAndWrapRumor(
-      request,
-      serverPrivateKey!,
-      establishmentPubkey
-    );
+    // Seal and wrap the rumor for the restaurant
+    const sealForRestaurant = sealRumor(rumor, serverPrivateKey!, establishmentPubkey);
+    const giftWrapForRestaurant = wrapSeal(sealForRestaurant, establishmentPubkey);
 
-    const giftWrapForSelf = createAndWrapRumor(
-      request,
-      serverPrivateKey!,
-      serverPublicKey!
-    );
+    // Seal and wrap the same rumor for self (Self CC)
+    const sealForSelf = sealRumor(rumor, serverPrivateKey!, serverPublicKey!);
+    const giftWrapForSelf = wrapSeal(sealForSelf, serverPublicKey!);
 
     // Publish to relays
     await Promise.all([
