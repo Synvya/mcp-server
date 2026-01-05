@@ -920,7 +920,23 @@ export async function makeReservation(
 
     // Extract time tags (confirmed start/end times from restaurant)
     const timeTag = response.tags.find(t => t[0] === 'time');
-    const confirmedStartTime = timeTag?.[1] || time;
+    let confirmedStartTime: string;
+
+    if (timeTag?.[1]) {
+      // Check if it's a Unix timestamp (numeric string)
+      const timeValue = timeTag[1];
+      if (/^\d+$/.test(timeValue)) {
+        // It's a Unix timestamp - convert to ISO string
+        confirmedStartTime = new Date(parseInt(timeValue, 10) * 1000).toISOString();
+        console.log(`Converted Unix timestamp ${timeValue} to ISO: ${confirmedStartTime}`);
+      } else {
+        // It's already an ISO string
+        confirmedStartTime = timeValue;
+      }
+    } else {
+      // Fallback to original request time
+      confirmedStartTime = time;
+    }
 
     // Calculate end time (90 minutes after start)
     const startDate = new Date(confirmedStartTime);
