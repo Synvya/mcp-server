@@ -145,11 +145,11 @@ export class NostrSubscriber {
         console.log(`Connected to ${relayUrl}`);
         
         // Subscribe to kind:1059 gift wraps addressed to this server
-        // Filter: { kinds: [1059], "#p": [serverPubkey], since: now }
+        // Note: No 'since' filter because NIP-59 randomizes timestamps for privacy
+        // Filter: { kinds: [1059], "#p": [serverPubkey] }
         const filter = {
           kinds: [1059],
           '#p': [this.publicKey],
-          since: Math.round(Date.now() / 1000),
         };
 
         const reqMessage = JSON.stringify(['REQ', subscriptionId, filter]);
