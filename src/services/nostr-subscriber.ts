@@ -9,8 +9,9 @@ import { unwrapAndUnseal, type Rumor } from '../lib/nip59.js';
 
 /**
  * Callback function type for handling unwrapped rumors
+ * Can be synchronous or asynchronous
  */
-export type RumorCallback = (rumor: Rumor, giftWrap: Event) => void;
+export type RumorCallback = (rumor: Rumor, giftWrap: Event) => void | Promise<void>;
 
 /**
  * Options for the Nostr subscriber
@@ -237,7 +238,7 @@ export class NostrSubscriber {
   /**
    * Handle a gift wrap event
    */
-  private handleEvent(giftWrap: Event, relayUrl: string): void {
+  private async handleEvent(giftWrap: Event, relayUrl: string): Promise<void> {
     console.log(`📨 Received event from ${relayUrl}: kind:${giftWrap.kind}, id: ${giftWrap.id.substring(0, 8)}...`);
     
     // Verify it's a kind:1059 gift wrap
@@ -269,8 +270,8 @@ export class NostrSubscriber {
       
       console.log(`   ✅ Decrypted successfully: kind:${rumor.kind} rumor from ${rumor.pubkey.substring(0, 8)}...`);
       
-      // Call the callback with the unwrapped rumor
-      this.onRumor(rumor, giftWrap);
+      // Call the callback with the unwrapped rumor (await if it's a promise)
+      await this.onRumor(rumor, giftWrap);
     } catch (error) {
       console.error(`   ❌ Failed to unwrap gift wrap:`, error);
       if (this.onError) {

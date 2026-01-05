@@ -14,16 +14,16 @@ import {
 } from './data-loader.js';
 import { NostrPublisher } from './services/nostr-publisher.js';
 import { NostrSubscriber } from './services/nostr-subscriber.js';
-import { ReservationResponseHandler } from './services/reservation-response-handler.js';
+import { ReservationStateStore } from './services/reservation-state-store.js';
 import { buildReservationRequest } from './lib/nip-rp.js';
 import { createAndWrapRumor, createRumor, sealRumor, wrapSeal } from './lib/nip59.js';
 import { nip19, getPublicKey } from 'nostr-tools';
-import { NOSTR_RELAYS, RESERVATION_TIMEOUT_MS, MCP_SERVER_NSEC } from './config.js';
+import { NOSTR_RELAYS, RESERVATION_TIMEOUT_MS, RESERVATION_POLL_INTERVAL_MS, MCP_SERVER_NSEC } from './config.js';
 
 // Initialize Nostr services for reservation handling
 let nostrPublisher: NostrPublisher | null = null;
 let nostrSubscriber: NostrSubscriber | null = null;
-let responseHandler: ReservationResponseHandler | null = null;
+let stateStore: ReservationStateStore | null = null;
 let serverPrivateKey: Uint8Array | null = null;
 let serverPublicKey: string | null = null;
 
@@ -32,7 +32,7 @@ let serverPublicKey: string | null = null;
  * Called lazily on first reservation request
  */
 function initializeNostrServices(): void {
-  if (nostrPublisher && nostrSubscriber && responseHandler) {
+  if (nostrPublisher && nostrSubscriber && stateStore) {
     return; // Already initialized
   }
 
@@ -55,38 +55,33 @@ function initializeNostrServices(): void {
   // Initialize publisher
   nostrPublisher = new NostrPublisher({ relays: NOSTR_RELAYS });
 
-  // Initialize response handler
-  responseHandler = new ReservationResponseHandler({
-    defaultTimeoutMs: RESERVATION_TIMEOUT_MS,
-  });
+  // Initialize state store (DynamoDB for shared state across serverless instances)
+  stateStore = new ReservationStateStore();
 
-  // Initialize subscriber with response handler integration
+  // Initialize subscriber with DynamoDB state integration
   nostrSubscriber = new NostrSubscriber({
     relays: NOSTR_RELAYS,
     privateKey: serverPrivateKey,
-    onRumor: (rumor, giftWrap) => {
+    onRumor: async (rumor, giftWrap) => {
       console.log(`📬 Received kind:${rumor.kind} rumor from ${rumor.pubkey.substring(0, 8)}... (gift wrap: ${giftWrap.id.substring(0, 8)}...)`);
       
-      // Log e-tag if present (for matching)
-      const eTag = rumor.tags.find(t => t[0] === 'e');
-      if (eTag) {
-        console.log(`   e-tag references: ${eTag[1].substring(0, 8)}...`);
-      }
-      
-      // Try to match with pending reservation request
-      const matched = responseHandler?.handleRumor(rumor);
-      
-      if (!matched) {
-        // Log unmatched rumors for debugging
-        console.log(`   ⚠️  No matching pending request found`);
-        const pendingIds = responseHandler?.getPendingRequestIds() || [];
-        if (pendingIds.length > 0) {
-          console.log(`   Pending requests: ${pendingIds.map(id => id.substring(0, 8)).join(', ')}`);
+      // For kind:9902 responses, update DynamoDB
+      if (rumor.kind === 9902) {
+        const eTag = rumor.tags.find(t => t[0] === 'e');
+        if (eTag && eTag[1]) {
+          const requestId = eTag[1];
+          console.log(`   e-tag references: ${requestId.substring(0, 8)}...`);
+          console.log(`   Updating DynamoDB with response...`);
+          
+          try {
+            await stateStore!.updateWithResponse(requestId, rumor);
+            console.log(`   ✅ Updated DynamoDB successfully`);
+          } catch (error) {
+            console.error(`   ❌ Failed to update DynamoDB:`, error);
+          }
         } else {
-          console.log(`   No pending requests at all`);
+          console.warn(`   ⚠️  No e-tag found in kind:9902 response`);
         }
-      } else {
-        console.log(`   ✅ Matched to pending request`);
       }
     },
     onError: (error, relay) => {
@@ -859,8 +854,22 @@ export async function makeReservation(
 
   console.log(`Making reservation request ${requestId.substring(0, 8)}... to ${restaurantData.name}`);
 
-  // Start waiting for response using the actual rumor ID
-  const responsePromise = responseHandler!.waitForResponse(requestId, RESERVATION_TIMEOUT_MS);
+  // Store pending request in DynamoDB
+  try {
+    await stateStore!.createPendingRequest(requestId, args);
+  } catch (error) {
+    console.error(`Failed to create pending request in DynamoDB:`, error);
+    return {
+      "@context": "https://schema.org",
+      "@type": "ReserveAction",
+      "actionStatus": "FailedActionStatus",
+      "error": {
+        "@type": "Thing",
+        "name": "DatabaseError",
+        "description": `Failed to store reservation request: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      },
+    };
+  }
 
   // Gift wrap the request for the restaurant and self
   try {
@@ -880,9 +889,7 @@ export async function makeReservation(
 
     console.log(`Published reservation request ${requestId.substring(0, 8)}... to ${NOSTR_RELAYS.length} relays`);
   } catch (error) {
-    // Cancel waiting for response
-    responseHandler!.cancel(requestId);
-
+    console.error(`Failed to publish reservation request:`, error);
     return {
       "@context": "https://schema.org",
       "@type": "ReserveAction",
@@ -895,9 +902,11 @@ export async function makeReservation(
     };
   }
 
-  // Wait for response
+  // Wait for response by polling DynamoDB
+  console.log(`Polling DynamoDB for response (timeout: ${RESERVATION_TIMEOUT_MS}ms, poll interval: ${RESERVATION_POLL_INTERVAL_MS}ms)...`);
+  
   try {
-    const response = await responsePromise;
+    const response = await stateStore!.waitForResponse(requestId, RESERVATION_TIMEOUT_MS, RESERVATION_POLL_INTERVAL_MS);
 
     console.log(`Received response for request ${requestId.substring(0, 8)}...`);
 

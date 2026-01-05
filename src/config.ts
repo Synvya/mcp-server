@@ -26,6 +26,19 @@ export const RESERVATION_TIMEOUT_MS =
   parseInt(process.env.RESERVATION_TIMEOUT_MS || '90000', 10);
 
 /**
+ * DynamoDB table name for storing reservation request/response state
+ * This is separate from the Nostr events table
+ */
+export const RESERVATION_TABLE_NAME = process.env.RESERVATION_TABLE_NAME;
+
+/**
+ * Polling interval for checking DynamoDB for reservation responses (milliseconds)
+ * Default: 2000 (2 seconds)
+ */
+export const RESERVATION_POLL_INTERVAL_MS = 
+  parseInt(process.env.RESERVATION_POLL_INTERVAL_MS || '2000', 10);
+
+/**
  * Validate that required configuration is present
  * @throws Error if required configuration is missing
  */
