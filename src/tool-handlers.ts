@@ -776,22 +776,39 @@ export async function makeReservation(
     const timeDate = new Date(time);
     timeTimestamp = Math.floor(timeDate.getTime() / 1000);
     
-    // Extract timezone from ISO string if present
+    // Extract timezone from ISO string or use restaurant's location
     // Format: YYYY-MM-DDTHH:mm:ss[+-]HH:mm or YYYY-MM-DDTHH:mm:ssZ
-    const tzMatch = time.match(/([+-]\d{2}:\d{2}|Z)$/);
+    const tzMatch = time.match(/([+-]\d{2}):(\d{2})|Z$/);
+    
     if (tzMatch) {
-      // Convert timezone offset to IANA identifier (simplified)
-      const offset = tzMatch[1];
+      const offset = tzMatch[0];
       if (offset === 'Z' || offset === '+00:00') {
         tzid = 'UTC';
       } else {
-        // For now, use a generic timezone format
-        // In production, this should map to proper IANA identifiers
-        tzid = `Etc/GMT${offset.replace(':', '')}`;
+        // Map common timezone offsets to IANA identifiers
+        // This is a simplified mapping; in production, use a proper timezone library
+        const offsetHours = parseInt(tzMatch[1]);
+        const offsetMinutes = parseInt(tzMatch[2] || '0');
+        const totalMinutes = offsetHours * 60 + (offsetHours < 0 ? -offsetMinutes : offsetMinutes);
+        
+        // Map to common IANA timezones based on offset
+        const timezoneMap: Record<string, string> = {
+          '-480': 'America/Los_Angeles', // PST/PDT
+          '-420': 'America/Denver',       // MST/MDT
+          '-360': 'America/Chicago',      // CST/CDT
+          '-300': 'America/New_York',     // EST/EDT
+          '-600': 'Pacific/Honolulu',     // HST
+          '0': 'UTC',
+          '60': 'Europe/London',          // GMT/BST
+          '120': 'Europe/Paris',          // CET/CEST
+        };
+        
+        tzid = timezoneMap[totalMinutes.toString()] || 'America/Los_Angeles'; // Default to Pacific
       }
     } else {
-      // Use system timezone
-      tzid = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      // No timezone in ISO string, try to infer from restaurant location or use system default
+      // Default to America/Los_Angeles for US-based restaurants (can be enhanced)
+      tzid = 'America/Los_Angeles';
     }
   } catch (error) {
     return {
