@@ -621,7 +621,7 @@ async function initializeServer() {
             .filter((t: string[]) => t[0] === 't' || t[0] === 'schema.org:MenuItem:suitableForDiet')
             .map((t: string[]) => t[1])
             .filter(Boolean)
-            .map((tag: string) => normalizeDietaryTag(tag)) // Normalize "GLUTEN_FREE" -> "gluten free"
+            .map((tag: string) => normalizeDietaryTag(tag)) // Normalize "GLUTEN_FREE" -> "glutenfree"
             .join(' ');
           
           // Match dish name/description/ingredients/dietary tags

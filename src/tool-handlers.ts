@@ -469,7 +469,7 @@ export function searchMenuItems(
       .filter(t => t[0] === 't' || t[0] === 'schema.org:MenuItem:suitableForDiet')
       .map(t => t[1])
       .filter(Boolean)
-      .map(tag => normalizeDietaryTag(tag)) // Normalize "GLUTEN_FREE" -> "gluten free"
+      .map(tag => normalizeDietaryTag(tag)) // Normalize "GLUTEN_FREE" -> "glutenfree"
       .join(' ');
     
     // Match dish name/description/ingredients/dietary tags

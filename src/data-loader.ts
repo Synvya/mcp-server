@@ -424,10 +424,15 @@ export function extractDishName(event: NostrEvent): string {
 }
 
 // Normalize dietary tags for matching
-// Profiles: "vegan", "gluten free" (lowercase)
-// Products: "VEGAN", "GLUTEN_FREE" (uppercase with underscores - Square format)
+// Handles various formats: "gluten free", "gluten-free", "GLUTEN_FREE", "GlutenFreeDiet"
+// All normalize to the same alphanumeric string (e.g., "glutenfree")
 export function normalizeDietaryTag(tag: string): string {
-  return tag.toLowerCase().replace(/[_\s]+/g, ' ').trim();
+  // Remove all non-alphanumeric characters, convert to lowercase, and strip "diet" suffix
+  return tag
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '')
+    .replace(/diet$/i, '')
+    .trim();
 }
 
 export function matchesDietaryTag(tag1: string, tag2: string): boolean {
