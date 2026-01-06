@@ -132,11 +132,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    const args = {
+    const args: any = {
       dish_query: params.dish_query,
-      dietary: params.dietary,
-      restaurant_id: params.restaurant_id,
     };
+
+    // Only include optional parameters if they are provided
+    if (params.dietary) {
+      args.dietary = params.dietary;
+    }
+    if (params.restaurant_id) {
+      args.restaurant_id = params.restaurant_id;
+    }
 
     // Call handler
     const result = searchMenuItems(args, data);

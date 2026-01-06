@@ -122,12 +122,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Parse parameters from query string (GET) or body (POST)
     const params = req.method === 'GET' ? req.query : (req.body || {});
-    const args = {
-      foodEstablishmentType: params.foodEstablishmentType,
-      cuisine: params.cuisine,
-      query: params.query,
-      dietary: params.dietary,
-    };
+    const args: any = {};
+
+    // Only include parameters if they are provided
+    if (params.foodEstablishmentType) {
+      args.foodEstablishmentType = params.foodEstablishmentType;
+    }
+    if (params.cuisine) {
+      args.cuisine = params.cuisine;
+    }
+    if (params.query) {
+      args.query = params.query;
+    }
+    if (params.dietary) {
+      args.dietary = params.dietary;
+    }
 
     // Call handler
     const result = searchFoodEstablishments(args, data);
