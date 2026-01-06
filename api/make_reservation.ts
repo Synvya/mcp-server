@@ -151,17 +151,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    const args = {
+    const args: any = {
       restaurant_id: body.restaurant_id,
       time: body.time,
       party_size: Number(body.party_size),
       name: body.name,
-      telephone: body.telephone,
-      email: body.email,
     };
 
+    // Only include telephone and email if they are provided
+    if (body.telephone) {
+      args.telephone = body.telephone;
+    }
+    if (body.email) {
+      args.email = body.email;
+    }
+
     // Call handler
-    const result = makeReservation(args, data);
+    const result = await makeReservation(args, data);
 
     // Return appropriate HTTP status code
     const statusCode = result['@type'] === 'FoodEstablishmentReservation' ? 200 : 400;
