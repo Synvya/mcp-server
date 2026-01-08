@@ -1042,3 +1042,182 @@ export async function makeReservation(
   }
 }
 
+/**
+ * Convert Unix timestamp to ISO 8601 string with timezone
+ */
+function convertTimestampToISO(unixTimestamp: number, timezone: string): string {
+  try {
+    // Create date from Unix timestamp (seconds to milliseconds)
+    const date = new Date(unixTimestamp * 1000);
+    
+    // Format date in the specified timezone using Intl.DateTimeFormat
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: timezone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+    });
+    
+    const parts = formatter.formatToParts(date);
+    const dateParts: Record<string, string> = {};
+    parts.forEach(part => {
+      if (part.type !== 'literal') {
+        dateParts[part.type] = part.value;
+      }
+    });
+    
+    // Get timezone offset
+    const offsetFormatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: timezone,
+      timeZoneName: 'longOffset',
+    });
+    const offsetParts = offsetFormatter.formatToParts(date);
+    const offsetPart = offsetParts.find(p => p.type === 'timeZoneName');
+    let offset = '+00:00'; // Default to UTC
+    
+    if (offsetPart && offsetPart.value.startsWith('GMT')) {
+      const offsetMatch = offsetPart.value.match(/GMT([+-]\d{1,2}(?::\d{2})?)/);
+      if (offsetMatch) {
+        offset = offsetMatch[1];
+        // Ensure offset has both hours and minutes
+        if (!offset.includes(':')) {
+          offset = offset + ':00';
+        }
+        // Ensure two-digit hours
+        const [sign, ...rest] = offset;
+        const timeStr = rest.join('');
+        if (timeStr.length === 4) {
+          // Already has :, just need to pad hour
+          const [hour, min] = timeStr.split(':');
+          offset = sign + hour.padStart(2, '0') + ':' + min;
+        }
+      }
+    }
+    
+    // Build ISO 8601 string: YYYY-MM-DDTHH:MM:SS±HH:MM
+    return `${dateParts.year}-${dateParts.month}-${dateParts.day}T${dateParts.hour}:${dateParts.minute}:${dateParts.second}${offset}`;
+  } catch (error) {
+    console.error(`Error converting timestamp ${unixTimestamp} with timezone ${timezone}:`, error);
+    // Fallback to UTC
+    return new Date(unixTimestamp * 1000).toISOString();
+  }
+}
+
+/**
+ * Search for restaurant offers
+ */
+export function searchOffers(
+  args: SearchOffersArgs,
+  data: ToolData
+): { "@context": string; "@graph": Record<string, any>[] } {
+  const { offer_type, restaurant_id } = args;
+  const { profiles, offers } = data;
+  
+  // Filter offers by restaurant if specified
+  const offersToSearch = restaurant_id
+    ? offers.filter(o => o.pubkey === npubToPubkey(restaurant_id))
+    : offers;
+  
+  // Filter for active offers and optionally by offer_type
+  const activeOffers = offersToSearch.filter(offer => {
+    // Check status tag - must be "active"
+    const statusTag = offer.tags.find(t => t[0] === 'status');
+    if (!statusTag || statusTag[1] !== 'active') {
+      return false;
+    }
+    
+    // Filter by offer_type if provided
+    if (offer_type) {
+      const typeTag = offer.tags.find(t => t[0] === 'type');
+      if (!typeTag || typeTag[1] !== offer_type) {
+        return false;
+      }
+    }
+    
+    return true;
+  });
+  
+  // Group offers by establishment
+  const establishmentMap = new Map<string, NostrEvent[]>();
+  
+  for (const offer of activeOffers) {
+    const establishmentPubkey = offer.pubkey;
+    
+    if (!establishmentMap.has(establishmentPubkey)) {
+      establishmentMap.set(establishmentPubkey, []);
+    }
+    establishmentMap.get(establishmentPubkey)!.push(offer);
+  }
+  
+  // Build JSON-LD graph
+  const graph: Record<string, any>[] = [];
+  
+  for (const [establishmentPubkey, establishmentOffers] of establishmentMap.entries()) {
+    // Find establishment profile
+    const profile = profiles.find(p => p.pubkey === establishmentPubkey);
+    if (!profile) continue;
+    
+    // Extract establishment data
+    const establishmentData = extractSchemaOrgData(profile);
+    if (!establishmentData) continue;
+    
+    // Convert offers to schema.org Offer format
+    const offersJsonLd: Record<string, any>[] = [];
+    
+    for (const offer of establishmentOffers) {
+      // Extract offer tags
+      const dTag = offer.tags.find(t => t[0] === 'd')?.[1] || '';
+      const typeTag = offer.tags.find(t => t[0] === 'type')?.[1] || '';
+      const validFromTag = offer.tags.find(t => t[0] === 'valid_from')?.[1];
+      const validUntilTag = offer.tags.find(t => t[0] === 'valid_until')?.[1];
+      const tzidTag = offer.tags.find(t => t[0] === 'tzid')?.[1] || 'UTC';
+      
+      // Skip offers without required fields
+      if (!validFromTag || !validUntilTag) {
+        console.warn(`Offer ${dTag} missing valid_from or valid_until, skipping`);
+        continue;
+      }
+      
+      // Convert Unix timestamps to ISO 8601 with timezone
+      const validFrom = convertTimestampToISO(parseInt(validFromTag), tzidTag);
+      const validThrough = convertTimestampToISO(parseInt(validUntilTag), tzidTag);
+      
+      const offerObject: Record<string, any> = {
+        "@type": "Offer",
+        "identifier": dTag,
+        "description": offer.content || '',
+        "category": typeTag,
+        "validFrom": validFrom,
+        "validThrough": validThrough,
+      };
+      
+      offersJsonLd.push(offerObject);
+    }
+    
+    // Build establishment object
+    const establishmentObject: Record<string, any> = {
+      "@type": establishmentData["@type"],
+      "name": establishmentData.name,
+      "@id": establishmentData["@id"],
+    };
+    
+    if (establishmentData.geo) {
+      establishmentObject.geo = establishmentData.geo;
+    }
+    
+    if (offersJsonLd.length > 0) {
+      establishmentObject.makesOffer = offersJsonLd;
+    }
+    
+    graph.push(establishmentObject);
+  }
+  
+  return {
+    "@context": "https://schema.org",
+    "@graph": graph,
+  };
+}

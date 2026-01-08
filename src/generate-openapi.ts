@@ -1,6 +1,7 @@
 import { zodToJsonSchema } from "zod-to-json-schema";
 import {
   FoodEstablishmentTypeEnum,
+  OfferTypeEnum,
   PostalAddressSchema,
   GeoCoordinatesSchema,
   MenuSectionSchema,
@@ -10,6 +11,7 @@ import {
   GetMenuItemsOutputSchema,
   SearchMenuItemsOutputSchema,
   MakeReservationOutputSchema,
+  SearchOffersOutputSchema,
 } from './schemas.js';
 
 /**
@@ -348,6 +350,45 @@ export function generateOpenAPISchema(baseUrl: string) {
               content: {
                 "application/json": {
                   schema: zodToJsonSchema(MakeReservationOutputSchema as any, { 
+                    $refStrategy: "none"
+                  })
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/search_offers": {
+        get: {
+          operationId: "search_offers",
+          summary: "Search for restaurant offers",
+          description: "Search for restaurant offers (promotions, happy hours, discounts, etc.) by type or restaurant. Returns a JSON-LD graph with FoodEstablishments and their active offers. Only active offers are returned.",
+          parameters: [
+            {
+              name: "offer_type",
+              in: "query",
+              required: false,
+              schema: { 
+                type: "string",
+                enum: ["coupon", "discount", "bogo", "free-item", "happy-hour"]
+              },
+              description: "Filter by offer type. Valid values: coupon, discount, bogo, free-item, happy-hour."
+            },
+            {
+              name: "restaurant_id",
+              in: "query",
+              required: false,
+              schema: { type: "string" },
+              description: "Optional: Filter results to a specific food establishment. Use the '@id' from search_food_establishments results."
+            }
+          ],
+          deprecated: false,
+          responses: {
+            "200": {
+              description: "Successfully found offers",
+              content: {
+                "application/json": {
+                  schema: zodToJsonSchema(SearchOffersOutputSchema as any, { 
                     $refStrategy: "none"
                   })
                 }
