@@ -132,6 +132,11 @@ export interface MakeReservationArgs {
   email?: string;
 }
 
+export interface SearchOffersArgs {
+  offer_type?: string;
+  restaurant_id?: string;
+}
+
 /**
  * Search for food establishments based on various criteria
  */
