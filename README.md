@@ -215,6 +215,51 @@ A JSON-LD graph structure following schema.org specifications:
 - Dietary tags are mapped to schema.org suitableForDiet values
 - Unmapped dietary tags are appended to the description as text (e.g., "Nut free. Sulphites")
 
+---
+
+### search_offers
+
+Search for restaurant offers (promotions, happy hours, discounts, etc.) by type or restaurant. Returns a JSON-LD graph with FoodEstablishments and their active offers. Only active offers are returned.
+
+**Parameters:**
+- `offer_type` (optional): Filter by offer type
+  - Valid values: `coupon`, `discount`, `bogo`, `free-item`, `happy-hour`
+  - If not provided, returns all offer types
+- `restaurant_id` (optional): Filter results to a specific food establishment
+  - Use the `@id` from `search_food_establishments` results
+
+**Returns:**
+A JSON-LD graph structure following schema.org specifications:
+- `@context`: "https://schema.org"
+- `@graph`: Array of FoodEstablishment objects, each containing:
+  - `@type` (string): Schema.org FoodEstablishment type (Restaurant, Bakery, etc.)
+  - `name` (string): Food establishment name
+  - `geo` (object, optional): GeoCoordinates with latitude and longitude
+  - `@id` (string): Food establishment identifier in bech32 format (nostr:npub1...)
+  - `makesOffer` (array): Array of Offer objects, each containing:
+    - `@type`: "Offer"
+    - `identifier` (string): Unique identifier for the offer (d-tag)
+    - `description` (string): Description of the offer
+    - `category` (string): Category of the offer (coupon, discount, bogo, free-item, happy-hour)
+    - `validFrom` (string): Start date and time of the offer in ISO 8601 format with timezone offset
+    - `validThrough` (string): End date and time of the offer in ISO 8601 format with timezone offset
+
+**Example:**
+```json
+{"offer_type": "happy-hour"}
+{"offer_type": "discount", "restaurant_id": "nostr:npub1..."}
+{"restaurant_id": "nostr:npub1..."}
+{}  // Returns all active offers from all restaurants
+```
+
+**Behavior Notes:**
+- Only returns offers with `status: "active"` - restaurants can delete offers by publishing a new event with `status: "inactive"`
+- Offer times (`validFrom` and `validThrough`) are displayed in the restaurant's local timezone
+- Results are grouped by food establishment - each establishment appears once with all matching offers
+- Output format is JSON-LD (JSON for Linked Data) following schema.org Offer specification
+- All objects include `@context` and `@type` for proper JSON-LD interpretation
+- Offers are stored as Nostr events (kind:31556) and leverage Nostr's replaceable event mechanism
+
 ## Testing
 
 ### Local Testing
@@ -265,9 +310,10 @@ The server supports both HTTP (for testing) and stdio (for Claude Desktop) trans
 3. **Restart Claude Desktop** - The server will automatically start when Claude connects.
 
 #### Example test queries:
-   - Search food establishments: `{"foodEstablishmentType": "Restaurant", "cuisine": "Spanish", "dietary": "vegan"}` or `{"query": "Snoqualmie"}` or `{"foodEstablishmentType": "Bakery", "dietary": "gluten free"}`
-   - Get menu items: `{"restaurant_id": "nostr:npub1...", "menu_identifier": "Dinner"}`
-   - Search dishes: `{"dish_query": "pizza"}` or `{"dish_query": "vegan"}` (auto-detects dietary term)
+  - Search food establishments: `{"foodEstablishmentType": "Restaurant", "cuisine": "Spanish", "dietary": "vegan"}` or `{"query": "Snoqualmie"}` or `{"foodEstablishmentType": "Bakery", "dietary": "gluten free"}`
+  - Get menu items: `{"restaurant_id": "nostr:npub1...", "menu_identifier": "Dinner"}`
+  - Search dishes: `{"dish_query": "pizza"}` or `{"dish_query": "vegan"}` (auto-detects dietary term)
+  - Search offers: `{"offer_type": "happy-hour"}` or `{"restaurant_id": "nostr:npub1..."}` or `{}` (all offers)
 
 ## Deployment
 
@@ -368,10 +414,11 @@ Configure these in your Vercel project settings (Settings → Environment Variab
 - `PROFILE_CACHE_TTL_SECONDS` - Profile cache duration in seconds (default: `300` = 5 minutes)
 - `COLLECTION_CACHE_TTL_SECONDS` - Collection cache duration in seconds (default: `300` = 5 minutes)
 - `PRODUCT_CACHE_TTL_SECONDS` - Product cache duration in seconds (default: `300` = 5 minutes)
+- `OFFER_CACHE_TTL_SECONDS` - Offer cache duration in seconds (default: `300` = 5 minutes)
 
 **Notes:**
-- When `USE_DYNAMODB=false` (default), profiles, collections, and products are loaded from `data/*.json` files
-- When `USE_DYNAMODB=true`, profiles (kind:0), collections (kind:30405), and products (kind:30402) are loaded from DynamoDB with automatic caching
+- When `USE_DYNAMODB=false` (default), profiles, collections, and products are loaded from `data/*.json` files; offers are only loaded from DynamoDB
+- When `USE_DYNAMODB=true`, profiles (kind:0), collections (kind:30405), products (kind:30402), and offers (kind:31556) are loaded from DynamoDB with automatic caching
 - If DynamoDB query fails, the system automatically falls back to static files
 - Cache reduces DynamoDB costs and improves response times
 
@@ -390,15 +437,16 @@ By default, the server reads from JSON files in the `data/` directory:
 - `profiles.json` - Restaurant profiles (kind:0 events)
 - `collections.json` - Menu collections (kind:30405 events)
 - `products.json` - Individual dishes (kind:30402 events)
+- **Note**: Offers (kind:31556) are only loaded from DynamoDB, not from static files
 
 ### DynamoDB Integration (Optional)
 
-When `USE_DYNAMODB=true`, the server loads profiles, collections, and products from AWS DynamoDB:
+When `USE_DYNAMODB=true`, the server loads profiles, collections, products, and offers from AWS DynamoDB:
 - **Table**: `synvya-nostr-events` (configurable)
 - **Source**: Live Nostr relay data (updated every 30 minutes via Lambda)
-- **Event Kinds**: Profiles (kind:0), Collections (kind:30405), Products (kind:30402)
+- **Event Kinds**: Profiles (kind:0), Collections (kind:30405), Products (kind:30402), Offers (kind:31556)
 - **Caching**: 5-minute in-memory cache per event type (configurable)
-- **Fallback**: Automatically uses static files if DynamoDB fails
+- **Fallback**: Automatically uses static files if DynamoDB fails (except for offers)
 
 **Benefits of DynamoDB:**
 - ✅ Real-time data updates from Nostr relays
