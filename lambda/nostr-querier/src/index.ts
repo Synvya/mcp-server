@@ -16,6 +16,7 @@ const MAX_EVENTS_PER_RELAY = parseInt(process.env.MAX_EVENTS_PER_RELAY || '1000'
 const QUERY_TIMEOUT_MS = parseInt(process.env.QUERY_TIMEOUT_MS || '25000', 10);
 const QUERY_COLLECTIONS = (process.env.QUERY_COLLECTIONS || 'true') === 'true';
 const QUERY_PRODUCTS = (process.env.QUERY_PRODUCTS || 'true') === 'true';
+const QUERY_OFFERS = (process.env.QUERY_OFFERS || 'true') === 'true';
 
 // Initialize DynamoDB client
 const dynamoClient = new DynamoDBClient({ region: REGION });
@@ -403,14 +404,40 @@ export const handler: Handler = async (event: LambdaEvent) => {
       console.log('\n=== STEP 3: Skipping products (no profiles retrieved) ===');
     }
 
+    // Step 4: Query offers (kind:31556) for known food establishments
+    let offerStats: QueryStats | null = null;
+    
+    if (QUERY_OFFERS && profileStats.eventsRetrieved > 0) {
+      console.log('\n=== STEP 4: Querying offers for food establishments ===');
+      
+      // Get all food establishment pubkeys from DynamoDB
+      const pubkeys = await getFoodEstablishmentPubkeys();
+      
+      if (pubkeys.length > 0) {
+        const offerFilter: Filter = {
+          kinds: [31556],
+          authors: pubkeys,
+          limit: MAX_EVENTS_PER_RELAY,
+        };
+        
+        offerStats = await queryNostrRelays(offerFilter, 'offers', dryRun);
+      } else {
+        console.log('No food establishment pubkeys found, skipping offers query');
+      }
+    } else if (!QUERY_OFFERS) {
+      console.log('\n=== STEP 4: Offers query disabled (QUERY_OFFERS=false) ===');
+    } else {
+      console.log('\n=== STEP 4: Skipping offers (no profiles retrieved) ===');
+    }
+
     // Combine statistics
     const combinedStats: QueryStats = {
-      eventsRetrieved: profileStats.eventsRetrieved + (collectionStats?.eventsRetrieved || 0) + (productStats?.eventsRetrieved || 0),
-      eventsStored: profileStats.eventsStored + (collectionStats?.eventsStored || 0) + (productStats?.eventsStored || 0),
-      eventsUpdated: profileStats.eventsUpdated + (collectionStats?.eventsUpdated || 0) + (productStats?.eventsUpdated || 0),
-      eventsSkipped: profileStats.eventsSkipped + (collectionStats?.eventsSkipped || 0) + (productStats?.eventsSkipped || 0),
-      relayErrors: [...profileStats.relayErrors, ...(collectionStats?.relayErrors || []), ...(productStats?.relayErrors || [])],
-      duration: profileStats.duration + (collectionStats?.duration || 0) + (productStats?.duration || 0),
+      eventsRetrieved: profileStats.eventsRetrieved + (collectionStats?.eventsRetrieved || 0) + (productStats?.eventsRetrieved || 0) + (offerStats?.eventsRetrieved || 0),
+      eventsStored: profileStats.eventsStored + (collectionStats?.eventsStored || 0) + (productStats?.eventsStored || 0) + (offerStats?.eventsStored || 0),
+      eventsUpdated: profileStats.eventsUpdated + (collectionStats?.eventsUpdated || 0) + (productStats?.eventsUpdated || 0) + (offerStats?.eventsUpdated || 0),
+      eventsSkipped: profileStats.eventsSkipped + (collectionStats?.eventsSkipped || 0) + (productStats?.eventsSkipped || 0) + (offerStats?.eventsSkipped || 0),
+      relayErrors: [...profileStats.relayErrors, ...(collectionStats?.relayErrors || []), ...(productStats?.relayErrors || []), ...(offerStats?.relayErrors || [])],
+      duration: profileStats.duration + (collectionStats?.duration || 0) + (productStats?.duration || 0) + (offerStats?.duration || 0),
     };
 
     // Log summary
@@ -435,6 +462,14 @@ export const handler: Handler = async (event: LambdaEvent) => {
       console.log(`  - Stored (new): ${productStats.eventsStored}`);
       console.log(`  - Updated: ${productStats.eventsUpdated}`);
       console.log(`  - Duration: ${productStats.duration}ms`);
+    }
+    
+    if (offerStats) {
+      console.log('Offers:');
+      console.log(`  - Retrieved: ${offerStats.eventsRetrieved}`);
+      console.log(`  - Stored (new): ${offerStats.eventsStored}`);
+      console.log(`  - Updated: ${offerStats.eventsUpdated}`);
+      console.log(`  - Duration: ${offerStats.duration}ms`);
     }
     
     console.log('Total:');
@@ -463,6 +498,7 @@ export const handler: Handler = async (event: LambdaEvent) => {
           profiles: profileStats,
           collections: collectionStats,
           products: productStats,
+          offers: offerStats,
         },
         message: isSuccess 
           ? 'Successfully queried Nostr relays and stored events'

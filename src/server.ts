@@ -8,6 +8,7 @@ import {
   loadProductsData,
   loadCalendarData,
   loadTablesData,
+  loadOffersData,
   type NostrEvent,
 } from './data-loader.js';
 import { registerTools } from './register-tools.js';
@@ -23,6 +24,7 @@ let collections: NostrEvent[] = [];
 let products: NostrEvent[] = [];
 let calendar: NostrEvent[] = [];
 let tables: NostrEvent[] = [];
+let offers: NostrEvent[] = [];
 
 async function initializeData() {
   try {
@@ -31,12 +33,14 @@ async function initializeData() {
     products = await loadProductsData();
     calendar = await loadCalendarData();
     tables = await loadTablesData();
+    offers = await loadOffersData();
     console.error("✅ Data loaded:", {
       profiles: profiles.length,
       collections: collections.length,
       products: products.length,
       calendar: calendar.length,
       tables: tables.length,
+      offers: offers.length,
     });
   } catch (error) {
     console.error("❌ Failed to load data:", error);
@@ -55,6 +59,7 @@ async function main() {
     products,
     calendar,
     tables,
+    offers,
   });
   
   // Check if we should use HTTP or stdio transport

@@ -12,6 +12,7 @@ import {
   loadProductsData,
   loadCalendarData,
   loadTablesData,
+  loadOffersData,
   pubkeyToNpub,
   type NostrEvent,
 } from './data-loader.js';
@@ -27,6 +28,7 @@ describe('Tool Handlers', () => {
     const products = await loadProductsData();
     const calendar = await loadCalendarData();
     const tables = await loadTablesData();
+    const offers = await loadOffersData();
 
     toolData = {
       profiles,
@@ -34,6 +36,7 @@ describe('Tool Handlers', () => {
       products,
       calendar,
       tables,
+      offers,
     };
 
     if (profiles.length > 0) {
