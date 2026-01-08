@@ -5,6 +5,7 @@ import {
   getMenuItems,
   searchMenuItems,
   makeReservation,
+  searchOffers,
   type ToolData,
 } from './tool-handlers.js';
 import {
@@ -16,6 +17,8 @@ import {
   SearchMenuItemsOutputSchema,
   MakeReservationInputSchema,
   MakeReservationOutputSchema,
+  SearchOffersInputSchema,
+  SearchOffersOutputSchema,
 } from './schemas.js';
 
 // Re-export ToolData for backwards compatibility
@@ -211,6 +214,52 @@ export function registerTools(server: McpServer, data: ToolData) {
               text: JSON.stringify(errorResponse, null, 2),
             },
           ],
+        };
+      }
+    }
+  );
+
+  // Tool 5: Search Offers
+  server.registerTool(
+    "search_offers",
+    {
+      description: "Search for restaurant offers (promotions, happy hours, discounts, etc.) by type or restaurant. Returns a JSON-LD graph with FoodEstablishments and their active offers. Offer types: coupon, discount, bogo, free-item, happy-hour. Example: {'offer_type': 'happy-hour'} or {'restaurant_id': 'nostr:npub1...'}",
+      inputSchema: SearchOffersInputSchema,
+      outputSchema: SearchOffersOutputSchema,
+    },
+    async (args) => {
+      try {
+        const structuredContent = searchOffers(args, {
+          profiles,
+          collections,
+          products,
+          calendar,
+          tables,
+          offers,
+        });
+        return {
+          structuredContent,
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(structuredContent, null, 2),
+            },
+          ],
+        };
+      } catch (error) {
+        console.error("Error in search_offers:", error);
+        const errorStructuredContent = {
+          "@context": "https://schema.org",
+          "@graph": [],
+        };
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(errorStructuredContent, null, 2),
+            },
+          ],
+          structuredContent: errorStructuredContent,
         };
       }
     }
