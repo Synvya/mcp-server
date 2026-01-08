@@ -23,6 +23,7 @@ const AWS_REGION = process.env.AWS_REGION || process.env.REGION || 'us-east-1';
 const PROFILE_CACHE_TTL_SECONDS = parseInt(process.env.PROFILE_CACHE_TTL_SECONDS || '300', 10);
 const COLLECTION_CACHE_TTL_SECONDS = parseInt(process.env.COLLECTION_CACHE_TTL_SECONDS || '300', 10);
 const PRODUCT_CACHE_TTL_SECONDS = parseInt(process.env.PRODUCT_CACHE_TTL_SECONDS || '300', 10);
+const OFFER_CACHE_TTL_SECONDS = parseInt(process.env.OFFER_CACHE_TTL_SECONDS || '300', 10);
 
 // Initialize DynamoDB client (lazy initialization)
 let dynamoClient: DynamoDBDocumentClient | null = null;
@@ -66,6 +67,17 @@ const productCache: {
   data: null,
   timestamp: 0,
   ttl: PRODUCT_CACHE_TTL_SECONDS * 1000,
+};
+
+// In-memory cache for offers
+const offerCache: {
+  data: NostrEvent[] | null;
+  timestamp: number;
+  ttl: number;
+} = {
+  data: null,
+  timestamp: 0,
+  ttl: OFFER_CACHE_TTL_SECONDS * 1000,
 };
 
 // Convert hex pubkey to bech32 npub format
@@ -368,6 +380,73 @@ export async function loadProductsData(): Promise<NostrEvent[]> {
   productCache.timestamp = now;
   
   return products;
+}
+
+/**
+ * Load offer data from DynamoDB
+ */
+async function loadOffersDataFromDynamoDB(): Promise<NostrEvent[]> {
+  const client = getDynamoDBClient();
+  
+  try {
+    console.log('Loading offers from DynamoDB...');
+    
+    // Query DynamoDB for all kind:31556 events (offers)
+    const command = new ScanCommand({
+      TableName: DYNAMODB_TABLE_NAME,
+      FilterExpression: '#kind = :kind',
+      ExpressionAttributeNames: {
+        '#kind': 'kind',
+      },
+      ExpressionAttributeValues: {
+        ':kind': 31556,
+      },
+    });
+    
+    const result = await client.send(command);
+    const events = (result.Items || []) as NostrEvent[];
+    
+    console.log(`✅ Loaded ${events.length} offers from DynamoDB`);
+    return events;
+  } catch (error) {
+    console.error('Error loading offers from DynamoDB:', error);
+    throw new Error('Failed to load offers from DynamoDB');
+  }
+}
+
+/**
+ * Load offer data with caching (no static file fallback)
+ */
+export async function loadOffersData(): Promise<NostrEvent[]> {
+  // Check cache first
+  const now = Date.now();
+  if (offerCache.data && (now - offerCache.timestamp) < offerCache.ttl) {
+    console.log('✅ Using cached offers');
+    return offerCache.data;
+  }
+  
+  let offers: NostrEvent[];
+  
+  if (USE_DYNAMODB) {
+    try {
+      // Load from DynamoDB
+      offers = await loadOffersDataFromDynamoDB();
+    } catch (error) {
+      console.warn('⚠️ DynamoDB load failed for offers, returning empty array');
+      // No static file fallback for offers - return empty array
+      offers = [];
+    }
+  } else {
+    // When DynamoDB is disabled, return empty array (no static file for offers)
+    console.log('⚠️ DynamoDB disabled, returning empty offers array');
+    offers = [];
+  }
+  
+  // Update cache
+  offerCache.data = offers;
+  offerCache.timestamp = now;
+  
+  return offers;
 }
 
 export async function loadCalendarData(): Promise<NostrEvent[]> {

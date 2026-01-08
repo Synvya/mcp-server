@@ -22,7 +22,7 @@ import {
 export type { ToolData };
 
 export function registerTools(server: McpServer, data: ToolData) {
-  const { profiles, collections, products, calendar, tables } = data;
+  const { profiles, collections, products, calendar, tables, offers } = data;
 
   // Tool 1: Food Establishment Search
   server.registerTool(
@@ -40,6 +40,7 @@ export function registerTools(server: McpServer, data: ToolData) {
           products,
           calendar,
           tables,
+          offers,
         });
         return {
           structuredContent,
@@ -84,6 +85,7 @@ export function registerTools(server: McpServer, data: ToolData) {
           products,
           calendar,
           tables,
+          offers,
         });
         return {
           structuredContent,
@@ -132,6 +134,7 @@ export function registerTools(server: McpServer, data: ToolData) {
           products,
           calendar,
           tables,
+          offers,
         });
         return {
           structuredContent,
@@ -177,6 +180,7 @@ export function registerTools(server: McpServer, data: ToolData) {
           products,
           calendar,
           tables,
+          offers,
         });
         return {
           structuredContent,

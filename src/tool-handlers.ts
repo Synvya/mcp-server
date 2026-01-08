@@ -102,6 +102,7 @@ export interface ToolData {
   products: NostrEvent[];
   calendar: NostrEvent[];
   tables: NostrEvent[];
+  offers: NostrEvent[];
 }
 
 export interface SearchFoodEstablishmentsArgs {
