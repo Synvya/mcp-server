@@ -40,6 +40,14 @@ export const DietEnum = z.enum([
   "VegetarianDiet",
 ]);
 
+export const OfferTypeEnum = z.enum([
+  'coupon',
+  'discount',
+  'bogo',
+  'free-item',
+  'happy-hour'
+]);
+
 // ============================================================================
 // COMMON SCHEMAS
 // ============================================================================
@@ -93,6 +101,15 @@ export const MenuItemSchema = z.object({
     priceCurrency: z.string().describe("Currency code (e.g., 'USD')"),
   }).optional().describe("Price information formatted as schema.org Offer"),
   geo: GeoCoordinatesSchema.optional().describe("Geographic coordinates"),
+});
+
+export const OfferSchema = z.object({
+  "@type": z.string().describe("Always 'Offer'"),
+  identifier: z.string().describe("Offer identifier from d tag"),
+  description: z.string().describe("Offer description"),
+  category: OfferTypeEnum.describe("Offer type: coupon, discount, bogo, free-item, or happy-hour"),
+  validFrom: z.string().describe("ISO 8601 timestamp with timezone (e.g., '2026-01-08T16:00:00-08:00')"),
+  validThrough: z.string().describe("ISO 8601 timestamp with timezone (e.g., '2026-02-07T17:00:00-08:00')"),
 });
 
 // ============================================================================
@@ -154,6 +171,11 @@ export const MakeReservationInputSchema = z.object({
     path: ["telephone", "email"],
   }
 );
+
+export const SearchOffersInputSchema = z.object({
+  offer_type: OfferTypeEnum.optional().describe("Filter by offer type. Valid values: coupon, discount, bogo, free-item, happy-hour."),
+  restaurant_id: z.string().optional().describe("Optional: Filter results to a specific food establishment. Use the '@id' from search_food_establishments results. The identifier is reported as '@id' in bech32 format (nostr:npub1...) in the JSON-LD output."),
+});
 
 // ============================================================================
 // TOOL OUTPUT SCHEMAS
@@ -221,4 +243,15 @@ export const MakeReservationOutputSchema = z.object({
     name: z.string(),
     description: z.string(),
   }).optional().describe("Error information (present only on errors)"),
+});
+
+export const SearchOffersOutputSchema = z.object({
+  "@context": z.string().describe("JSON-LD context, always 'https://schema.org'"),
+  "@graph": z.array(z.object({
+    "@type": z.string().describe("Schema.org FoodEstablishment type (Restaurant, Bakery, etc.)"),
+    name: z.string().describe("Food establishment name"),
+    geo: GeoCoordinatesSchema.optional().describe("Geographic coordinates"),
+    "@id": z.string().describe("Food establishment identifier in bech32 format (nostr:npub1...)"),
+    makesOffer: z.array(OfferSchema).describe("Array of Offer objects"),
+  })),
 });
