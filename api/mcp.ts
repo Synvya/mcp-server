@@ -9,6 +9,7 @@ import {
   loadProductsData,
   loadCalendarData,
   loadTablesData,
+  loadOffersData,
   type NostrEvent,
 } from '../dist/data-loader.js';
 import { registerTools } from '../dist/register-tools.js';
@@ -100,6 +101,7 @@ async function loadAllData() {
     const products = await loadProductsData();
     const calendar = await loadCalendarData();
     const tables = await loadTablesData();
+    const offers = await loadOffersData();
     
     console.log("✅ Data loaded:", {
       profiles: profiles.length,
@@ -107,9 +109,10 @@ async function loadAllData() {
       products: products.length,
       calendar: calendar.length,
       tables: tables.length,
+      offers: offers.length,
     });
     
-    return { profiles, collections, products, calendar, tables };
+    return { profiles, collections, products, calendar, tables, offers };
   } catch (error) {
     console.error("❌ Failed to load data:", error);
     throw error;
