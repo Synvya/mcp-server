@@ -236,7 +236,7 @@ A JSON-LD graph structure following schema.org specifications:
 - `@graph`: Array of FoodEstablishment objects, each containing:
   - `@type` (string): Schema.org FoodEstablishment type (Restaurant, Bakery, etc.)
   - `name` (string): Food establishment name
-  - `geo` (object, optional): GeoCoordinates with latitude and longitude
+  - `address` (object, optional): PostalAddress with street, city, state, postal code
   - `@id` (string): Food establishment identifier in bech32 format (nostr:npub1...)
   - `makesOffer` (array): Array of Offer objects, each containing:
     - `@type`: "Offer"
