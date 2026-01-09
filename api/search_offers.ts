@@ -126,7 +126,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Parse parameters from query string (GET) or body (POST)
     const params = req.method === 'GET' ? req.query : (req.body || {});
     
-    // Both parameters are optional for search_offers
+    // All parameters are optional for search_offers
     const args: any = {};
 
     // Only include optional parameters if they are provided
@@ -135,6 +135,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
     if (params.restaurant_id) {
       args.restaurant_id = params.restaurant_id;
+    }
+    if (params.offer_id) {
+      args.offer_id = params.offer_id;
     }
 
     // Call handler

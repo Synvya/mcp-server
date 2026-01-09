@@ -175,6 +175,7 @@ export const MakeReservationInputSchema = z.object({
 export const SearchOffersInputSchema = z.object({
   offer_type: OfferTypeEnum.optional().describe("Filter by offer type. Valid values: coupon, discount, bogo, free-item, happy-hour."),
   restaurant_id: z.string().optional().describe("Optional: Filter results to a specific food establishment. Use the '@id' from search_food_establishments results. The identifier is reported as '@id' in bech32 format (nostr:npub1...) in the JSON-LD output."),
+  offer_id: z.string().optional().describe("Optional: Filter by specific offer identifier (d-tag). Use the 'identifier' value from the offer object."),
 });
 
 // ============================================================================

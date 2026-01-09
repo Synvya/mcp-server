@@ -380,6 +380,13 @@ export function generateOpenAPISchema(baseUrl: string) {
               required: false,
               schema: { type: "string" },
               description: "Optional: Filter results to a specific food establishment. Use the '@id' from search_food_establishments results."
+            },
+            {
+              name: "offer_id",
+              in: "query",
+              required: false,
+              schema: { type: "string" },
+              description: "Optional: Filter by specific offer identifier (d-tag). Use the 'identifier' value from the offer object."
             }
           ],
           deprecated: false,

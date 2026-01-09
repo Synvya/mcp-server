@@ -135,6 +135,7 @@ export interface MakeReservationArgs {
 export interface SearchOffersArgs {
   offer_type?: string;
   restaurant_id?: string;
+  offer_id?: string;
 }
 
 /**
@@ -1114,7 +1115,7 @@ export function searchOffers(
   args: SearchOffersArgs,
   data: ToolData
 ): { "@context": string; "@graph": Record<string, any>[] } {
-  const { offer_type, restaurant_id } = args;
+  const { offer_type, restaurant_id, offer_id } = args;
   const { profiles, offers } = data;
   
   // Filter offers by restaurant if specified
@@ -1122,7 +1123,7 @@ export function searchOffers(
     ? offers.filter(o => o.pubkey === npubToPubkey(restaurant_id))
     : offers;
   
-  // Filter for active offers and optionally by offer_type
+  // Filter for active offers and optionally by offer_type and offer_id
   const activeOffers = offersToSearch.filter(offer => {
     // Check status tag - must be "active"
     const statusTag = offer.tags.find(t => t[0] === 'status');
@@ -1134,6 +1135,14 @@ export function searchOffers(
     if (offer_type) {
       const typeTag = offer.tags.find(t => t[0] === 'type');
       if (!typeTag || typeTag[1] !== offer_type) {
+        return false;
+      }
+    }
+    
+    // Filter by offer_id if provided (matches d-tag)
+    if (offer_id) {
+      const dTag = offer.tags.find(t => t[0] === 'd');
+      if (!dTag || dTag[1] !== offer_id) {
         return false;
       }
     }
