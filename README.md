@@ -227,6 +227,8 @@ Search for restaurant offers (promotions, happy hours, discounts, etc.) by type 
   - If not provided, returns all offer types
 - `restaurant_id` (optional): Filter results to a specific food establishment
   - Use the `@id` from `search_food_establishments` results
+- `offer_id` (optional): Filter by specific offer identifier
+  - Use the `identifier` value from the offer object (d-tag)
 
 **Returns:**
 A JSON-LD graph structure following schema.org specifications:
@@ -249,6 +251,7 @@ A JSON-LD graph structure following schema.org specifications:
 {"offer_type": "happy-hour"}
 {"offer_type": "discount", "restaurant_id": "nostr:npub1..."}
 {"restaurant_id": "nostr:npub1..."}
+{"offer_id": "MHWS1YD3"}
 {}  // Returns all active offers from all restaurants
 ```
 
@@ -313,7 +316,7 @@ The server supports both HTTP (for testing) and stdio (for Claude Desktop) trans
   - Search food establishments: `{"foodEstablishmentType": "Restaurant", "cuisine": "Spanish", "dietary": "vegan"}` or `{"query": "Snoqualmie"}` or `{"foodEstablishmentType": "Bakery", "dietary": "gluten free"}`
   - Get menu items: `{"restaurant_id": "nostr:npub1...", "menu_identifier": "Dinner"}`
   - Search dishes: `{"dish_query": "pizza"}` or `{"dish_query": "vegan"}` (auto-detects dietary term)
-  - Search offers: `{"offer_type": "happy-hour"}` or `{"restaurant_id": "nostr:npub1..."}` or `{}` (all offers)
+  - Search offers: `{"offer_type": "happy-hour"}` or `{"restaurant_id": "nostr:npub1..."}` or `{"offer_id": "MHWS1YD3"}` or `{}` (all offers)
 
 ## Deployment
 
