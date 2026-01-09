@@ -201,7 +201,7 @@ export const SearchMenuItemsOutputSchema = z.object({
   "@graph": z.array(z.object({
     "@type": z.string().describe("Schema.org FoodEstablishment type (Restaurant, Bakery, etc.)"),
     name: z.string().describe("Food establishment name"),
-    geo: GeoCoordinatesSchema.optional().describe("Geographic coordinates"),
+    address: PostalAddressSchema.optional().describe("PostalAddress from schema.org"),
     "@id": z.string().describe("Food establishment identifier in bech32 format (nostr:npub1...)"),
     hasMenu: z.array(z.object({
       "@type": z.string().describe("Always 'Menu'"),

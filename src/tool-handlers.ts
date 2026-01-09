@@ -696,8 +696,8 @@ export function searchMenuItems(
       "@id": establishmentData["@id"],
     };
     
-    if (establishmentData.geo) {
-      establishmentObject.geo = establishmentData.geo;
+    if (establishmentData.address) {
+      establishmentObject.address = establishmentData.address;
     }
     
     if (hasMenu.length > 0) {
