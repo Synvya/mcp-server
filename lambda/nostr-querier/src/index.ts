@@ -255,6 +255,15 @@ async function queryNostrRelays(
     
     // Deduplicate events
     for (const event of events) {
+      // Validate kind:31556 (offers) have required 'type' tag
+      if (event.kind === 31556) {
+        const typeTag = event.tags.find((t: string[]) => t[0] === 'type');
+        if (!typeTag || !typeTag[1]) {
+          console.warn(`Offer event ${event.id} missing 'type' tag, skipping`);
+          continue;
+        }
+      }
+      
       // For replaceable events (kind 30000-39999), deduplicate by [kind, pubkey, d-tag]
       if (event.kind >= 30000 && event.kind < 40000) {
         const dTag = getDTag(event);

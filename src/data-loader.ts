@@ -404,9 +404,19 @@ async function loadOffersDataFromDynamoDB(): Promise<NostrEvent[]> {
     });
     
     const result = await client.send(command);
-    const events = (result.Items || []) as NostrEvent[];
+    const allEvents = (result.Items || []) as NostrEvent[];
     
-    console.log(`✅ Loaded ${events.length} offers from DynamoDB`);
+    // Filter out offers without 'type' tag (old schema)
+    const events = allEvents.filter(event => {
+      const typeTag = event.tags.find(t => t[0] === 'type');
+      if (!typeTag || !typeTag[1]) {
+        console.log(`Skipping offer ${event.id || 'unknown'} without 'type' tag`);
+        return false;
+      }
+      return true;
+    });
+    
+    console.log(`✅ Loaded ${events.length} offers from DynamoDB (${allEvents.length - events.length} skipped without 'type' tag)`);
     return events;
   } catch (error) {
     console.error('Error loading offers from DynamoDB:', error);
