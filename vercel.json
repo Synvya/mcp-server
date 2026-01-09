@@ -18,6 +18,9 @@
     },
     "api/make_reservation.ts": {
       "maxDuration": 90
+    },
+    "api/search_offers.ts": {
+      "maxDuration": 30
     }
   },
   "rewrites": [
