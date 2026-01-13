@@ -8,6 +8,22 @@
 - **Billing Mode**: On-Demand
 - **GSIs**: KindIndex, PubkeyIndex
 
+## Lambda Function
+- **Function Name**: synvya-nostr-querier
+- **Runtime**: Node.js 20.x
+- **Handler**: index.handler
+- **Timeout**: 30 seconds
+- **Memory**: 512 MB
+- **Execution Role**: SynvyaNostrLambdaRole
+
+## EventBridge Schedule
+- **Schedule Name**: synvya-nostr-relay-schedule
+- **Frequency**: Every 30 minutes (`rate(30 minutes)`)
+- **Status**: Enabled
+- **Description**: Triggers Nostr relay querier Lambda every 30 minutes
+- **Schedule ARN**: arn:aws:scheduler:us-east-1:122610503853:schedule/default/synvya-nostr-relay-schedule
+- **Created**: Dec 29, 2025
+
 ## IAM Role (Lambda)
 - **Role Name**: SynvyaNostrLambdaRole
 - **ARN**: arn:aws:iam::122610503853:role/SynvyaNostrLambdaRole

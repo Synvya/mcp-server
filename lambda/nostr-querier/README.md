@@ -305,7 +305,7 @@ The Lambda logs structured data you can extract:
 - High memory allocation
 
 **Solutions**:
-- Reduce EventBridge schedule frequency
+- Reduce EventBridge schedule frequency (currently every 30 minutes)
 - Increase cache TTL in MCP server
 - Optimize memory allocation (start with 512 MB)
 
@@ -337,10 +337,38 @@ Recommended relays:
 - `wss://nos.lol` - Good performance
 - `wss://relay.snort.social` - Active community
 
+## Automated Execution
+
+The Lambda function is configured to run automatically via EventBridge:
+
+- **Schedule Name**: `synvya-nostr-relay-schedule`
+- **Frequency**: Every 30 minutes (`rate(30 minutes)`)
+- **Status**: Enabled
+- **Executions per day**: 48
+- **Schedule ARN**: `arn:aws:scheduler:us-east-1:122610503853:schedule/default/synvya-nostr-relay-schedule`
+
+### Managing the Schedule
+
+You can control the schedule via AWS Console:
+1. Navigate to: https://console.aws.amazon.com/scheduler
+2. Select the schedule: `synvya-nostr-relay-schedule`
+3. Actions available:
+   - **Disable**: Temporarily stop automatic executions
+   - **Edit**: Change the frequency or configuration
+   - **Delete**: Remove the schedule entirely
+
+### Common Schedule Patterns
+
+If you need to adjust the frequency:
+- **Every 15 minutes**: `rate(15 minutes)`
+- **Every hour**: `rate(1 hour)`
+- **Every 6 hours**: `rate(6 hours)`
+- **Daily at midnight**: `cron(0 0 * * ? *)`
+
 ## Next Steps
 
 After deploying this Lambda:
-1. Set up EventBridge schedule (Issue #32)
+1. ✅ EventBridge schedule configured (runs every 30 minutes)
 2. Test manual execution
 3. Monitor CloudWatch logs
 4. Verify DynamoDB contains events

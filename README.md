@@ -458,6 +458,6 @@ When `USE_DYNAMODB=true`, the server loads profiles, collections, products, and 
 - ✅ No manual data file updates needed
 
 **Setup:**
-1. Complete Lambda setup (DynamoDB table, Lambda function, EventBridge schedule)
+1. ✅ Lambda infrastructure deployed (DynamoDB table, Lambda function, EventBridge schedule running every 30 minutes)
 2. Configure Vercel environment variables (see above)
 3. Set `USE_DYNAMODB=true` in production
