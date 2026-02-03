@@ -11,7 +11,9 @@
     "dev": "tsx src/server.ts",
     "build": "tsc",
     "vercel-build": "npm run build",
-    "deploy": "vercel --prod"
+    "deploy": "vercel --prod",
+    "cleanup:kind0": "tsx scripts/cleanup-kind0-duplicates.ts",
+    "cleanup:kind0:dry-run": "tsx scripts/cleanup-kind0-duplicates.ts --dry-run"
   },
   "repository": {
     "type": "git",
