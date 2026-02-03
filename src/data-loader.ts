@@ -125,6 +125,23 @@ export type NostrEvent = {
 };
 
 /**
+ * Deduplicate kind 0 profile events by pubkey, keeping the latest by created_at.
+ * Exported for testing.
+ */
+export function deduplicateKind0ByPubkey(events: NostrEvent[]): NostrEvent[] {
+  const byPubkey = new Map<string, NostrEvent>();
+  for (const event of events) {
+    const existing = byPubkey.get(event.pubkey);
+    const eventTs = event.created_at ?? 0;
+    const existingTs = existing?.created_at ?? 0;
+    if (!existing || eventTs > existingTs) {
+      byPubkey.set(event.pubkey, event);
+    }
+  }
+  return Array.from(byPubkey.values());
+}
+
+/**
  * Load profile data from DynamoDB
  */
 async function loadProfileDataFromDynamoDB(): Promise<NostrEvent[]> {
@@ -159,9 +176,12 @@ async function loadProfileDataFromDynamoDB(): Promise<NostrEvent[]> {
         return false;
       });
     });
-    
-    console.log(`✅ Loaded ${foodEstablishmentProfiles.length} food establishment profiles from DynamoDB`);
-    return foodEstablishmentProfiles;
+
+    // Deduplicate by pubkey: keep only the latest kind 0 per pubkey (replaceable per NIP-01)
+    const deduped = deduplicateKind0ByPubkey(foodEstablishmentProfiles);
+
+    console.log(`✅ Loaded ${deduped.length} food establishment profiles from DynamoDB`);
+    return deduped;
   } catch (error) {
     console.error('Error loading profiles from DynamoDB:', error);
     throw error;
