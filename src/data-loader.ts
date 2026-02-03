@@ -132,7 +132,9 @@ export function deduplicateKind0ByPubkey(events: NostrEvent[]): NostrEvent[] {
   const byPubkey = new Map<string, NostrEvent>();
   for (const event of events) {
     const existing = byPubkey.get(event.pubkey);
-    if (!existing || event.created_at > existing.created_at) {
+    const eventTs = event.created_at ?? 0;
+    const existingTs = existing?.created_at ?? 0;
+    if (!existing || eventTs > existingTs) {
       byPubkey.set(event.pubkey, event);
     }
   }
