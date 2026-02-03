@@ -7,6 +7,7 @@ import { Handler } from 'aws-lambda';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, PutCommand, GetCommand, ScanCommand, DeleteCommand } from '@aws-sdk/lib-dynamodb';
 import { SimplePool, Filter, Event as NostrEvent } from 'nostr-tools';
+import { buildEventMap } from './dedup.js';
 
 // Environment variables
 const DYNAMODB_TABLE_NAME = process.env.DYNAMODB_TABLE_NAME || 'synvya-nostr-events';
@@ -138,10 +139,52 @@ async function findExistingReplaceableEvent(event: NostrEvent): Promise<any | nu
 }
 
 /**
+ * Find existing kind 0 (profile) event in DynamoDB by pubkey.
+ * Kind 0 is replaceable per NIP-01; only the latest per pubkey should be stored.
+ */
+async function findExistingKind0Event(pubkey: string): Promise<NostrEvent | null> {
+  try {
+    const result = await docClient.send(new ScanCommand({
+      TableName: DYNAMODB_TABLE_NAME,
+      FilterExpression: '#kind = :kind AND pubkey = :pubkey',
+      ExpressionAttributeNames: {
+        '#kind': 'kind',
+      },
+      ExpressionAttributeValues: {
+        ':kind': 0,
+        ':pubkey': pubkey,
+      },
+    }));
+
+    const items = (result.Items || []) as NostrEvent[];
+    if (items.length === 0) return null;
+    // Keep the event with the latest created_at
+    return items.reduce((latest, item) =>
+      item.created_at > latest.created_at ? item : latest
+    );
+  } catch (error) {
+    console.error(`Error finding existing kind 0 event for pubkey ${pubkey.substring(0, 8)}...:`, error);
+    return null;
+  }
+}
+
+/**
  * Check if an event already exists in DynamoDB and if it's newer
  */
 async function shouldStoreEvent(event: NostrEvent): Promise<{ shouldStore: boolean; oldEventId?: string }> {
   try {
+    // For kind 0 (profile), replaceable per NIP-01: one per pubkey, keep latest
+    if (event.kind === 0) {
+      const existingEvent = await findExistingKind0Event(event.pubkey);
+      if (!existingEvent) {
+        return { shouldStore: true };
+      }
+      if (event.created_at > existingEvent.created_at) {
+        return { shouldStore: true, oldEventId: existingEvent.id };
+      }
+      return { shouldStore: false };
+    }
+
     // For replaceable events (kind 30000-39999), check by [kind, pubkey, d-tag]
     if (event.kind >= 30000 && event.kind < 40000) {
       const existingEvent = await findExistingReplaceableEvent(event);
@@ -250,41 +293,8 @@ async function queryNostrRelays(
     stats.eventsRetrieved = events.length;
     console.log(`Retrieved ${events.length} events from relays`);
 
-    // Process events
-    const eventMap = new Map<string, NostrEvent>();
-    
-    // Deduplicate events
-    for (const event of events) {
-      // Validate kind:31556 (offers) have required 'type' tag
-      if (event.kind === 31556) {
-        const typeTag = event.tags.find((t: string[]) => t[0] === 'type');
-        if (!typeTag || !typeTag[1]) {
-          console.warn(`Offer event ${event.id} missing 'type' tag, skipping`);
-          continue;
-        }
-      }
-      
-      // For replaceable events (kind 30000-39999), deduplicate by [kind, pubkey, d-tag]
-      if (event.kind >= 30000 && event.kind < 40000) {
-        const dTag = getDTag(event);
-        if (dTag) {
-          const replaceableKey = `${event.kind}:${event.pubkey}:${dTag}`;
-          const existing = eventMap.get(replaceableKey);
-          if (!existing || event.created_at > existing.created_at) {
-            eventMap.set(replaceableKey, event);
-          }
-        } else {
-          console.warn(`Replaceable event ${event.id} missing d-tag, skipping`);
-        }
-      } else {
-        // For non-replaceable events, deduplicate by event ID
-        const existing = eventMap.get(event.id);
-        if (!existing || event.created_at > existing.created_at) {
-          eventMap.set(event.id, event);
-        }
-      }
-    }
-
+    // Deduplicate events (kind 0 by pubkey, replaceable by [kind, pubkey, d-tag], others by id)
+    const eventMap = buildEventMap(events);
     console.log(`Processing ${eventMap.size} unique events...`);
 
     // Store events in DynamoDB (skip if dryRun)
