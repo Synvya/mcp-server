@@ -43,4 +43,17 @@ describe('deduplicateKind0ByPubkey', () => {
   it('returns empty array for empty input', () => {
     expect(deduplicateKind0ByPubkey([])).toEqual([]);
   });
+
+  it('fixture with multiple kind 0 for same pubkey yields one with latest created_at', () => {
+    const fixture: NostrEvent[] = [
+      mkProfile('elcandado', 1000, 'id-old'),
+      mkProfile('elcandado', 2000, 'id-mid'),
+      mkProfile('elcandado', 1500, 'id-other'),
+    ];
+    const result = deduplicateKind0ByPubkey(fixture);
+    expect(result).toHaveLength(1);
+    expect(result[0].pubkey).toBe('elcandado');
+    expect(result[0].created_at).toBe(2000);
+    expect(result[0].id).toBe('id-mid');
+  });
 });

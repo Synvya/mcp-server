@@ -54,4 +54,15 @@ describe('buildEventMap', () => {
     expect(map.size).toBe(1);
     expect(map.get('e1')!.created_at).toBe(200);
   });
+
+  it('uses replaceable key 0:pubkey for kind 0 (NIP-01 replaceable)', () => {
+    const pubkey = 'abc123';
+    const events: NostrEvent[] = [
+      mkEvent({ id: 'ev1', pubkey, kind: 0, created_at: 100 }),
+    ];
+    const map = buildEventMap(events);
+    const key = `0:${pubkey}`;
+    expect(map.has(key)).toBe(true);
+    expect(map.get(key)!.id).toBe('ev1');
+  });
 });
