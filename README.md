@@ -446,18 +446,18 @@ By default, the server reads from JSON files in the `data/` directory:
 
 When `USE_DYNAMODB=true`, the server loads profiles, collections, products, and offers from AWS DynamoDB:
 - **Table**: `synvya-nostr-events` (configurable)
-- **Source**: Live Nostr relay data (updated every 30 minutes via Lambda)
+- **Source**: Live Nostr relay data (updated every 1 minute via Lambda)
 - **Event Kinds**: Profiles (kind:0), Collections (kind:30405), Products (kind:30402), Offers (kind:31556)
 - **Caching**: 5-minute in-memory cache per event type (configurable)
 - **Fallback**: Automatically uses static files if DynamoDB fails (except for offers)
 
 **Benefits of DynamoDB:**
 - ✅ Real-time data updates from Nostr relays
-- ✅ Automatic synchronization every 30 minutes
+- ✅ Automatic synchronization every 1 minute
 - ✅ Scalable to thousands of restaurants and menu items
 - ✅ No manual data file updates needed
 
 **Setup:**
-1. ✅ Lambda infrastructure deployed (DynamoDB table, Lambda function, EventBridge schedule running every 30 minutes)
+1. ✅ Lambda infrastructure deployed (DynamoDB table, Lambda function, EventBridge schedule running every 1 minute)
 2. Configure Vercel environment variables (see above)
 3. Set `USE_DYNAMODB=true` in production

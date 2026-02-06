@@ -18,9 +18,9 @@
 
 ## EventBridge Schedule
 - **Schedule Name**: synvya-nostr-relay-schedule
-- **Frequency**: Every 30 minutes (`rate(30 minutes)`)
+- **Frequency**: Every 1 minute (`rate(1 minute)`)
 - **Status**: Enabled
-- **Description**: Triggers Nostr relay querier Lambda every 30 minutes
+- **Description**: Triggers Nostr relay querier Lambda every 1 minute
 - **Schedule ARN**: arn:aws:scheduler:us-east-1:122610503853:schedule/default/synvya-nostr-relay-schedule
 - **Created**: Dec 29, 2025
 
