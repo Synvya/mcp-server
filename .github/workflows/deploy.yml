@@ -1,4 +1,4 @@
-name: Deploy Lambda Function
+name: Deploy Lambda Functions
 
 on:
   push:
@@ -11,8 +11,8 @@ permissions:
   id-token: write
 
 jobs:
-  deploy:
-    name: Build and Deploy Lambda
+  deploy-nostr-querier:
+    name: Build and Deploy Nostr Querier Lambda
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -201,4 +201,105 @@ jobs:
           echo "ℹ️ No changes detected in lambda/nostr-querier/ - skipping deployment"
           echo "## ⏭️ Deployment Skipped" >> $GITHUB_STEP_SUMMARY
           echo "No changes detected in Lambda function code." >> $GITHUB_STEP_SUMMARY
+
+  deploy-bot-analytics:
+    name: Build and Deploy Bot Analytics Lambda
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: lambda/bot-analytics/package-lock.json
+
+      - name: Check for Lambda changes
+        id: lambda-changes
+        run: |
+          if git cat-file -e ${{ github.event.before }} 2>/dev/null; then
+            if git log --name-only --diff-filter=AM ${{ github.event.before }}..${{ github.sha }} -- "lambda/bot-analytics/" | grep -q "^lambda/bot-analytics/"; then
+              echo "changed=true" >> $GITHUB_OUTPUT
+            else
+              echo "changed=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            if git diff-tree --no-commit-id --name-only -r ${{ github.sha }} | grep -q "^lambda/bot-analytics/"; then
+              echo "changed=true" >> $GITHUB_OUTPUT
+            else
+              echo "changed=false" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+      - name: Install dependencies
+        if: steps.lambda-changes.outputs.changed == 'true'
+        working-directory: lambda/bot-analytics
+        run: npm ci
+
+      - name: Run tests
+        if: steps.lambda-changes.outputs.changed == 'true'
+        working-directory: lambda/bot-analytics
+        run: npm test
+
+      - name: Build Lambda function
+        if: steps.lambda-changes.outputs.changed == 'true'
+        working-directory: lambda/bot-analytics
+        run: npm run build
+
+      - name: Package Lambda function
+        if: steps.lambda-changes.outputs.changed == 'true'
+        working-directory: lambda/bot-analytics
+        run: |
+          cd dist
+          cp ../package*.json .
+          npm ci --production --omit=dev
+
+          zip -qr ../synvya-bot-analytics.zip .
+
+          cd ..
+          echo "Lambda package created: synvya-bot-analytics.zip"
+          ls -lh synvya-bot-analytics.zip
+
+      - name: Configure AWS credentials
+        if: steps.lambda-changes.outputs.changed == 'true'
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-session-name: GitHubActionsBotAnalyticsDeploy
+
+      - name: Deploy Lambda function
+        if: steps.lambda-changes.outputs.changed == 'true'
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          echo "Deploying Lambda function: synvya-bot-analytics"
+
+          aws lambda update-function-code \
+            --region "$AWS_REGION" \
+            --function-name synvya-bot-analytics \
+            --zip-file fileb://lambda/bot-analytics/synvya-bot-analytics.zip
+
+          echo "Lambda function deployed successfully"
+
+      - name: Deployment summary
+        if: steps.lambda-changes.outputs.changed == 'true'
+        run: |
+          echo "## Deployment Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Function**: synvya-bot-analytics" >> $GITHUB_STEP_SUMMARY
+          echo "- **Region**: ${{ secrets.AWS_REGION }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Trigger**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Skip deployment
+        if: steps.lambda-changes.outputs.changed == 'false'
+        run: |
+          echo "No changes detected in lambda/bot-analytics/ - skipping deployment"
+          echo "## Deployment Skipped" >> $GITHUB_STEP_SUMMARY
+          echo "No changes detected in Bot Analytics Lambda function code." >> $GITHUB_STEP_SUMMARY
 
